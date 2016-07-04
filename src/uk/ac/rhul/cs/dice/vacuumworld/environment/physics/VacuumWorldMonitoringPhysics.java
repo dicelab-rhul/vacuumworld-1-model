@@ -13,9 +13,9 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.MonitoringResult;
 
 public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements
     VacuumWorldMonitoringPhysicsInterface, CustomObserver {

@@ -1,0 +1,249 @@
+##########
+##########
+##########
+##########
+###@######
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,NORTH),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282429679
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(3,4,EAST),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282429679
+
+##########
+##########
+##########
+##########
+###@######
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(4,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282431681
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,NORTH),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282431681
+
+##########
+##########
+##########
+##########
+###gG#####
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282433682
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(4,4,SOUTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282433682
+
+##########
+##########
+##########
+##########
+###gG#####
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(4,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282435683
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,SOUTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282435683
+
+##########
+##########
+##########
+##########
+###gG#####
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282437684
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(5,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282437684
+
+##########
+##########
+##########
+##########
+###g#G####
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,EAST),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282439684
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282439684
+
+##########
+##########
+##########
+##########
+###g##G###
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,4,EAST),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282441684
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,6,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282441684
+
+##########
+##########
+##########
+##########
+###g##G###
+########o#
+#######O##
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,5,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282443685
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,4,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282443685
+
+##########
+##########
+##########
+##########
+###g##G###
+#######Oo#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,5,NORTH),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282445685
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,4,NORTH),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282445685
+
+##########
+##########
+##########
+##########
+###g##G###
+#######Oo#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,4,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282447686
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282447686
+
+##########
+##########
+##########
+######G###
+###g###O##
+########o#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282449686
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,NORTH),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282449686
+
+##########
+##########
+##########
+######G###
+###g###O##
+########o#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,WEST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282451687
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(8,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f : ACTION_DONE : 1467282451687
+
+##########
+##########
+##########
+######G###
+###g####O#
+########o#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(8,4,SOUTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282453688
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,SOUTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282453688
+
+##########
+##########
+##########
+######G###
+###g####O#
+########o#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,SOUTH),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282455689
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(8,4,EAST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282455689
+
+##########
+##########
+##########
+######G###
+###g####O#
+########o#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,WEST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282457690
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(8,4,EAST),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282457690
+
+##########
+##########
+##########
+######G###
+###g####O#
+########o#
+##########
+##########
+##########
+##########
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction@1f : ACTION_DONE : 1467282459690
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(8,4,EAST),Sensors: 2,Actuators: 2} : {PerceiveAction:2:false} : ACTION_DONE : 1467282459690
+
+##########
+##########
+##########
+######G###
+###g####O#
+########o#
+##########
+##########
+##########
+##########
+
+
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(6,3,WEST),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282461691
+MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(8,4,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467282461691
+
+##########
+##########
+##########
+######G###
+###g####O#
+########o#
+##########
+##########
+##########
+##########

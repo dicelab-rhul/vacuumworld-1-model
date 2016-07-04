@@ -1,18 +1,33 @@
 package uk.ac.rhul.cs.dice.vacuumworld.monitor;
 
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.actions.WriteResult;
+import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverMind;
 import uk.ac.rhul.cs.dice.monitor.common.PerceptionRefiner;
+import uk.ac.rhul.cs.dice.monitor.mongo.MongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.ThreadState;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldMindInterface;
 
+/**
+ * A Vacuum World implementation of {@link ObserverMind}. Contains Vacuum World
+ * Specific functionality including {@link Thread} related functionality. This
+ * {@link Mind} is set up to handle {@link MonitoringResult MonitoringResults}
+ * from {@link VWObserverBrain}.
+ * 
+ * @author Ben Wilkins
+ *
+ */
 public class VWObserverMind extends ObserverMind implements
     VacuumWorldMindInterface {
 
@@ -20,23 +35,37 @@ public class VWObserverMind extends ObserverMind implements
   private final Action perceiveAction = new TotalPerceptionAction();
   private boolean canProceed = false;
 
-  public VWObserverMind(PerceptionRefiner refiner, Class<?> brainObserver) {
-    super(refiner, brainObserver);
+  /**
+   * Constructor.
+   * 
+   * @param refiner
+   *          for refining {@link Perceptions}. Note that this should be
+   *          {@link DefaultPerceptionRefiner} as (unless for a good reason) the
+   *          perception should not be refined further. Only parse a value other
+   *          than {@link DefaultPerceptionRefiner} if you understand the
+   *          implications; having create a new {@link MongoBridge} etc.
+   */
+  public VWObserverMind(PerceptionRefiner refiner) {
+    super(refiner);
   }
 
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-    if(o instanceof VWObserverBrain && arg instanceof MonitoringResult) {
-        perceive(arg);
+    if (o instanceof VWObserverBrain && arg instanceof MonitoringResult) {
+      perceive(arg);
     }
   }
-  
+
+  /**
+   * Starts the perceive process, which for an {@link ObserverAgent} involves
+   * sending the perception to a database.
+   */
   @Override
   public void perceive(Object perceptionWrapper) {
-    System.out.println("PERCEIVING!");
-    if(perceptionWrapper instanceof MonitoringResult) {
-      //get the perception and refine it
-      Perception perception = ((MonitoringResult) perceptionWrapper).getPerception();
+   System.out.println(this.getClass().getSimpleName() + Thread.currentThread().getId() + " perceive");
+    if (perceptionWrapper instanceof MonitoringResult) {
+      Perception perception = ((MonitoringResult) perceptionWrapper)
+          .getPerception();
       this.storePerception(perception);
     }
   }
@@ -45,14 +74,15 @@ public class VWObserverMind extends ObserverMind implements
   public void execute(Action action) {
     notifyObservers(action, VWObserverBrain.class);
   }
- 
+
   @Override
   protected void manageWriteResult(WriteResult result) {
-    if(result.getActionResult().equals(ActionResult.ACTION_DONE)){
+    if (result.getActionResult().equals(ActionResult.ACTION_DONE)) {
       this.setState(ThreadState.AFTER_PERCEIVE);
       return;
     } else {
-      System.out.println("WRITE ACTION FAILED");
+      Logger.getGlobal().log(Level.SEVERE, "WRITE RESULT FAILED ",
+          result.getFailureReason());
     }
   }
 
@@ -73,6 +103,7 @@ public class VWObserverMind extends ObserverMind implements
     execute(perceiveAction);
   }
 
+  @Override
   public void waitForServerBeforeExecution() {
     while (!this.canProceed)
       ;
@@ -95,7 +126,6 @@ public class VWObserverMind extends ObserverMind implements
    */
   @Override
   public void start() {
-    // Unused
   }
 
   /**
@@ -113,6 +143,5 @@ public class VWObserverMind extends ObserverMind implements
    */
   @Override
   protected void stepCycle(Object actionResultWrapper) {
-
   }
 }

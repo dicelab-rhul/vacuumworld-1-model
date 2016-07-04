@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
@@ -26,6 +27,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.AgentRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.monitor.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverActuator;
@@ -73,6 +75,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   }
 
   public void addEvaluatorAgent(VWEvaluatorAgent agent) {
+    System.out.println("Adding evaluator");
     this.evaluatorAgents.add(agent);
     ((VWEvaluatorActuator) agent.getActuators().get(
         agent.getActionActuatorIndex())).addObserver(this);
@@ -105,16 +108,16 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
       Action a = event.getAction();
       agent.setClean(false);
       agent.setSuccessfulClean(false);
-
+      
       if (a instanceof CleanAction) {
         agent.setClean(true);
-        // if the agent was ontop of some dirt then remove it from the map
+        // if the agent was on top of some dirt then remove it from the map
         VacuumWorldCoordinates coord = new VacuumWorldCoordinates(agent.getX(),
             agent.getY());
         if (vacuumWorldSpaceRepresentation.getDirts().get(coord) != null) {
           // remove the dirt as some was found on the location of an agent who
           // is cleaning
-          vacuumWorldSpaceRepresentation.getDirts().remove(coord);
+          vacuumWorldSpaceRepresentation.dirtCleaned(coord);
           agent.setSuccessfulClean(true);
         }
         // cleaning failed!
@@ -180,6 +183,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   public void createVacuumWorldSpaceRepresentation() {
     Collection<Location> locations = subContainerSpace.getLocations();
     Iterator<Location> iter = locations.iterator();
+    Random rand = new Random();
     while (iter.hasNext()) {
       VacuumWorldLocation loc = (VacuumWorldLocation) iter.next();
       if (loc.isAnAgentPresent()) {
@@ -198,10 +202,13 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
         // create the obstacle representation
         Dirt dirt = loc.getDirt();
         if (dirt != null) {
-          vacuumWorldSpaceRepresentation.getDirts().put(
-              new VacuumWorldCoordinates(loc.getCoordinates().getX(), loc
-                  .getCoordinates().getY()),
-              ((DirtAppearance) dirt.getExternalAppearance()).getDirtType());
+          vacuumWorldSpaceRepresentation.getDirts()
+              .put(
+                  new VacuumWorldCoordinates(loc.getCoordinates().getX(), loc
+                      .getCoordinates().getY()),
+                  new DirtRepresentation(String.valueOf(rand.nextLong()),
+                      ((DirtAppearance) dirt.getExternalAppearance())
+                          .getDirtType()));
         } else {
           System.err.println("CANNOT REPRESENT: " + loc.getObstacle() + "IN "
               + VacuumWorldSpaceRepresentation.class.getSimpleName());

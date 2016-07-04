@@ -11,6 +11,6 @@ public abstract class TurningAction extends PhysicalAction {
 	}
 
 	public void setAgentOldFacingDirection(AgentFacingDirection agentOldFacingDirection) {
-		this.agentOldFacingDirection = agentOldFacingDirection;
+		this.agentOldFacingDirection = AgentFacingDirection.fromString(agentOldFacingDirection.toString().toLowerCase());
 	}
 }

@@ -50,6 +50,7 @@ MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(3,3,EAST),Sensors: 2,Actu
 
 MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(3,3,NORTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_DONE : 1467210765089
 MESSAGE FROM SUBCONTAINER! : {VacuumWorldCleaningAgent(7,7,SOUTH),Sensors: 2,Actuators: 2} : uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f : ACTION_FAILED : 1467210765089
+/***** BUG HERE, The above agents direction should not have been updated to SOUTH from WEST after the TurnLeftAction failed! *****/
 ##########
 ##########
 ##########

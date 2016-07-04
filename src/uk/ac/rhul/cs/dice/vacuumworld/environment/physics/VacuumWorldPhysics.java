@@ -46,7 +46,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public Result attempt(Event event, Space context) {
+  public synchronized Result attempt(Event event, Space context) {
     this.activeAgents.put(Thread.currentThread().getId(),
         (VacuumWorldCleaningAgent) event.getActor());
     this.sensorsToNotify.put(Thread.currentThread().getId(),
@@ -55,14 +55,14 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return event.getAction().attempt(this, context);
   }
 
-  private VacuumWorldLocation getCurrentActorLocation(VacuumWorldSpace context) {
+  private synchronized VacuumWorldLocation getCurrentActorLocation(VacuumWorldSpace context) {
     VacuumWorldCoordinates coordinates = this.activeAgents.get(
         Thread.currentThread().getId()).getCurrentLocation();
 
     return (VacuumWorldLocation) context.getLocation(coordinates);
   }
 
-  private void releaseWriteLockIfNecessary(Lockable lockable) {
+  private synchronized void releaseWriteLockIfNecessary(Lockable lockable) {
     lockable.releaseExclusiveWriteLock();
   }
 
@@ -70,17 +70,17 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
    * A turning action is always possible.
    */
   @Override
-  public boolean isPossible(TurnLeftAction action, Space context) {
+  public synchronized boolean isPossible(TurnLeftAction action, Space context) {
     return true;
   }
 
   @Override
-  public boolean isNecessary(TurnLeftAction action, Space context) {
+  public synchronized boolean isNecessary(TurnLeftAction action, Space context) {
     return false;
   }
 
   @Override
-  public Result perform(TurnLeftAction action, Space context) {
+  public synchronized Result perform(TurnLeftAction action, Space context) {
     VacuumWorldLocation agentLocation = null;
 
     try {
@@ -89,8 +89,14 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
 
       action.setAgentOldFacingDirection(agentLocation.getAgent()
           .getFacingDirection());
+      //System.out.println(Thread.currentThread().getId() + "Local variable before turning left: " + agentLocation.getAgent().getFacingDirection());
+      //System.out.println(Thread.currentThread().getId() + "List variable before turning left: " + this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
       agentLocation.getAgent().turnLeft();
-
+      
+      //System.out.println(Thread.currentThread().getId() + "Local variable after turning left: " + agentLocation.getAgent().getFacingDirection());
+      //System.out.println(Thread.currentThread().getId() + "List variable after turning left: " + this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
+      
+      
       VacuumWorldPerception newPerception = perceive(
           (VacuumWorldSpace) context,
           this.activeAgents.get(Thread.currentThread().getId())
@@ -111,15 +117,17 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean succeeded(TurnLeftAction action, Space context) { 
+  public synchronized boolean succeeded(TurnLeftAction action, Space context) { 
         boolean check = this.activeAgents.get(Thread.currentThread().getId())
         .getFacingDirection() == action.getAgentOldFacingDirection()
         .getLeftDirection();
         
         if(!check) {
-          Logger.getGlobal().log(Level.SEVERE, "FAILED: succeeded:TurnLeftAction : v1" + this.activeAgents.get(Thread.currentThread().getId())
-        .getFacingDirection() + ", v2:" + action.getAgentOldFacingDirection()
+          Logger.getGlobal().log(Level.SEVERE, Thread.currentThread().getId() + "FAILED: succeeded:TurnLeftAction : List variable:" + this.activeAgents.get(Thread.currentThread().getId())
+        .getFacingDirection() + ", Local variable.getLeft():" + action.getAgentOldFacingDirection()
         .getLeftDirection());
+          
+          Logger.getGlobal().log(Level.SEVERE, Thread.currentThread().getId() + "Furthermore, the old direction (from Local variable) was " + action.getAgentOldFacingDirection());
         }
         return check;
   }
@@ -128,17 +136,17 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
    * A turning action is always possible.
    */
   @Override
-  public boolean isPossible(TurnRightAction action, Space context) {
+  public synchronized boolean isPossible(TurnRightAction action, Space context) {
     return true;
   }
 
   @Override
-  public boolean isNecessary(TurnRightAction action, Space context) {
+  public synchronized boolean isNecessary(TurnRightAction action, Space context) {
     return false;
   }
 
   @Override
-  public Result perform(TurnRightAction action, Space context) {
+  public synchronized Result perform(TurnRightAction action, Space context) {
     VacuumWorldLocation agentLocation = null;
 
     try {
@@ -147,7 +155,11 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
 
       action.setAgentOldFacingDirection(agentLocation.getAgent()
           .getFacingDirection());
+      //System.out.println(Thread.currentThread().getId() + "Local variable before turning right: " + agentLocation.getAgent().getFacingDirection());
+      //System.out.println(Thread.currentThread().getId() + "List variable before turning right: " + this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
       agentLocation.getAgent().turnRight();
+      //System.out.println(Thread.currentThread().getId() + "Local variable after turning right: " + agentLocation.getAgent().getFacingDirection());
+      //System.out.println(Thread.currentThread().getId() + "List variable after turning right: " + this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
 
       VacuumWorldPerception newPerception = perceive(
           (VacuumWorldSpace) context,
@@ -169,21 +181,23 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean succeeded(TurnRightAction action, Space context) {
+  public synchronized boolean succeeded(TurnRightAction action, Space context) {
     boolean check = this.activeAgents.get(Thread.currentThread().getId())
         .getFacingDirection() == action.getAgentOldFacingDirection()
         .getRightDirection();
         
         if(!check) {
-          Logger.getGlobal().log(Level.SEVERE, "FAILED: succeeded:TurnRightAction : v1" + this.activeAgents.get(Thread.currentThread().getId())
-        .getFacingDirection() + ", v2:" + action.getAgentOldFacingDirection()
+          Logger.getGlobal().log(Level.SEVERE,Thread.currentThread().getId() +  "FAILED: succeeded:TurnRightAction : List variable:" + this.activeAgents.get(Thread.currentThread().getId())
+        .getFacingDirection() + ", Local variable.getRight():" + action.getAgentOldFacingDirection()
         .getRightDirection());
+          
+          Logger.getGlobal().log(Level.SEVERE, Thread.currentThread().getId() + "Furthermore, the old direction (from Local variable) was " + action.getAgentOldFacingDirection());
         }
         return check;
   }
 
   @Override
-  public boolean isPossible(MoveAction action, Space context) {
+  public synchronized boolean isPossible(MoveAction action, Space context) {
     AgentFacingDirection agentFacingDirection = this.activeAgents.get(
         Thread.currentThread().getId()).getFacingDirection();
     VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
@@ -196,12 +210,12 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
         && !checkForObstacle(targetLocation);
   }
 
-  private boolean checkForWall(VacuumWorldLocation agentLocation,
+  private synchronized boolean checkForWall(VacuumWorldLocation agentLocation,
       AgentFacingDirection agentFacingDirection) {
     return agentLocation.getNeighborLocation(agentFacingDirection) == VacuumWorldLocationType.WALL;
   }
 
-  private boolean checkForObstacle(VacuumWorldLocation targetLocation) {
+  private synchronized boolean checkForObstacle(VacuumWorldLocation targetLocation) {
     if (targetLocation == null) {
       return true;
     }
@@ -210,11 +224,11 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
         || checkForAnotherAgent(targetLocation);
   }
 
-  private boolean checkForAnotherAgent(VacuumWorldLocation targetLocation) {
+  private synchronized boolean checkForAnotherAgent(VacuumWorldLocation targetLocation) {
     return targetLocation.getAgent() != null;
   }
 
-  private boolean checkForGenericObstacle(VacuumWorldLocation targetLocation) {
+  private synchronized boolean checkForGenericObstacle(VacuumWorldLocation targetLocation) {
     Obstacle potentialObstacle = targetLocation.getObstacle();
 
     if (potentialObstacle == null || potentialObstacle instanceof Dirt) {
@@ -225,12 +239,12 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean isNecessary(MoveAction action, Space context) {
+  public synchronized boolean isNecessary(MoveAction action, Space context) {
     return false;
   }
 
   @Override
-  public Result perform(MoveAction action, Space context) {
+  public synchronized Result perform(MoveAction action, Space context) {
     VacuumWorldLocation agentLocation = null;
     VacuumWorldLocation targetLocation = null;
 
@@ -279,7 +293,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean succeeded(MoveAction action, Space context) {
+  public synchronized boolean succeeded(MoveAction action, Space context) {
     VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
     VacuumWorldLocation agentOldLocation = (VacuumWorldLocation) ((EnvironmentalSpace) context)
         .getLocation(action.getOldLocationCoordinates());
@@ -290,7 +304,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean isPossible(CleanAction action, Space context) {
+  public synchronized boolean isPossible(CleanAction action, Space context) {
     VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 
     if (agentLocation == null) {
@@ -301,12 +315,12 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean isNecessary(CleanAction action, Space context) {
+  public synchronized boolean isNecessary(CleanAction action, Space context) {
     return false;
   }
 
   @Override
-  public Result perform(CleanAction action, Space context) {
+  public synchronized Result perform(CleanAction action, Space context) {
     VacuumWorldLocation agentLocation = null;
 
     try {
@@ -335,7 +349,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean succeeded(CleanAction action, Space context) {
+  public synchronized boolean succeeded(CleanAction action, Space context) {
     VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 
     return !(agentLocation.isDirtPresent());
@@ -345,17 +359,17 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
    * A perceiving action is always possible.
    */
   @Override
-  public boolean isPossible(PerceiveAction action, Space context) {
+  public synchronized boolean isPossible(PerceiveAction action, Space context) {
     return true;
   }
 
   @Override
-  public boolean isNecessary(PerceiveAction action, Space context) {
+  public synchronized boolean isNecessary(PerceiveAction action, Space context) {
     return false;
   }
 
   @Override
-  public Result perform(PerceiveAction action, Space context) {
+  public synchronized Result perform(PerceiveAction action, Space context) {
     try {
       int perceptionRange = action.getPerceptionRange();
       boolean canSeeBehind = action.canAgentSeeBehind();
@@ -374,7 +388,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     }
   }
 
-  private VacuumWorldPerception perceive(VacuumWorldSpace context,
+  private synchronized VacuumWorldPerception perceive(VacuumWorldSpace context,
       int perceptionRange, boolean canSeeBehind) {
     VacuumWorldCleaningAgent current = this.activeAgents.get(Thread
         .currentThread().getId());
@@ -395,7 +409,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return perceive(context, overheads);
   }
 
-  private int getEasternOverhead(int perceptionRange, boolean canSeeBehind,
+  private synchronized int getEasternOverhead(int perceptionRange, boolean canSeeBehind,
       AgentFacingDirection direction) {
     int baseOverhead = perceptionRange - 1;
 
@@ -406,7 +420,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return baseOverhead;
   }
 
-  private int getWesternOverhead(int perceptionRange, boolean canSeeBehind,
+  private synchronized int getWesternOverhead(int perceptionRange, boolean canSeeBehind,
       AgentFacingDirection direction) {
     int baseOverhead = perceptionRange - 1;
 
@@ -417,7 +431,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return baseOverhead;
   }
 
-  private int getSouthernOverhead(int perceptionRange, boolean canSeeBehind,
+  private synchronized int getSouthernOverhead(int perceptionRange, boolean canSeeBehind,
       AgentFacingDirection direction) {
     int baseOverhead = perceptionRange - 1;
 
@@ -428,7 +442,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return baseOverhead;
   }
 
-  private int getNorthernOverhead(int perceptionRange, boolean canSeeBehind,
+  private synchronized int getNorthernOverhead(int perceptionRange, boolean canSeeBehind,
       AgentFacingDirection direction) {
     int baseOverhead = perceptionRange - 1;
 
@@ -439,7 +453,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return baseOverhead;
   }
 
-  private VacuumWorldPerception perceive(VacuumWorldSpace context,
+  private synchronized VacuumWorldPerception perceive(VacuumWorldSpace context,
       int[] overheads) {
     VacuumWorldCoordinates currentCoordinates = getCurrentActorLocation(context)
         .getCoordinates();
@@ -451,7 +465,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     return new VacuumWorldPerception(perception, currentCoordinates);
   }
 
-  private Map<VacuumWorldCoordinates, VacuumWorldLocation> perceive(
+  private synchronized Map<VacuumWorldCoordinates, VacuumWorldLocation> perceive(
       VacuumWorldSpace context, int[] overheads, int currentX, int currentY) {
     Map<VacuumWorldCoordinates, VacuumWorldLocation> perception = new HashMap<>();
 
@@ -474,18 +488,18 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
    * A perceiving action has no post-conditions to check.
    */
   @Override
-  public boolean succeeded(PerceiveAction action, Space context) {
+  public synchronized boolean succeeded(PerceiveAction action, Space context) {
     return true;
   }
 
   @Override
-  public void update(CustomObservable o, Object arg) {
+  public synchronized void update(CustomObservable o, Object arg) {
     if (o instanceof VacuumWorldSpace && arg instanceof Object[]) {
       manageEnvironmentRequest((Object[]) arg);
     }
   }
 
-  private void manageEnvironmentRequest(Object[] arg) {
+  private synchronized void manageEnvironmentRequest(Object[] arg) {
     if (arg.length != 2) {
       return;
     }
@@ -496,7 +510,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     }
   }
 
-  private void attemptEvent(VacuumWorldEvent event, VacuumWorldSpace context) {
+  private synchronized void attemptEvent(VacuumWorldEvent event, VacuumWorldSpace context) {
     Result result = event.attempt(this, context);
     ActionResult code = ((DefaultActionResult)result).getActionResult();
     MonitoringUpdateEvent ue = new MonitoringUpdateEvent(event.getAction(), event.getTimestamp(), event.getActor(), code);

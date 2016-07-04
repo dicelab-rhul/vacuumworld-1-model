@@ -2,19 +2,50 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitor;
 
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
+/**
+ * The representation of a {@link VacuumWorldCleaningAgent} used internally by
+ * {@link VacuumWorldMonitoringContainer} to build a useful representation of
+ * what is happening inside its sub container - {@link VacuumWorldSpace}. </br>
+ * See also: {@link AgentDatabaseRepresentation},
+ * {@link VacuumWorldSpaceRepresentation}.
+ * 
+ * @author Ben Wilkins
+ *
+ */
 public class AgentRepresentation {
 
   private String _id;
   private VacuumWorldAgentType type;
   private int sensors;
   private int actuators;
+  //did the agent perform a clean this cycle
   private boolean clean;
+  //was the clean successful
   private boolean successfulClean;
   private AgentFacingDirection direction;
   private int x;
   private int y;
 
+  /**
+   * Constructor.
+   * 
+   * @param _id
+   *          the id of the agent
+   * @param type
+   *          the {@link VacuumWorldAgentType} of the agent
+   * @param sensors
+   *          the number of sensors the agent has
+   * @param actuators
+   *          the number of actuators the agent has
+   * @param direction
+   *          that the agent is currently facing
+   * @param x
+   *          position
+   * @param y
+   *          position
+   */
   public AgentRepresentation(String _id, VacuumWorldAgentType type,
       int sensors, int actuators, AgentFacingDirection direction, int x, int y) {
     super();

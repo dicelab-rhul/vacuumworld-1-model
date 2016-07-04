@@ -20,6 +20,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
+import uk.ac.rhul.cs.dice.monitor.agents.AgentClassModel;
 import uk.ac.rhul.cs.dice.monitor.agents.DefaultAgentAppearance;
 import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
@@ -38,8 +39,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldUniverse;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.monitor.DefaultEvaluationStrategy;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.DefaultPerceptionRefiner;
+import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorBrain;
+import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorMind;
+import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWMongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverAgent;
@@ -48,6 +54,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverSensor;
 
 public class VacuumWorldServer {
+  // counts the number of cycles that have happened (used for updating dirt in
+  // database)
+  private static int cycleNumber = 1;
+
   private ServerSocket server;
   private Socket clientSocket;
   private InputStream input;
@@ -151,18 +161,18 @@ public class VacuumWorldServer {
     Set<Action> observerActions = new HashSet<Action>();
     observerActions.add(new TotalPerceptionAction());
     for (VWObserverAgent oa : oas) {
-      System.out.println("Starting observer agent thread");
       startAgentThread(oa, observerActions);
     }
 
     for (VWEvaluatorAgent ea : eas) {
-      startAgentThread(ea, null);
+      System.out.println("Starting evaluator agent thread");
+      startAgentThread(ea, new HashSet<Action>());
     }
     startMonitoring();
   }
 
   private void createTestObserver(VacuumWorldMonitoringContainer container) {
-    // TODO move this somewhere else?
+    // create database
     MongoConnector connector = new MongoConnector();
     connector.connect("localhost", "27017", null, null);
     connector.setDatabase("Test");
@@ -170,19 +180,37 @@ public class VacuumWorldServer {
     CollectionRepresentation colrep = new CollectionRepresentation("Test", null);
     MongoBridge bridge = new VWMongoBridge(connector,
         container.getVacuumWorldSpaceRepresentation(), colrep);
+    // create observer
     List<Sensor> sensors = new ArrayList<Sensor>();
     List<Actuator> actuators = new ArrayList<Actuator>();
-    sensors.add(new VWObserverSensor(VWObserverAgent.class));
+    sensors.add(new VWObserverSensor());
     actuators.add(new VWObserverActuator());
+
+    AgentClassModel observerClassModel = new AgentClassModel(
+        VWObserverBrain.class, VWObserverAgent.class, VWObserverMind.class,
+        VWObserverSensor.class, VWObserverActuator.class);
 
     VWObserverAgent a = new VWObserverAgent(new DefaultAgentAppearance(null,
         null), sensors, actuators, new VWObserverMind(
-        new DefaultPerceptionRefiner(), VWObserverBrain.class),
-        new VWObserverBrain(VWObserverMind.class, VWObserverAgent.class),
-        (AbstractMongoBridge) bridge,
-        new CollectionRepresentation("Test", null), VWObserverBrain.class,
-        VWObserverActuator.class);
+        new DefaultPerceptionRefiner()), new VWObserverBrain(),
+        observerClassModel, (AbstractMongoBridge) bridge, colrep);
     container.addObserverAgent(a);
+
+    // create evaluator
+    sensors = new ArrayList<Sensor>();
+    actuators = new ArrayList<Actuator>();
+    sensors.add(new VWEvaluatorSensor());
+    actuators.add(new VWEvaluatorActuator());
+
+    AgentClassModel evaluatorClassModel = new AgentClassModel(
+        VWEvaluatorBrain.class, VWEvaluatorAgent.class, VWEvaluatorMind.class,
+        VWEvaluatorSensor.class, VWEvaluatorActuator.class);
+
+    VWEvaluatorAgent e = new VWEvaluatorAgent(new DefaultAgentAppearance(null,
+        null), sensors, actuators, new VWEvaluatorMind(
+        new DefaultEvaluationStrategy()), new VWEvaluatorBrain(),
+        evaluatorClassModel, (AbstractMongoBridge) bridge, colrep);
+    container.addEvaluatorAgent(e);
   }
 
   private void startAgentThread(AbstractAgent agent,
@@ -216,6 +244,7 @@ public class VacuumWorldServer {
         monitorAfterDecide();
         monitorAfterPerceive();
         restartThreads();
+        cycleNumber++;
       } catch (Exception e) {
         e.printStackTrace();
         newCycle = false;
@@ -330,5 +359,9 @@ public class VacuumWorldServer {
         .updateRepresentation((VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe
             .getState()).getSubContainerSpace());
     System.out.println(this.universe.getAppearance().represent());
+  }
+
+  public static int getCycleNumber() {
+    return cycleNumber;
   }
 }
