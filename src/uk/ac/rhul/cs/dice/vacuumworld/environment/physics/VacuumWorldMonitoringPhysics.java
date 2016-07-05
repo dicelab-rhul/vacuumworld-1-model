@@ -39,7 +39,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public Result attempt(Event event, Space context) {
+  public synchronized Result attempt(Event event, Space context) {
     this.activeAgents.put(Thread.currentThread().getId(),
         (AbstractAgent)event.getActor());
     this.sensorsToNotify.put(Thread.currentThread().getId(),
@@ -49,33 +49,33 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean isPossible(TotalPerceptionAction action, Space context) {
+  public synchronized boolean isPossible(TotalPerceptionAction action, Space context) {
     return true;
   }
 
   @Override
-  public boolean isNecessary(TotalPerceptionAction action, Space context) {
+  public synchronized boolean isNecessary(TotalPerceptionAction action, Space context) {
     return false;
   }
 
   @Override
-  public Result perform(TotalPerceptionAction action, Space context) {
+  public synchronized Result perform(TotalPerceptionAction action, Space context) {
     return new MonitoringResult(ActionResult.ACTION_DONE, null, null, ((VacuumWorldMonitoringContainer)context).getVacuumWorldSpaceRepresentation());
   }
 
   @Override
-  public boolean succeeded(TotalPerceptionAction action, Space context) {
+  public synchronized boolean succeeded(TotalPerceptionAction action, Space context) {
     return true;
   }
 
   @Override
-  public void update(CustomObservable o, Object arg) {
+  public synchronized void update(CustomObservable o, Object arg) {
     if (o instanceof VacuumWorldMonitoringContainer && arg instanceof Object[]) {
       manageEnvironmentRequest((Object[]) arg);
     }
   }
 
-  private void manageEnvironmentRequest(Object[] arg) {
+  private synchronized void manageEnvironmentRequest(Object[] arg) {
     if (arg.length != 2) {
       return;
     }
@@ -86,7 +86,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements
     }
   }
 
-  private void attemptEvent(MonitoringEvent event, VacuumWorldMonitoringContainer context) {
+  private synchronized void attemptEvent(MonitoringEvent event, VacuumWorldMonitoringContainer context) {
     Result result = event.attempt(this, context);
 
     if (result.getRecipientId() == null) {
@@ -101,7 +101,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public int hashCode() {
+  public synchronized int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
     result = prime
@@ -112,7 +112,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public synchronized boolean equals(Object obj) {
     if (this == obj)
       return true;
     if (!super.equals(obj))

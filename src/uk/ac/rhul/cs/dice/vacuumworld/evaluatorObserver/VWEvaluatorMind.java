@@ -1,21 +1,19 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.actions.ChangedResult;
+import uk.ac.rhul.cs.dice.monitor.actions.ReadAction;
 import uk.ac.rhul.cs.dice.monitor.actions.ReadResult;
 import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorMind;
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
 import uk.ac.rhul.cs.dice.vacuumworld.ThreadState;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldMindInterface;
 
 public class VWEvaluatorMind extends EvaluatorMind implements
@@ -24,52 +22,58 @@ public class VWEvaluatorMind extends EvaluatorMind implements
   private ThreadState state;
   private boolean canProceed = false;
 
-  private ArrayList<RefinedPerception> perceptions;
+  private EvaluationStrategy<?> strategy;
   private int changes = 0;
-  
+
   /**
    * Constructor.
    * 
    * @param strategy
    *          that will be used for evaluation.
    */
-  public VWEvaluatorMind(EvaluationStrategy strategy) {
-    super(strategy);
-    this.perceptions = new ArrayList<RefinedPerception>();
+  public VWEvaluatorMind(EvaluationStrategy<?> strategy) {
+    this.strategy = strategy;
+    canProceed = false;
   }
 
   @Override
   public void execute(Action action) {
-    //System.out.println("EVALUATOR EXECUTE");
-    this.read();
-    Evaluation e = this.evaluate(perceptions);
-    if(e != null) {
-      System.out.println("AN EVALUATION WAS MADE!");
+    if (shouldRead()) {
+      Logger.getGlobal().log(Level.INFO, "Evaluator reading...");
+      read();
+      
+    } else {
+      Logger.getGlobal().log(Level.INFO, "Evaluator did not read");
+      this.state = ThreadState.AFTER_PERCEIVE;
     }
+  }
+
+  @Override
+  protected void manageReadResult(ReadResult result) {
+    perceive(result);
+    Evaluation e = this.evaluate();
+    System.out.println("AN EVALUATION WAS MADE!");
     this.state = ThreadState.AFTER_PERCEIVE;
     return;
   }
 
   @Override
-  protected void manageReadResult(ReadResult result) {
-    //System.out.println("RECEIVED READ RESULT");
-    if(result.getActionResult().equals(ActionResult.ACTION_DONE)) {
-      
-      RefinedPerception[] ps = (RefinedPerception[]) result.getPerceptions().toArray(new RefinedPerception[]{});
-      if(ps.length > 1) {
-        Logger.getGlobal().log(Level.SEVERE, "INCORRECT READ SIZE FOR EVALUATION!");
-      } else {
-        perceptions.add(ps[0]);
-      }
-    } else {
-      Logger.getGlobal().log(Level.SEVERE, "READ RESULT FAILED ",
-          result.getFailureReason());
+  public void perceive(Object perceptionWrapper) {
+    if (perceptionWrapper instanceof ReadResult) {
+      ReadResult result = (ReadResult) perceptionWrapper;
+      RefinedPerception[] ps = (RefinedPerception[]) result.getPerceptions()
+          .toArray(new RefinedPerception[] {});
+      strategy.update(ps[0]);
     }
   }
 
   @Override
+  public Action decide(Object... parameters) {
+    return null;
+  }
+
+  @Override
   protected void manageChangedResult(ChangedResult result) {
-    //System.out.println("RECIEVED CHANGED RESULT!");
     this.changes++;
   }
 
@@ -80,12 +84,23 @@ public class VWEvaluatorMind extends EvaluatorMind implements
 
   @Override
   protected boolean shouldEvaluate() {
-    return shouldRead(); // if a read has just been made then evaluate
+    return shouldRead();
+  }
+
+  @Override
+  protected void read() {
+    notifyObservers(new ReadAction(), VWEvaluatorBrain.class);
+  }
+
+  @Override
+  public Evaluation evaluate() {
+    return strategy.evaluate(null, 0, 0);
   }
 
   @Override
   public void start(int perceptionRange, boolean canSeeBehind,
       Set<Action> availableActions) {
+    Logger.getGlobal().log(Level.INFO, "Evaluator Starting");
     this.state = ThreadState.JUST_STARTED;
     this.state = ThreadState.AFTER_DECIDE;
 
@@ -107,8 +122,9 @@ public class VWEvaluatorMind extends EvaluatorMind implements
 
   @Override
   public void waitForServerBeforeExecution() {
-    while (!this.canProceed)
-      ;
+    while (!this.canProceed) {
+      Logger.getGlobal().log(Level.INFO, "Evaluator is waiting");
+    }
   }
 
   public void setState(ThreadState state) {
@@ -116,23 +132,6 @@ public class VWEvaluatorMind extends EvaluatorMind implements
   }
 
   // ******* NOT USED METHODS ******* //
-
-  /**
-   * Perceptions are made the same way as {@link VacuumWorldCleaningAgent}s.
-   * Evaluator perceptions are made actively and are not recieved from the
-   * environment as a result if performing an action.
-   */
-  @Override
-  public void perceive(Object perceptionWrapper) {
-  }
-
-  /**
-   * Not used. An {@link VWEvaluatorMind} makes no decisions.
-   */
-  @Override
-  public Action decide(Object... parameters) {
-    return null;
-  }
 
   /**
    * Not used, start is called via
@@ -152,22 +151,5 @@ public class VWEvaluatorMind extends EvaluatorMind implements
 
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-   System.out.println("EVALUATOR:" + getMethodName(1));
   }
-  
-  public static String getMethodName(final int depth)
-  {
-    final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-
-    //System. out.println(ste[ste.length-depth].getClassName()+"#"+ste[ste.length-depth].getMethodName());
-    // return ste[ste.length - depth].getMethodName();  //Wrong, fails for depth = 0
-    return ste[ste.length - 1 - depth].getMethodName(); //Thank you Tom Tresansky
-  }
-  
-  
-  
-  
-  
-  
-  
 }

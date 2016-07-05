@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,6 +11,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.monitor.actions.ChangedResult;
 import uk.ac.rhul.cs.dice.monitor.actions.DatabaseEvent;
 import uk.ac.rhul.cs.dice.monitor.actions.ReadResult;
 import uk.ac.rhul.cs.dice.monitor.actions.WriteResult;
@@ -25,7 +26,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,7 +80,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
    * Insert method specific to Vacuum World.
    */
   @Override
-  public WriteResult insert(CollectionRepresentation collectionRep,
+  public synchronized WriteResult insert(CollectionRepresentation collectionRep,
       RefinedPerception perception) {
     VacuumWorldSpaceRepresentation p = (VacuumWorldSpaceRepresentation) perception;
     // check the agents to see if they exist, if they don't - add them
@@ -115,6 +119,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
         p.getRemovedDirts().remove(rep);
       }
     }
+    notifyObservers(new ChangedResult(collectionRep));
     return new WriteResult(ActionResult.ACTION_DONE, null);
   }
 
@@ -140,7 +145,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
    *          a mapping of {@link VacuumWorldCoordinates} to
    *          {@link DirtRepresentation} specifying new {@link Dirt} to add
    */
-  public void insertDirts(CollectionRepresentation collectionRepresentation,
+  public synchronized void insertDirts(CollectionRepresentation collectionRepresentation,
       Map<VacuumWorldCoordinates, DirtRepresentation> map) {
     String json;
     Iterator<Entry<VacuumWorldCoordinates, DirtRepresentation>> iter = map
@@ -205,19 +210,19 @@ public class VWMongoBridge extends AbstractMongoBridge {
   }
 
   @Override
-  public ReadResult get(CollectionRepresentation collectionRep) {
+  public synchronized ReadResult get(CollectionRepresentation collectionRep) {
     HashSet<RefinedPerception> ps = new HashSet<RefinedPerception>();
     ps.add(new DirtDatabaseRepresentation(null, null, 0, 0, 0, 0));
     return new ReadResult(ActionResult.ACTION_DONE, ps, null);
   }
 
   @Override
-  public Result attempt(Event event, Space context) {
+  public synchronized Result attempt(Event event, Space context) {
     return event.getAction().attempt(this, context);
   }
 
   @Override
-  public void update(CustomObservable o, Object arg) {
+  public synchronized void update(CustomObservable o, Object arg) {
     if (o instanceof ObserverActuator || o instanceof EvaluatorActuator) {
       if (arg instanceof DatabaseEvent) {
         System.out.println("UPDATE " + this.getClass().getSimpleName()

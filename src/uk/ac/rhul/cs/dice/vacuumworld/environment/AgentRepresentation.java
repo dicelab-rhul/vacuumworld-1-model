@@ -1,8 +1,8 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.AgentDatabaseRepresentation;
 
 /**
  * The representation of a {@link VacuumWorldCleaningAgent} used internally by
@@ -14,15 +14,15 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
  * @author Ben Wilkins
  *
  */
-public class AgentRepresentation {
+public class AgentRepresentation implements Cloneable {
 
   private String _id;
   private VacuumWorldAgentType type;
   private int sensors;
   private int actuators;
-  //did the agent perform a clean this cycle
+  // did the agent perform a clean this cycle
   private boolean clean;
-  //was the clean successful
+  // was the clean successful
   private boolean successfulClean;
   private AgentFacingDirection direction;
   private int x;
@@ -130,5 +130,14 @@ public class AgentRepresentation {
 
   public void setSuccessfulClean(boolean successfulClean) {
     this.successfulClean = successfulClean;
+  }
+  
+  @Override
+  public AgentRepresentation clone() {
+    AgentRepresentation rep =  new AgentRepresentation(this._id, this.type, this.sensors,
+        this.actuators, this.direction, this.x, this.y);
+    rep.setClean(this.isClean());
+    rep.setSuccessfulClean(this.isSuccessfulClean());
+    return rep;
   }
 }

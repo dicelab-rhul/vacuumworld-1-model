@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -8,6 +8,7 @@ import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorAgent;
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
 
 /**
  * The representation of a {@link VacuumWorldCleaningAgent} in a MongoDB.

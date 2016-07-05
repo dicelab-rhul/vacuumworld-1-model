@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import java.util.List;
 
@@ -24,17 +24,6 @@ public class VWEvaluatorAgent extends EvaluatorAgent implements
       CollectionRepresentation collectionRepresentation) {
     super(appearance, sensors, actuators, mind, brain, classModel, database,
         collectionRepresentation);
-    // TODO Auto-generated constructor stub
-  }
-
-  @Override
-  public Object simulate() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void updateCon(CustomObservable o, Object arg) {
   }
 
   /**
@@ -61,6 +50,11 @@ public class VWEvaluatorAgent extends EvaluatorAgent implements
   }
 
   // ***** NOT USED ***** //
+  
+  @Override
+  public void updateCon(CustomObservable o, Object arg) {
+  }
+  
   @Override
   public int getPerceptionRange() {
     return 0;
@@ -70,5 +64,9 @@ public class VWEvaluatorAgent extends EvaluatorAgent implements
   public boolean canSeeBehind() {
     return true;
   }
-
+  
+  @Override
+  public Object simulate() {
+    return null;
+  }
 }

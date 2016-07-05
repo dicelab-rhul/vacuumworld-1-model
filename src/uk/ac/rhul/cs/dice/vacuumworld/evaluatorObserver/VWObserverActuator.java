@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -19,8 +19,6 @@ public class VWObserverActuator extends ObserverActuator {
   @Override
   public void updateCon(CustomObservable o, Object arg) {
     if (o instanceof VWObserverAgent && arg instanceof MonitoringEvent) {
-      //System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-          //+ o.getClass().getSimpleName() + " " + arg);
       notifyObservers(arg, VacuumWorldMonitoringContainer.class);
     }
   }

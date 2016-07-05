@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import java.util.Set;
 import java.util.logging.Level;
@@ -51,7 +51,7 @@ public class VWObserverMind extends ObserverMind implements
 
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-    if (o instanceof VWObserverBrain && arg instanceof MonitoringResult) {
+    if (o instanceof VWObserverBrain) {
       perceive(arg);
     }
   }
@@ -62,7 +62,7 @@ public class VWObserverMind extends ObserverMind implements
    */
   @Override
   public void perceive(Object perceptionWrapper) {
-   System.out.println(this.getClass().getSimpleName() + Thread.currentThread().getId() + " perceive");
+   //System.out.println(this.getClass().getSimpleName() + Thread.currentThread().getId() + " perceive");
     if (perceptionWrapper instanceof MonitoringResult) {
       Perception perception = ((MonitoringResult) perceptionWrapper)
           .getPerception();
@@ -96,6 +96,7 @@ public class VWObserverMind extends ObserverMind implements
   @Override
   public void start(int perceptionRange, boolean canSeeBehind,
       Set<Action> availableActions) {
+    canProceed = false;
     this.state = ThreadState.JUST_STARTED;
     this.state = ThreadState.AFTER_DECIDE;
 

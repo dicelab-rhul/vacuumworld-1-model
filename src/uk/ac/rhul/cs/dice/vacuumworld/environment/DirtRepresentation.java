@@ -1,8 +1,8 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.DirtDatabaseRepresentation;
 
 /**
  * The representation of a {@link Dirt} used internally by
@@ -15,7 +15,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
  * @author Ben Wilkins
  *
  */
-public class DirtRepresentation {
+public class DirtRepresentation implements Cloneable {
   private String _id;
   private DirtType type;
 
@@ -31,6 +31,10 @@ public class DirtRepresentation {
     super();
     this._id = _id;
     this.type = type;
+  }
+  
+  public DirtRepresentation clone() {
+    return new DirtRepresentation(this._id, this.type);
   }
 
   public String get_id() {

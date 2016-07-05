@@ -6,7 +6,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
 
 /**
  * A {@link Result} extending {@link DefaultActionResult} that is specific to

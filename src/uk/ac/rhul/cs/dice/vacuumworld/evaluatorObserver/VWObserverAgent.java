@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import java.util.List;
 
@@ -14,6 +14,7 @@ import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgent;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
@@ -64,19 +65,11 @@ public class VWObserverAgent extends ObserverAgent implements
         collectionRepresentation);
   }
 
-  @Override
-  public Object simulate() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-    // System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-    // + o.getClass().getSimpleName() + " " + arg);
     if (o instanceof VWObserverBrain && arg instanceof TotalPerceptionAction) {
-      // TODO timestamp
-      MonitoringEvent event = new MonitoringEvent((Action) arg, (long) 1, this);
+      MonitoringEvent event = new MonitoringEvent((Action) arg, (long) VacuumWorldServer.getCycleNumber(), this);
       event.setActuatorRecipient(((VWObserverActuator) this.getActuators().get(
           this.getActionActuatorIndex())).getActuatorId());
       event.setSensorToCallBackId(((VWObserverSensor) this.getSensors().get(
@@ -113,7 +106,7 @@ public class VWObserverAgent extends ObserverAgent implements
     return this.getClass().getSimpleName();
   }
 
-  // ***** NOT USED ***** //
+//***** NOT USED ***** //
 
   @Override
   public int getPerceptionRange() {
@@ -124,5 +117,11 @@ public class VWObserverAgent extends ObserverAgent implements
   public boolean canSeeBehind() {
     return true;
   }
+  
+  @Override
+  public Object simulate() {
+    return null;
+  }
+
 
 }

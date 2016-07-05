@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Brain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -19,9 +19,6 @@ public class VWObserverBrain extends ObserverBrain {
 
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-    //System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-        //+ o.getClass().getSimpleName() + " " + arg);
-
     if (o instanceof VWObserverMind && arg instanceof TotalPerceptionAction) {
       notifyObservers(arg, VWObserverAgent.class);
     } else if (o instanceof VWObserverAgent && arg instanceof MonitoringResult) {

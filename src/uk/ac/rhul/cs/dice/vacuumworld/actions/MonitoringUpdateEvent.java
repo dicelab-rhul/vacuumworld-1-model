@@ -24,6 +24,11 @@ public class MonitoringUpdateEvent extends AbstractEvent {
 	public String represent() {
 		return this.getActor() + " : " + this.getAction() + " : " + result.toString() + " : " + this.getTimestamp();
 	}
+	
+	@Override
+	public String toString() {
+	  return this.represent();
+	}
 
 	@Override
 	public boolean isPossible(Physics physics, Space context) {

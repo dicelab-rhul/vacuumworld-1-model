@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -7,6 +7,7 @@ import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorAgent;
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
 
 /**
  * The representation of a {@link Dirt} in a MongoDB. Converting an instance of

@@ -1,8 +1,10 @@
-package uk.ac.rhul.cs.dice.vacuumworld.monitor;
+package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
@@ -10,11 +12,8 @@ import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringUpdateEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
 
 /**
  * The representation of {@link VacuumWorldSpace} used by
@@ -32,7 +31,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
  * @author Ben Wilkins
  *
  */
-public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception {
+public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception, Cloneable {
 
   private int width, height;
 
@@ -96,6 +95,36 @@ public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception 
   public void dirtCleaned(VacuumWorldCoordinates coordsOfCleanedDirt) {
     removedDirts.add(dirts.get(coordsOfCleanedDirt));
     dirts.remove(coordsOfCleanedDirt);
+  }
+  
+  @Override
+  public synchronized VacuumWorldSpaceRepresentation clone() {
+    VacuumWorldSpaceRepresentation rep =  new VacuumWorldSpaceRepresentation();
+    rep.setHeight(this.height);
+    rep.setWidth(this.width);
+    
+    Map<String, AgentRepresentation> agents = new HashMap<String, AgentRepresentation>();
+    Map<VacuumWorldCoordinates, DirtRepresentation> dirts = new HashMap<VacuumWorldCoordinates, DirtRepresentation>();
+    Set<DirtRepresentation> removedDirts = new HashSet<DirtRepresentation>();
+    //clone the maps/set
+    Iterator<Entry<String, AgentRepresentation>> agentIter = this.agents.entrySet().iterator();
+    while(agentIter.hasNext()) {
+      Entry<String, AgentRepresentation> e = agentIter.next();
+      agents.put(e.getKey(), e.getValue().clone());
+    }
+    Iterator<Entry<VacuumWorldCoordinates, DirtRepresentation>> dirtIter = this.dirts.entrySet().iterator();
+    while(dirtIter.hasNext()) {
+      Entry<VacuumWorldCoordinates, DirtRepresentation> e = dirtIter.next();
+      dirts.put(e.getKey().clone(), e.getValue().clone());
+    }
+    Iterator<DirtRepresentation> rdirtsIter = this.removedDirts.iterator();
+    while(rdirtsIter.hasNext()) {
+      removedDirts.add(rdirtsIter.next().clone());
+    }
+    rep.setAgents(agents);
+    rep.setDirts(dirts);
+    rep.setRemovedDirts(removedDirts);
+    return rep;
   }
 
 }

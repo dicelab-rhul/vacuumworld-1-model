@@ -4,7 +4,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Coordinates;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 
-public class VacuumWorldCoordinates implements Coordinates {
+public class VacuumWorldCoordinates implements Coordinates, Cloneable {
 	private int x;
 	private int y;
 	
@@ -118,6 +118,11 @@ public class VacuumWorldCoordinates implements Coordinates {
 
 	private int breakTie(int x1, int x2) {
 		return x1 > x2 ? 1 : -1;
+	}
+	
+	@Override
+	public VacuumWorldCoordinates clone() {
+	  return new VacuumWorldCoordinates(this.x, this.y);
 	}
 
 	@Override

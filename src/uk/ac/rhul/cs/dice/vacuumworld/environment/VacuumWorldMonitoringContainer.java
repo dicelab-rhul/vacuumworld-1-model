@@ -5,11 +5,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Agent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractSensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -22,22 +26,19 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurningAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
+import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.AgentRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.DirtRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWEvaluatorAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VWObserverSensor;
-import uk.ac.rhul.cs.dice.vacuumworld.monitor.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
-  private List<VWObserverAgent> observerAgents;
-  private List<VWEvaluatorAgent> evaluatorAgents;
+  private List<Agent> monitoringAgents;
   private VacuumWorldMonitoringPhysics physics;
   private VacuumWorldSpace subContainerSpace;
   private VacuumWorldSpaceRepresentation vacuumWorldSpaceRepresentation;
@@ -46,17 +47,38 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
       VacuumWorldSpace space) {
     this.physics = physics;
     this.subContainerSpace = space;
-    this.observerAgents = new ArrayList<>();
-    this.evaluatorAgents = new ArrayList<>();
+    this.monitoringAgents = new ArrayList<>();
     vacuumWorldSpaceRepresentation = new VacuumWorldSpaceRepresentation();
   }
 
+  public List<VacuumWorldMonitorAgent> getMonitorAgents() {
+    List<VacuumWorldMonitorAgent> list = new ArrayList<>();
+    for (Agent a : monitoringAgents) {
+      if (a instanceof VacuumWorldMonitorAgent) {
+        list.add((VacuumWorldMonitorAgent) a);
+      }
+    }
+    return list;
+  }
+
   public List<VWObserverAgent> getObserverAgents() {
-    return this.observerAgents;
+    List<VWObserverAgent> list = new ArrayList<>();
+    for (Agent a : monitoringAgents) {
+      if (a instanceof VWObserverAgent) {
+        list.add((VWObserverAgent) a);
+      }
+    }
+    return list;
   }
 
   public List<VWEvaluatorAgent> getEvaluatorAgents() {
-    return this.evaluatorAgents;
+    List<VWEvaluatorAgent> list = new ArrayList<>();
+    for (Agent a : monitoringAgents) {
+      if (a instanceof VWEvaluatorAgent) {
+        list.add((VWEvaluatorAgent) a);
+      }
+    }
+    return list;
   }
 
   public VacuumWorldMonitoringPhysics getPhysics() {
@@ -65,31 +87,40 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
   public VacuumWorldSpace getSubContainerSpace() {
     return this.subContainerSpace;
+
+  }
+
+  public void addMonitorAgent(VacuumWorldMonitorAgent agent) {
+    this.monitoringAgents.add(agent);
+    this.addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
+    ((VacuumWorldMonitorActuator) agent.getActuators().get(
+        agent.getActionActuatorIndex())).addObserver(this);
   }
 
   public void addObserverAgent(VWObserverAgent agent) {
-    this.observerAgents.add(agent);
+    this.monitoringAgents.add(agent);
     this.addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
     ((VWObserverActuator) agent.getActuators().get(
         agent.getActionActuatorIndex())).addObserver(this);
   }
 
   public void addEvaluatorAgent(VWEvaluatorAgent agent) {
-    System.out.println("Adding evaluator");
-    this.evaluatorAgents.add(agent);
+    this.monitoringAgents.add(agent);
     ((VWEvaluatorActuator) agent.getActuators().get(
         agent.getActionActuatorIndex())).addObserver(this);
   }
 
   @Override
   public void update(CustomObservable o, Object arg) {
+    System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
+        + o.getClass().getSimpleName() + " " + arg);
     // Manage sub container message
     if (o instanceof VacuumWorldPhysics && arg instanceof MonitoringUpdateEvent) {
       manageSubContainerMessage((MonitoringUpdateEvent) arg);
       return;
     }
     // Manage Actuator message
-    if (o instanceof VWObserverActuator && arg instanceof MonitoringEvent) {
+    if ((o instanceof VWObserverActuator || o instanceof VacuumWorldMonitorActuator)  && arg instanceof MonitoringEvent) {
       manageActuatorRequest((MonitoringEvent) arg);
     }
     // Manage Physics message
@@ -108,7 +139,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
       Action a = event.getAction();
       agent.setClean(false);
       agent.setSuccessfulClean(false);
-      
+
       if (a instanceof CleanAction) {
         agent.setClean(true);
         // if the agent was on top of some dirt then remove it from the map
@@ -157,8 +188,8 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
   private void notifyIfNeeded(CustomObserver recipient, Object arg,
       String sensorId) {
-    if (recipient instanceof VWObserverSensor) {
-      VWObserverSensor s = (VWObserverSensor) recipient;
+    if (recipient instanceof AbstractSensor) {
+      AbstractSensor s = (AbstractSensor) recipient;
 
       if (s.getSensorId().equals(sensorId)) {
         s.update(this, arg);
@@ -210,7 +241,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
                       ((DirtAppearance) dirt.getExternalAppearance())
                           .getDirtType()));
         } else {
-          System.err.println("CANNOT REPRESENT: " + loc.getObstacle() + "IN "
+          Logger.getGlobal().log(Level.SEVERE, "CANNOT REPRESENT: " + loc.getObstacle() + "IN "
               + VacuumWorldSpaceRepresentation.class.getSimpleName());
         }
       }
