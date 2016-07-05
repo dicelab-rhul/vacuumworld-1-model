@@ -145,4 +145,9 @@ public class VWObserverMind extends ObserverMind implements
   @Override
   protected void stepCycle(Object actionResultWrapper) {
   }
+
+@Override
+public boolean canProceed() {
+	return this.canProceed;
+}
 }

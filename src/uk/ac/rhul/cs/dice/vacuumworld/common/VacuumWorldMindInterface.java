@@ -31,6 +31,8 @@ public interface VacuumWorldMindInterface {
    */
   public void resume();
 
+  public boolean canProceed();
+  
   /**
    * Starts or restarts the agents thread cycle. The parameters are only need
    * for the first execution.

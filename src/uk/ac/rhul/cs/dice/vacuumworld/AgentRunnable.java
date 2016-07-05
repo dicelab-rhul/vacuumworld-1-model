@@ -35,7 +35,9 @@ public class AgentRunnable implements Runnable {
 	}
 	
 	public void resumeAgent() {
-		((VacuumWorldMindInterface) this.agent.getMind()).resume();
+		while(!(((VacuumWorldMindInterface) this.agent.getMind()).canProceed())) {
+			((VacuumWorldMindInterface) this.agent.getMind()).resume();
+		}
 	}
 	
 	@Override

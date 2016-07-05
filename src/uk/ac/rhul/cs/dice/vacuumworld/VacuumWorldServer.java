@@ -297,17 +297,17 @@ public class VacuumWorldServer {
 
     while (newCycle) {
       try {
-        Logger.getGlobal().log(Level.INFO, "Before Decide");
+        //Logger.getGlobal().log(Level.INFO, "Before Decide");
         monitorAfterDecide();
         
-        Logger.getGlobal().log(Level.INFO, "Before perceive");
+        //Logger.getGlobal().log(Level.INFO, "Before perceive");
         monitorAfterPerceive();
         
-        Logger.getGlobal().log(Level.INFO, "Before restart");
+        //Logger.getGlobal().log(Level.INFO, "Before restart");
         restartThreads();
         
-        Logger.getGlobal().log(Level.INFO, "after restart");
-        cycleNumber++;
+        //Logger.getGlobal().log(Level.INFO, "after restart");
+        //cycleNumber++;
       } catch (Exception e) {
         e.printStackTrace();
         newCycle = false;
@@ -326,23 +326,28 @@ public class VacuumWorldServer {
     this.threadsAfterPerceive = 0;
 
     while (this.threadsAfterPerceive < this.runnableAgents.size()) {
-      System.out.println("1: Threads after perceive" + threadsAfterPerceive + "," + runnableAgents.size());
-      updateThreadsAterPerceive();
+    	System.out.println("Threads after perceive: " + threadsAfterPerceive + "/" + runnableAgents.size());
+      updateThreadsAfterPerceive();
+      try {
+		Thread.sleep(2000);
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}
     }
-    System.out.println("2: Threads after perceive" + threadsAfterPerceive + "," + runnableAgents.size());
-
+    System.out.println("Threads after perceive: " + threadsAfterPerceive + "/" + runnableAgents.size());
     killThreads();
   }
 
-  private void updateThreadsAterPerceive() {
+  private void updateThreadsAfterPerceive() {
+	  this.threadsAfterPerceive = 0;
     for (AgentRunnable agentRunnable : this.runnableAgents.values()) {
-      System.out.println(agentRunnable.getThreadState());
+      //System.out.println(agentRunnable.getThreadState());
       
       
       
       if (agentRunnable.getThreadState() != ThreadState.AFTER_PERCEIVE) {
         this.threadsAfterPerceive = 0;
-        continue;
+        break;
       } else {
         this.threadsAfterPerceive++;
       }
@@ -367,19 +372,19 @@ public class VacuumWorldServer {
     this.threadsAfterDecide = 0;
 
     while (this.threadsAfterDecide < this.runnableAgents.size()) {
-      //System.out.println("1: Threads after decide" + threadsAfterDecide + "," + runnableAgents.size());
-      updateThreadsAterDecide();
+      System.out.println("Threads after decide: " + threadsAfterDecide + "/" + runnableAgents.size());
+      updateThreadsAfterDecide();
     }
-    System.out.println("2: Threads after decide" + threadsAfterDecide + "," + runnableAgents.size());
+    System.out.println("Threads after decide: " + threadsAfterDecide + "/" + runnableAgents.size());
     printState();
     resumeThreads();
   }
 
-  private void updateThreadsAterDecide() {
+  private void updateThreadsAfterDecide() {
     for (AgentRunnable agentRunnable : this.runnableAgents.values()) {
       if (agentRunnable.getThreadState() != ThreadState.AFTER_DECIDE) {
         this.threadsAfterDecide = 0;
-        continue;
+        break;
       } else {
         this.threadsAfterDecide++;
       }

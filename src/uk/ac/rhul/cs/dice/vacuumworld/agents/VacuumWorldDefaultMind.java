@@ -37,9 +37,9 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
     this.canProceed = false;
   }
 
+  @Override
   public void start(int perceptionRange, boolean canSeeBehind,
       Set<Action> availableActions) {
-    //canProceed = false;
     this.state = ThreadState.JUST_STARTED;
 
     this.perceptionRange = perceptionRange;
@@ -48,23 +48,36 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
     this.nextAction = decide();
     this.canProceed = false;
 
+    System.out.println("Thread " + Thread.currentThread().getId() + " after decide.");
     this.state = ThreadState.AFTER_DECIDE;
 
     waitForServerBeforeExecution();
     execute(this.nextAction);
   }
 
+  @Override
   public void waitForServerBeforeExecution() {
-    while (!this.canProceed)
-      ;
+	System.out.println("Thread " + Thread.currentThread().getId() + " waiting for execution permission.");
+    while (!this.canProceed) {
+    	System.out.println("Thread " + Thread.currentThread().getId() + " cannot execute.");
+    	continue;
+    }
+    System.out.println("Thread " + Thread.currentThread().getId() + " can now execute.");
   }
 
+  @Override
   public void resume() {
     this.canProceed = true;
   }
 
+  @Override
   public ThreadState getState() {
     return this.state;
+  }
+  
+  @Override
+  public boolean canProceed() {
+	  return this.canProceed;
   }
 
   @Override
@@ -75,8 +88,10 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
   }
 
   private void manageBrainMessage(Object arg) {
+	System.out.println("Thread " + Thread.currentThread().getId() + " after execute.");
     if (arg instanceof DefaultActionResult) {
       perceive(arg);
+      System.out.println("Thread " + Thread.currentThread().getId() + " after perceive.");
       this.state = ThreadState.AFTER_PERCEIVE;
       return;
     }
@@ -89,6 +104,7 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
     } else if (perceptionWrapper instanceof DefaultActionResult) {
       this.previousActionResult = null;
     }
+    this.canProceed = false;
   }
 
   @Override
@@ -115,11 +131,11 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
   public void execute(Action action) {
     try {
       Thread.sleep(2000);
+      System.out.println("Thread " + Thread.currentThread().getId() + " executing...");
+      notifyObservers(action, VacuumWorldDefaultBrain.class);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-
-    notifyObservers(action, VacuumWorldDefaultBrain.class);
   }
 
   private Action decideMove(VacuumWorldPerception perception) {

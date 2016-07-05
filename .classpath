@@ -6,6 +6,11 @@
 	<classpathentry kind="lib" path="res/javax.json-api-1.0.jar"/>
 	<classpathentry kind="lib" path="res/javax.json-1.0.4.jar"/>
 	<classpathentry kind="lib" path="res/cawl.jar"/>
+	<classpathentry kind="lib" path="res/mongo-java-driver-3.2.2.jar"/>
+	<classpathentry kind="lib" path="res/jackson-databind-2.7.5.jar"/>
+	<classpathentry kind="lib" path="res/jackson-core-2.7.5.jar"/>
+	<classpathentry kind="lib" path="res/jackson-annotations-2.7.0.jar"/>
+	<classpathentry kind="lib" path="res/goel.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/goel"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

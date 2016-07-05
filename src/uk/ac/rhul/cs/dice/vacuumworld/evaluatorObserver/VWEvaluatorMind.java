@@ -152,4 +152,9 @@ public class VWEvaluatorMind extends EvaluatorMind implements
   @Override
   public void updateCon(CustomObservable o, Object arg) {
   }
+
+@Override
+public boolean canProceed() {
+	return this.canProceed;
+}
 }

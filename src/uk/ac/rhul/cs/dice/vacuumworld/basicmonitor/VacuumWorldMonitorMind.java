@@ -84,4 +84,9 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind implements
     return this.state;
   }
 
+@Override
+public boolean canProceed() {
+	return this.canProceed;
+}
+
 }
