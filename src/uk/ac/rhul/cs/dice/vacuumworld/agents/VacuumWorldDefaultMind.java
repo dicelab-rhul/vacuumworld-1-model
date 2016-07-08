@@ -80,7 +80,7 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
       return decideMove(previousActionResult.getPerception());
     }
   }
-  
+
   private Action decideMove(VacuumWorldPerception perception) {
     if (perception != null) {
       updateAvailableActions(perception);

@@ -303,8 +303,6 @@ public class VacuumWorldServer implements Observer {
     container.addObserverAgent(a);
   }
 
-  // *** GENERAL/SERVER MANAGEMENT METHODS *** //
-
   private Map<SpaceCoordinates, Double[]> createDimensionsMap(int[] dimensions) {
     Map<SpaceCoordinates, Double[]> dimensionsMap = new EnumMap<>(
         SpaceCoordinates.class);

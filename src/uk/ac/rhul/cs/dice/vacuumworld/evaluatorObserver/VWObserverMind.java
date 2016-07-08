@@ -88,4 +88,9 @@ public class VWObserverMind extends ObserverMind {
   public void setAvailableActions(Set<Action> actions) {
     this.actions = actions;
   }
+
+@Override
+public boolean canProceed() {
+	return this.canProceed;
+}
 }
