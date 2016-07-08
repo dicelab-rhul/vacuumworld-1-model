@@ -9,8 +9,6 @@ public class VacuumWorldMonitorSensor extends AbstractSensor {
 
   @Override
   public void update(CustomObservable o, Object arg) {
-    System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-        + o.getClass().getSimpleName() + " " + arg);
     if (o instanceof VacuumWorldMonitoringContainer
         && arg instanceof MonitoringResult) {
       notifyObservers(arg, VacuumWorldMonitorAgent.class);

@@ -2,19 +2,7 @@
   "width": 10,
   "height": 10,
   "notable_locations": [
-    {
-      "x": 3,
-      "y": 4,
-      "agent": null,
-      "dirt": "green"
-    },
-    {
-      "x": 8,
-      "y": 5,
-      "agent": null,
-      "dirt": "orange"
-    },
-    {
+     {
       "x": 7,
       "y": 6,
       "agent": {
@@ -28,21 +16,6 @@
         "facing_direction": "north"
       },
       "dirt": null
-    },
-    {
-      "x": 3,
-      "y": 4,
-      "agent": {
-        "id": "89cb0dbe-ba2d-4bf9-ad62-80383ae99be1",
-        "name": "agent2",
-        "color": "green",
-        "sensors": 2,
-        "actuators": 2,
-        "width": 1,
-        "height": 1,
-        "facing_direction": "east"
-      },
-      "dirt": "green"
     }
   ]
 }

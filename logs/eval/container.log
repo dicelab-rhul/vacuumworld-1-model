@@ -1,0 +1,5 @@
+{PerceiveAction:2:false}:ACTION_DONE
+{PerceiveAction:2:false}:ACTION_DONE
+uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f:ACTION_DONE
+uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction@1f:ACTION_DONE
+uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction@1f:ACTION_DONE

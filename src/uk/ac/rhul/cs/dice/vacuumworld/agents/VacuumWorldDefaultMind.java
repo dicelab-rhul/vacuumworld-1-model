@@ -5,80 +5,40 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import uk.ac.rhul.cs.dice.cawl.CyclingAutonomousAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.ThreadState;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldMindInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 
-public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
-    implements VacuumWorldMindInterface {
+public class VacuumWorldDefaultMind extends AbstractAgentMind {
+  
   private int perceptionRange;
   private boolean canSeeBehind;
-  private List<Action> availableActions;
+  
+  private Set<Action> actions;
+  private ArrayList<Action> availableActions;
+  
   private Random rng;
   private DefaultActionResult previousActionResult;
   private Action nextAction;
-  private ThreadState state;
-  private boolean canProceed;
 
   public VacuumWorldDefaultMind() {
     this.previousActionResult = null;
     this.rng = new Random();
-    this.canProceed = false;
-  }
-
-  public void start(int perceptionRange, boolean canSeeBehind,
-      Set<Action> availableActions) {
-    //canProceed = false;
-    this.state = ThreadState.JUST_STARTED;
-
-    this.perceptionRange = perceptionRange;
-    this.canSeeBehind = canSeeBehind;
-    this.availableActions = new ArrayList<>(availableActions);
-    this.nextAction = decide();
-    this.canProceed = false;
-
-    this.state = ThreadState.AFTER_DECIDE;
-
-    waitForServerBeforeExecution();
-    execute(this.nextAction);
-  }
-
-  public void waitForServerBeforeExecution() {
-    while (!this.canProceed)
-      ;
-  }
-
-  public void resume() {
-    this.canProceed = true;
-  }
-
-  public ThreadState getState() {
-    return this.state;
   }
 
   @Override
   public void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldDefaultBrain) {
-      manageBrainMessage(arg);
-    }
-  }
-
-  private void manageBrainMessage(Object arg) {
-    if (arg instanceof DefaultActionResult) {
+    if (o instanceof VacuumWorldDefaultBrain && arg instanceof DefaultActionResult) {
       perceive(arg);
-      this.state = ThreadState.AFTER_PERCEIVE;
-      return;
     }
   }
 
@@ -93,13 +53,23 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
 
   @Override
   public Action decide(Object... parameters) {
+    availableActions = new ArrayList<>();
+    availableActions.addAll(actions);
+    
+    System.out.println(this.getClass().getSimpleName() + ": decide");
     if (this.previousActionResult == null) {
-      return new PerceiveAction(this.perceptionRange, this.canSeeBehind);
+      nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
     } else if (this.previousActionResult instanceof VacuumWorldActionResult) {
-      return decideFromPerception((VacuumWorldActionResult) this.previousActionResult);
+      nextAction = decideFromPerception((VacuumWorldActionResult) this.previousActionResult);
     } else {
-      return decideMove();
+      nextAction = decideMove();
     }
+    return nextAction;
+  }
+  
+  @Override
+  public void execute(Action action) {
+    notifyObservers(nextAction, VacuumWorldDefaultBrain.class);
   }
 
   private Action decideFromPerception(
@@ -110,30 +80,17 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
       return decideMove(previousActionResult.getPerception());
     }
   }
-
-  @Override
-  public void execute(Action action) {
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-
-    notifyObservers(action, VacuumWorldDefaultBrain.class);
-  }
-
+  
   private Action decideMove(VacuumWorldPerception perception) {
     if (perception != null) {
       updateAvailableActions(perception);
     }
-
     return decideMove();
   }
 
   private Action decideMove() {
     int size = this.availableActions.size();
     int randomNumber = rng.nextInt(size);
-
     return availableActions.get(randomNumber);
   }
 
@@ -163,7 +120,6 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
         toRemove.add((CleanAction) a);
       }
     }
-
     this.availableActions.removeAll(toRemove);
   }
 
@@ -174,7 +130,6 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
         return;
       }
     }
-
     this.availableActions.add(new CleanAction());
   }
 
@@ -218,7 +173,19 @@ public class VacuumWorldDefaultMind extends CyclingAutonomousAgentMind
       }
     }
   }
-
+  
+  public void setAvailableActions(Set<Action> actions) {
+    this.actions = actions;
+  }
+  
+  public void setCanSeeBehind(boolean canSeeBehind) {
+    this.canSeeBehind = canSeeBehind;
+  }
+  
+  public void setPerceptionRange(int preceptionRange) {
+    this.perceptionRange = preceptionRange;
+  }
+  
   @Override
   public int hashCode() {
     final int prime = 31;

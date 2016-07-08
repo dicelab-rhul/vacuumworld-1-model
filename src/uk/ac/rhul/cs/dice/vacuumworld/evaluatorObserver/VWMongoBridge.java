@@ -11,7 +11,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.monitor.actions.ChangedResult;
 import uk.ac.rhul.cs.dice.monitor.actions.DatabaseEvent;
 import uk.ac.rhul.cs.dice.monitor.actions.ReadResult;
 import uk.ac.rhul.cs.dice.monitor.actions.WriteResult;
@@ -119,7 +118,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
         p.getRemovedDirts().remove(rep);
       }
     }
-    notifyObservers(new ChangedResult(collectionRep));
+    //notifyObservers(new ChangedResult(new CollectionRepresentation("lol",null)));
     return new WriteResult(ActionResult.ACTION_DONE, null);
   }
 

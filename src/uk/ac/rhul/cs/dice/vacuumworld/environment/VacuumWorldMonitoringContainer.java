@@ -36,6 +36,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
+import util.Utils;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   private List<Agent> monitoringAgents;
@@ -43,12 +44,15 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   private VacuumWorldSpace subContainerSpace;
   private VacuumWorldSpaceRepresentation vacuumWorldSpaceRepresentation;
 
+  private Logger logger;
+  
   public VacuumWorldMonitoringContainer(VacuumWorldMonitoringPhysics physics,
       VacuumWorldSpace space) {
     this.physics = physics;
     this.subContainerSpace = space;
     this.monitoringAgents = new ArrayList<>();
     vacuumWorldSpaceRepresentation = new VacuumWorldSpaceRepresentation();
+    logger = Utils.fileLogger("C:/Users/Ben/workspace/vacuumworldmodel/logs/eval/container.log");
   }
 
   public List<VacuumWorldMonitorAgent> getMonitorAgents() {
@@ -112,8 +116,8 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
   @Override
   public void update(CustomObservable o, Object arg) {
-    System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-        + o.getClass().getSimpleName() + " " + arg);
+    //System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
+        //+ o.getClass().getSimpleName() + " " + arg);
     // Manage sub container message
     if (o instanceof VacuumWorldPhysics && arg instanceof MonitoringUpdateEvent) {
       manageSubContainerMessage((MonitoringUpdateEvent) arg);
@@ -132,6 +136,9 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
   private void manageSubContainerMessage(MonitoringUpdateEvent event) {
     System.out.println("MESSAGE FROM SUBCONTAINER! : " + event.represent());
+    
+    logger.info(event.getAction() + ":" + event.getResult());
+    
     // if the action was not done then it is not relevant
     if (event.getResult().equals(ActionResult.ACTION_DONE)) {
       AgentRepresentation agent = vacuumWorldSpaceRepresentation

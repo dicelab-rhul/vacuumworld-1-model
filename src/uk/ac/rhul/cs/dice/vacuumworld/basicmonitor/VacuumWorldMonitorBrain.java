@@ -9,9 +9,6 @@ public class VacuumWorldMonitorBrain extends AbstractAgentBrain {
 
   @Override
   public void update(CustomObservable o, Object arg) {
-    System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-        + o.getClass().getSimpleName() + " " + arg);
-
     if (o instanceof VacuumWorldMonitorMind
         && arg instanceof TotalPerceptionAction) {
       notifyObservers(arg, VacuumWorldMonitorAgent.class);

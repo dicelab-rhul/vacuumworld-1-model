@@ -1,9 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.actions.ChangedResult;
@@ -13,17 +9,13 @@ import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorMind;
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
-import uk.ac.rhul.cs.dice.vacuumworld.ThreadState;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldMindInterface;
 
-public class VWEvaluatorMind extends EvaluatorMind implements
-    VacuumWorldMindInterface {
-
-  private ThreadState state;
-  private boolean canProceed = false;
-
+public class VWEvaluatorMind extends EvaluatorMind {
+  
   private EvaluationStrategy<?> strategy;
   private int changes = 0;
+  private ReadAction readAction = new ReadAction();
+  private Action nextAction;
 
   /**
    * Constructor.
@@ -33,28 +25,15 @@ public class VWEvaluatorMind extends EvaluatorMind implements
    */
   public VWEvaluatorMind(EvaluationStrategy<?> strategy) {
     this.strategy = strategy;
-    canProceed = false;
   }
 
   @Override
   public void execute(Action action) {
-    if (shouldRead()) {
-      Logger.getGlobal().log(Level.INFO, "Evaluator reading...");
+    if(nextAction != null) {
       read();
-      
     } else {
-      Logger.getGlobal().log(Level.INFO, "Evaluator did not read");
-      this.state = ThreadState.AFTER_PERCEIVE;
+      System.out.println("EVALUATOR DID NOTHING");
     }
-  }
-
-  @Override
-  protected void manageReadResult(ReadResult result) {
-    perceive(result);
-    Evaluation e = this.evaluate();
-    System.out.println("AN EVALUATION WAS MADE!");
-    this.state = ThreadState.AFTER_PERCEIVE;
-    return;
   }
 
   @Override
@@ -69,17 +48,33 @@ public class VWEvaluatorMind extends EvaluatorMind implements
 
   @Override
   public Action decide(Object... parameters) {
-    return null;
+    if(changes > 1) {
+      System.out.println("EVALUATOR DECIDED TO READ");
+      nextAction = readAction;
+      changes = 0;
+    } else {
+      System.out.println("EVALUATOR DECIDED TO DO NOTHING");
+      nextAction = null;
+    }
+    return nextAction;
   }
 
   @Override
+  protected void manageReadResult(ReadResult result) {
+    perceive(result);
+    Evaluation e = this.evaluate();
+    System.out.println("AN EVALUATION WAS MADE!");
+  }
+  
+  @Override
   protected void manageChangedResult(ChangedResult result) {
+    System.out.println("RECIEVED CHANGED RESULT");
     this.changes++;
   }
 
   @Override
   protected boolean shouldRead() {
-    return changes % 3 == 0 && changes != 0;
+    return nextAction instanceof ReadAction;
   }
 
   @Override
@@ -89,7 +84,7 @@ public class VWEvaluatorMind extends EvaluatorMind implements
 
   @Override
   protected void read() {
-    notifyObservers(new ReadAction(), VWEvaluatorBrain.class);
+    notifyObservers(nextAction, VWEvaluatorBrain.class);
   }
 
   @Override
@@ -97,58 +92,9 @@ public class VWEvaluatorMind extends EvaluatorMind implements
     return strategy.evaluate(null, 0, 0);
   }
 
-  @Override
-  public void start(int perceptionRange, boolean canSeeBehind,
-      Set<Action> availableActions) {
-    Logger.getGlobal().log(Level.INFO, "Evaluator Starting");
-    this.state = ThreadState.JUST_STARTED;
-    this.state = ThreadState.AFTER_DECIDE;
-
-    waitForServerBeforeExecution();
-    execute(null); // the action will be a read action if shouldRead().
-  }
-
-  // ******* THREAD RELATED METHODS ******* //
-
-  @Override
-  public ThreadState getState() {
-    return this.state;
-  }
-
-  @Override
-  public void resume() {
-    this.canProceed = true;
-  }
-
-  @Override
-  public void waitForServerBeforeExecution() {
-    while (!this.canProceed) {
-      Logger.getGlobal().log(Level.INFO, "Evaluator is waiting");
-    }
-  }
-
-  public void setState(ThreadState state) {
-    this.state = state;
-  }
-
-  // ******* NOT USED METHODS ******* //
-
-  /**
-   * Not used, start is called via
-   * {@link VacuumWorldMindInterface#start(int, boolean, Set)}.
+  /** 
+   * Not used.
    */
-  @Override
-  public void start() {
-  }
-
-  /**
-   * Not used. Cycling is done via
-   * {@link VacuumWorldMindInterface#start(int, boolean, Set)}.
-   */
-  @Override
-  protected void stepCycle(Object perviousActionResultWrapper) {
-  }
-
   @Override
   public void updateCon(CustomObservable o, Object arg) {
   }

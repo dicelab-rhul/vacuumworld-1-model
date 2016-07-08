@@ -14,10 +14,7 @@ import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverMind;
 import uk.ac.rhul.cs.dice.monitor.common.PerceptionRefiner;
 import uk.ac.rhul.cs.dice.monitor.mongo.MongoBridge;
-import uk.ac.rhul.cs.dice.vacuumworld.ThreadState;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldMindInterface;
 
 /**
  * A Vacuum World implementation of {@link ObserverMind}. Contains Vacuum World
@@ -28,12 +25,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldMindInterface;
  * @author Ben Wilkins
  *
  */
-public class VWObserverMind extends ObserverMind implements
-    VacuumWorldMindInterface {
+public class VWObserverMind extends ObserverMind {
 
-  private ThreadState state;
-  private final Action perceiveAction = new TotalPerceptionAction();
-  private boolean canProceed = false;
+  private Set<Action> actions;
+  private Action nextAction;
 
   /**
    * Constructor.
@@ -47,6 +42,12 @@ public class VWObserverMind extends ObserverMind implements
    */
   public VWObserverMind(PerceptionRefiner refiner) {
     super(refiner);
+  }
+  
+  @Override
+  public Action decide(Object... parameters) {
+    nextAction = (Action) actions.toArray()[0];
+    return nextAction;
   }
 
   @Override
@@ -62,7 +63,6 @@ public class VWObserverMind extends ObserverMind implements
    */
   @Override
   public void perceive(Object perceptionWrapper) {
-   //System.out.println(this.getClass().getSimpleName() + Thread.currentThread().getId() + " perceive");
     if (perceptionWrapper instanceof MonitoringResult) {
       Perception perception = ((MonitoringResult) perceptionWrapper)
           .getPerception();
@@ -72,77 +72,20 @@ public class VWObserverMind extends ObserverMind implements
 
   @Override
   public void execute(Action action) {
-    notifyObservers(action, VWObserverBrain.class);
+    notifyObservers(nextAction, VWObserverBrain.class);
   }
 
   @Override
   protected void manageWriteResult(WriteResult result) {
     if (result.getActionResult().equals(ActionResult.ACTION_DONE)) {
-      this.setState(ThreadState.AFTER_PERCEIVE);
       return;
     } else {
       Logger.getGlobal().log(Level.SEVERE, "WRITE RESULT FAILED ",
           result.getFailureReason());
     }
   }
-
-  // ******* THREAD RELATED METHODS *******//
-
-  @Override
-  public ThreadState getState() {
-    return this.state;
-  }
-
-  @Override
-  public void start(int perceptionRange, boolean canSeeBehind,
-      Set<Action> availableActions) {
-    canProceed = false;
-    this.state = ThreadState.JUST_STARTED;
-    this.state = ThreadState.AFTER_DECIDE;
-
-    waitForServerBeforeExecution();
-    execute(perceiveAction);
-  }
-
-  @Override
-  public void waitForServerBeforeExecution() {
-    while (!this.canProceed)
-      ;
-  }
-
-  @Override
-  public void resume() {
-    this.canProceed = true;
-  }
-
-  public void setState(ThreadState state) {
-    this.state = state;
-  }
-
-  // ******* NOT USED METHODS *******//
-
-  /**
-   * Not used, start is called via
-   * {@link VacuumWorldMindInterface#start(int, boolean, Set)}.
-   */
-  @Override
-  public void start() {
-  }
-
-  /**
-   * Not used. An {@link VWObserverMind} makes no decisions. Its only actions
-   * are to perceive.
-   */
-  @Override
-  public Action decide(Object... parameters) {
-    return null;
-  }
-
-  /**
-   * Not used. Cycling is done via
-   * {@link VacuumWorldMindInterface#start(int, boolean, Set)}.
-   */
-  @Override
-  protected void stepCycle(Object actionResultWrapper) {
+  
+  public void setAvailableActions(Set<Action> actions) {
+    this.actions = actions;
   }
 }

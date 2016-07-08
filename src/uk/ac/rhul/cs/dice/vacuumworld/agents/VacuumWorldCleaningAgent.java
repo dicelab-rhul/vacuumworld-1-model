@@ -19,14 +19,18 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
 public class VacuumWorldCleaningAgent extends AbstractAgent implements
     VacuumWorldAgentInterface {
-  private AgentFacingDirection facingDirection;
+ 
+  
   private static final int PERCEPTION_RANGE = 2;
   private static final boolean CAN_SEE_BEHIND = false;
+  
   private static final int ACTION_ACTUATOR_INDEX = 0;
   private static final int SERVER_MESSAGE_SENSOR_INDEX = 1;
   private static final int ACTION_RESULT_SENSOR_INDEX = 0;
   private static final int MIND_SIGNAL_ACTUATOR_INDEX = 1;
+  
   private VacuumWorldCoordinates currentLocation;
+  private AgentFacingDirection facingDirection;
 
   public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance,
       List<Sensor> sensors, List<Actuator> actuators, AbstractAgentMind mind,

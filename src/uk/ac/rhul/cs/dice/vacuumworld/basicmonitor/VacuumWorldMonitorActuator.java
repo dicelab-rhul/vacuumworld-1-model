@@ -9,8 +9,6 @@ public class VacuumWorldMonitorActuator extends AbstractActuator {
   @Override
   public void update(CustomObservable o, Object arg) {
     if (o instanceof VacuumWorldMonitorAgent && arg instanceof MonitoringEvent) {
-      System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-          + o.getClass().getSimpleName() + " " + arg);
       notifyObservers(arg, VacuumWorldMonitoringContainer.class);
     }
   }

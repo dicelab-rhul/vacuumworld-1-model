@@ -27,8 +27,6 @@ public class VacuumWorldMonitorAgent extends AbstractAgent implements
 
   @Override
   public void update(CustomObservable o, Object arg) {
-    System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-        + o.getClass().getSimpleName() + " " + arg);
     if (o instanceof VacuumWorldMonitorBrain
         && arg instanceof TotalPerceptionAction) {
       MonitoringEvent event = new MonitoringEvent((Action) arg, (long) VacuumWorldServer.getCycleNumber(), this);

@@ -6,16 +6,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
-import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
@@ -34,6 +34,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorBrain;
@@ -58,30 +59,39 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverMind;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverSensor;
+import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
+import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 
-public class VacuumWorldServer {
+public class VacuumWorldServer implements Observer {
   // counts the number of cycles that have happened (used for updating dirt in
   // database)
   private static int cycleNumber = 1;
-  
-  private static boolean loadBasicMonitor = false;
-  private static boolean loadEvaluatorObserver = false;
 
+  private final boolean loadBasicMonitor = true;
+  private final boolean loadEvaluatorObserver = false;
+  private final Set<Action> VACUUMWORLDACTIONS;
+  
+  private final Set<Action> MONITORINGWORLDACTIONS;
+  
   private ServerSocket server;
   private Socket clientSocket;
   private InputStream input;
   private VacuumWorldUniverse universe;
-  private int threadsAfterDecide;
-  private int threadsAfterPerceive;
-  private Map<Long, AgentRunnable> runnableAgents;
-  private List<Thread> activeThreads;
+  private VacuumWorldAgentThreadManager threadManager;
 
   public VacuumWorldServer(int port) throws IOException {
     this.server = new ServerSocket(port);
-    this.threadsAfterDecide = 0;
-    this.threadsAfterPerceive = 0;
-    this.runnableAgents = new HashMap<>();
-    this.activeThreads = new ArrayList<>();
+    threadManager = new VacuumWorldAgentThreadManager();
+    
+    VACUUMWORLDACTIONS = new HashSet<>();
+    VACUUMWORLDACTIONS.add(new TurnLeftAction());
+    VACUUMWORLDACTIONS.add(new TurnRightAction());
+    VACUUMWORLDACTIONS.add(new MoveAction());
+    VACUUMWORLDACTIONS.add(new CleanAction());
+    VACUUMWORLDACTIONS.add(new PerceiveAction());
+    
+    MONITORINGWORLDACTIONS = new HashSet<>();
+    MONITORINGWORLDACTIONS.add(new TotalPerceptionAction());
   }
 
   public void startServer(boolean debug) {
@@ -118,43 +128,28 @@ public class VacuumWorldServer {
   private void manageRequests() throws IOException {
     VacuumWorldMonitoringContainer initialState = VacuumWorldParser
         .parseInitialState(this.input);
-
     constructUniverseAndStart(initialState);
   }
 
   private void constructUniverseAndStart(
       VacuumWorldMonitoringContainer initialState) {
-    Set<Action> availableActions = getAvailableActions();
     Physics physics = new VacuumWorldPhysics();
     initialState.getPhysics().setMonitoredContainerPhysics(physics);
     int[] dimensions = initialState.getSubContainerSpace().getDimensions();
     Map<SpaceCoordinates, Double[]> dimensionsMap = createDimensionsMap(dimensions);
     VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld",
         dimensionsMap, initialState.getSubContainerSpace());
-    this.universe = new VacuumWorldUniverse(initialState, availableActions,
+    this.universe = new VacuumWorldUniverse(initialState, VACUUMWORLDACTIONS,
         null, null, appearance);
-
-    startSimulation(availableActions);
+    startSimulation();
   }
 
-  private Set<Action> getAvailableActions() {
-    Set<Action> availableActions = new HashSet<>();
-
-    availableActions.add(new TurnLeftAction());
-    availableActions.add(new TurnRightAction());
-    availableActions.add(new MoveAction());
-    availableActions.add(new CleanAction());
-    availableActions.add(new PerceiveAction());
-
-    return availableActions;
-  }
-
-  private void startSimulation(Set<Action> availableActions) {
+  private void startSimulation() {
     VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe
         .getState();
 
     container.createVacuumWorldSpaceRepresentation();
-    //how will the system be monitored
+    // how will the system be monitored
     if (loadBasicMonitor) {
       this.loadBasicMonitorModel(container);
     }
@@ -166,22 +161,59 @@ public class VacuumWorldServer {
         .getAgents();
 
     for (VacuumWorldCleaningAgent agent : agents) {
-      startAgentThread(agent, availableActions);
+      setUpVacuumWorldCleaningAgent(agent);
     }
 
-    startMonitoring();
+    // START!
+    threadManager.addObserver(this);
+    threadManager.start();
   }
+
+  /**
+   * Called from notify in the {@link VacuumWorldThreadManager} showing that a
+   * cycle has ended and that the view should be updated.
+   */
+  @Override
+  public void update(Observable arg0, Object arg1) {
+    cycleNumber++;
+    printState();
+  }
+
+  // ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
+
+  private void setUpVacuumWorldCleaningAgent(VacuumWorldCleaningAgent agent) {
+    VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe
+        .getState();
+
+    container.getSubContainerSpace().addObserver(
+        agent.getSensors().get(agent.getActionResultSensorIndex()));
+
+    VacuumWorldDefaultActuator actuator = (VacuumWorldDefaultActuator) agent
+        .getActuators().get(agent.getActionActuatorIndex());
+    actuator.addObserver(container.getSubContainerSpace());
+
+    ((VacuumWorldDefaultMind) agent.getMind()).setCanSeeBehind(agent
+        .canSeeBehind());
+    ((VacuumWorldDefaultMind) agent.getMind()).setPerceptionRange(agent
+        .getPerceptionRange());
+    ((VacuumWorldDefaultMind) agent.getMind()).setAvailableActions(VACUUMWORLDACTIONS);
+
+    threadManager.addAgent(new AgentRunnable(agent.getMind()));
+  }
+
+  // ******** LOAD BASIC MONITOR MODEL ******** //
 
   private void loadBasicMonitorModel(VacuumWorldMonitoringContainer container) {
     createBasicMonitor(container);
-    
-    List<VacuumWorldMonitorAgent> mas = container.getMonitorAgents();
 
+    List<VacuumWorldMonitorAgent> mas = container.getMonitorAgents();
     Set<Action> monitoringActions = new HashSet<Action>();
     monitoringActions.add(new TotalPerceptionAction());
+
     for (VacuumWorldMonitorAgent m : mas) {
       System.out.println("Starting monitor agent thread");
-      startAgentThread(m, monitoringActions);
+      threadManager.addAgent(new AgentRunnable(m.getMind()));
+      ((VacuumWorldMonitorMind) m.getMind()).setAvailableActions(MONITORINGWORLDACTIONS);
     }
   }
 
@@ -191,35 +223,38 @@ public class VacuumWorldServer {
     sensors.add(new VacuumWorldMonitorSensor());
     actuators.add(new VacuumWorldMonitorActuator());
 
-    VacuumWorldMonitorAgent a = new VacuumWorldMonitorAgent(new DefaultAgentAppearance(null,
-        null), sensors, actuators, new VacuumWorldMonitorMind(new VacuumWorldStepEvaluationStrategy()), new VacuumWorldMonitorBrain());
+    VacuumWorldMonitorAgent a = new VacuumWorldMonitorAgent(
+        new DefaultAgentAppearance(null, null), sensors, actuators,
+        new VacuumWorldMonitorMind(new VacuumWorldStepEvaluationStrategy()),
+        new VacuumWorldMonitorBrain());
     container.addMonitorAgent(a);
   }
+
+  // ******** LOAD OBSERVER EVAULATOR MONITOR MODEL ******** //
 
   private void loadEvaluatorObserverModel(
       VacuumWorldMonitoringContainer container) {
     CollectionRepresentation collectionRepresentation = new CollectionRepresentation(
         "Test", null);
     MongoBridge bridge = createDatabase(container, collectionRepresentation);
-    //createObserver(container, bridge, collectionRepresentation);
-    //TODO major hang bug when evaluator is added!!!! FIX !!!!
+    createObserver(container, bridge, collectionRepresentation);
     createEvaluator(container, bridge, collectionRepresentation);
-    
+
     List<VWObserverAgent> oas = container.getObserverAgents();
     List<VWEvaluatorAgent> eas = container.getEvaluatorAgents();
 
-    Set<Action> observerActions = new HashSet<Action>();
-    observerActions.add(new TotalPerceptionAction());
     for (VWObserverAgent oa : oas) {
-      startAgentThread(oa, observerActions);
+      System.out.println("Starting observer agent thread");
+      threadManager.addAgent(new AgentRunnable(oa.getMind()));
+      ((VWObserverMind) oa.getMind()).setAvailableActions(MONITORINGWORLDACTIONS);
     }
 
     for (VWEvaluatorAgent ea : eas) {
       System.out.println("Starting evaluator agent thread");
-      startAgentThread(ea, new HashSet<Action>());
+      threadManager.addAgent(new AgentRunnable(ea.getMind()));
     }
   }
-  
+
   private MongoBridge createDatabase(VacuumWorldMonitoringContainer container,
       CollectionRepresentation collectionRepresentation) {
     MongoConnector connector = new MongoConnector();
@@ -237,7 +272,6 @@ public class VacuumWorldServer {
     List<Actuator> actuators = new ArrayList<>();
     sensors.add(new VWEvaluatorSensor());
     actuators.add(new VWEvaluatorActuator());
-
     AgentClassModel evaluatorClassModel = new AgentClassModel(
         VWEvaluatorBrain.class, VWEvaluatorAgent.class, VWEvaluatorMind.class,
         VWEvaluatorSensor.class, VWEvaluatorActuator.class);
@@ -269,122 +303,7 @@ public class VacuumWorldServer {
     container.addObserverAgent(a);
   }
 
-  private void startAgentThread(AbstractAgent agent,
-      Set<Action> availableActions) {
-    VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe
-        .getState();
-
-    if (agent instanceof VacuumWorldCleaningAgent) {
-      VacuumWorldCleaningAgent a = (VacuumWorldCleaningAgent) agent;
-      container.getSubContainerSpace().addObserver(
-          a.getSensors().get(a.getActionResultSensorIndex()));
-      ((VacuumWorldDefaultActuator) a.getActuators().get(
-          a.getActionActuatorIndex())).addObserver(container
-          .getSubContainerSpace());
-    }
-
-    AgentRunnable agentRunnable = new AgentRunnable(agent, availableActions);
-    this.runnableAgents.put(agentRunnable.getId(), agentRunnable);
-
-    Thread agentThread = new Thread(agentRunnable);
-    this.activeThreads.add(agentThread);
-
-    agentThread.start();
-  }
-
-  private void startMonitoring() {
-    boolean newCycle = true;
-
-    while (newCycle) {
-      try {
-        Logger.getGlobal().log(Level.INFO, "Before Decide");
-        monitorAfterDecide();
-        
-        Logger.getGlobal().log(Level.INFO, "Before perceive");
-        monitorAfterPerceive();
-        
-        Logger.getGlobal().log(Level.INFO, "Before restart");
-        restartThreads();
-        
-        Logger.getGlobal().log(Level.INFO, "after restart");
-        cycleNumber++;
-      } catch (Exception e) {
-        e.printStackTrace();
-        newCycle = false;
-      }
-    }
-  }
-
-  private void restartThreads() {
-    for (AgentRunnable agentRunnable : this.runnableAgents.values()) {
-      Thread thread = new Thread(agentRunnable);
-      thread.start();
-    }
-  }
-
-  private void monitorAfterPerceive() {
-    this.threadsAfterPerceive = 0;
-
-    while (this.threadsAfterPerceive < this.runnableAgents.size()) {
-      System.out.println("1: Threads after perceive" + threadsAfterPerceive + "," + runnableAgents.size());
-      updateThreadsAterPerceive();
-    }
-    System.out.println("2: Threads after perceive" + threadsAfterPerceive + "," + runnableAgents.size());
-
-    killThreads();
-  }
-
-  private void updateThreadsAterPerceive() {
-    for (AgentRunnable agentRunnable : this.runnableAgents.values()) {
-      System.out.println(agentRunnable.getThreadState());
-      
-      
-      
-      if (agentRunnable.getThreadState() != ThreadState.AFTER_PERCEIVE) {
-        this.threadsAfterPerceive = 0;
-        continue;
-      } else {
-        this.threadsAfterPerceive++;
-      }
-    }
-  }
-  
-  private void killThreads() {
-    for (Thread thread : this.activeThreads) {
-      if (!thread.isInterrupted()) {
-        thread.interrupt();
-      }
-    }
-  }
-
-  private void resumeThreads() {
-    for (AgentRunnable agentRunnable : this.runnableAgents.values()) {
-      agentRunnable.resumeAgent();
-    }
-  }
-
-  private void monitorAfterDecide() {
-    this.threadsAfterDecide = 0;
-
-    while (this.threadsAfterDecide < this.runnableAgents.size()) {
-      //System.out.println("1: Threads after decide" + threadsAfterDecide + "," + runnableAgents.size());
-      updateThreadsAterDecide();
-    }
-    System.out.println("2: Threads after decide" + threadsAfterDecide + "," + runnableAgents.size());
-    printState();
-    resumeThreads();
-  }
-
-  private void updateThreadsAterDecide() {
-    for (AgentRunnable agentRunnable : this.runnableAgents.values()) {
-      if (agentRunnable.getThreadState() != ThreadState.AFTER_DECIDE) {
-        this.threadsAfterDecide = 0;
-        continue;
-      } else {
-        this.threadsAfterDecide++;
-      }
-    }
-  }
+  // *** GENERAL/SERVER MANAGEMENT METHODS *** //
 
   private Map<SpaceCoordinates, Double[]> createDimensionsMap(int[] dimensions) {
     Map<SpaceCoordinates, Double[]> dimensionsMap = new EnumMap<>(
@@ -424,7 +343,7 @@ public class VacuumWorldServer {
     }
   }
 
-  private void printState() {
+  public void printState() {
     ((VacuumWorldAppearance) this.universe.getAppearance())
         .updateRepresentation((VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe
             .getState()).getSubContainerSpace());
