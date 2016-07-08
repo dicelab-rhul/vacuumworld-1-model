@@ -11,6 +11,5 @@
 	<classpathentry kind="lib" path="res/jackson-core-2.7.5.jar"/>
 	<classpathentry kind="lib" path="res/jackson-annotations-2.7.0.jar"/>
 	<classpathentry kind="lib" path="res/goel.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/goel"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
