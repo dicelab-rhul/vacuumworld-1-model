@@ -1,7 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractEvent;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Actor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
@@ -12,7 +12,7 @@ public class MonitoringEvent extends AbstractEvent  {
   private String sensorToCallBackId;
   private String actuatorRecipient;
   
-  public MonitoringEvent(Action action, Long timestamp, Actor actor) {
+  public MonitoringEvent(EnvironmentalAction action, Long timestamp, Actor actor) {
     super(action, timestamp, actor);
   }
 

@@ -1,7 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractEvent;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Actor;
@@ -11,7 +11,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
 public class MonitoringUpdateEvent extends AbstractEvent {
 	private ActionResult result;
 	
-	public MonitoringUpdateEvent(Action action, Long timestamp, Actor actor, ActionResult result) {
+	public MonitoringUpdateEvent(EnvironmentalAction action, Long timestamp, Actor actor, ActionResult result) {
 		super(action, timestamp, actor);
 		this.result = result;
 	}

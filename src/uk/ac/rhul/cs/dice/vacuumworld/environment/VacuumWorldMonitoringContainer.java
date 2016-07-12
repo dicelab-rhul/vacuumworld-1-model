@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Agent;
@@ -143,7 +143,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
     if (event.getResult().equals(ActionResult.ACTION_DONE)) {
       AgentRepresentation agent = vacuumWorldSpaceRepresentation
           .getAgent((String) ((AbstractAgent) event.getActor()).getId());
-      Action a = event.getAction();
+      EnvironmentalAction a = event.getAction();
       agent.setClean(false);
       agent.setSuccessfulClean(false);
 

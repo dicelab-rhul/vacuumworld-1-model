@@ -9,7 +9,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
 
 /**
- * An {@link Action} extending {@link AbstractAction} that is used to request a
+ * An {@link EnvironmentalAction} extending {@link AbstractAction} that is used to request a
  * complete perception of a {@link Space}. In VacuumWorld this should only be
  * used by the {@link ObserverAgent} and should only be available in
  * {@link VacuumWorldMonitoringContainer}.

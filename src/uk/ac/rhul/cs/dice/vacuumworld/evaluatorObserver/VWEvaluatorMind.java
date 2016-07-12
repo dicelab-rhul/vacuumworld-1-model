@@ -1,6 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.actions.ChangedResult;
 import uk.ac.rhul.cs.dice.monitor.actions.ReadAction;
@@ -15,7 +15,8 @@ public class VWEvaluatorMind extends EvaluatorMind {
   private EvaluationStrategy<?> strategy;
   private int changes = 0;
   private ReadAction readAction = new ReadAction();
-  private Action nextAction;
+  private EnvironmentalAction nextAction;
+  private ReadResult perception;
 
   /**
    * Constructor.
@@ -28,8 +29,10 @@ public class VWEvaluatorMind extends EvaluatorMind {
   }
 
   @Override
-  public void execute(Action action) {
-    if(nextAction != null) {
+  public void execute(EnvironmentalAction action) {
+    //Evaluation e = this.evaluate();
+    //System.out.println("AN EVALUATION WAS MADE!");
+    if(shouldRead()) {
       read();
     } else {
       System.out.println("EVALUATOR DID NOTHING");
@@ -38,16 +41,15 @@ public class VWEvaluatorMind extends EvaluatorMind {
 
   @Override
   public void perceive(Object perceptionWrapper) {
-    if (perceptionWrapper instanceof ReadResult) {
-      ReadResult result = (ReadResult) perceptionWrapper;
-      RefinedPerception[] ps = (RefinedPerception[]) result.getPerceptions()
+    if(perception != null) {
+      RefinedPerception[] ps = (RefinedPerception[]) perception.getPerceptions()
           .toArray(new RefinedPerception[] {});
       strategy.update(ps[0]);
     }
   }
 
   @Override
-  public Action decide(Object... parameters) {
+  public EnvironmentalAction decide(Object... parameters) {
     if(changes > 1) {
       System.out.println("EVALUATOR DECIDED TO READ");
       nextAction = readAction;
@@ -61,9 +63,7 @@ public class VWEvaluatorMind extends EvaluatorMind {
 
   @Override
   protected void manageReadResult(ReadResult result) {
-    perceive(result);
-    Evaluation e = this.evaluate();
-    System.out.println("AN EVALUATION WAS MADE!");
+    perception = result;
   }
   
   @Override
@@ -84,6 +84,7 @@ public class VWEvaluatorMind extends EvaluatorMind {
 
   @Override
   protected void read() {
+    System.out.println("READING");
     notifyObservers(nextAction, VWEvaluatorBrain.class);
   }
 

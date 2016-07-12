@@ -3,7 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.agents;
 import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.AbstractAgentAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
@@ -19,8 +19,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
 public class VacuumWorldCleaningAgent extends AbstractAgent implements
     VacuumWorldAgentInterface {
- 
-  
   private static final int PERCEPTION_RANGE = 2;
   private static final boolean CAN_SEE_BEHIND = false;
   
@@ -132,7 +130,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements
     return null;
   }
 
-  private String selectSensorToBeNotifiedBackId(Action action) {
+  private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
     if (AbstractAction.class.isAssignableFrom(action.getClass())) {
       return ((VacuumWorldDefaultSensor) getSensors().get(
           ACTION_RESULT_SENSOR_INDEX)).getSensorId();

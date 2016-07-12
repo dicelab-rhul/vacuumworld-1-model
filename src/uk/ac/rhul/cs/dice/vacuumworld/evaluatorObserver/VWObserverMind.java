@@ -4,11 +4,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.actions.WriteResult;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverMind;
@@ -27,8 +26,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
  */
 public class VWObserverMind extends ObserverMind {
 
-  private Set<Action> actions;
-  private Action nextAction;
+  private Set<EnvironmentalAction> actions;
+  private EnvironmentalAction nextAction;
+  private MonitoringResult currentPerception;
 
   /**
    * Constructor.
@@ -43,17 +43,17 @@ public class VWObserverMind extends ObserverMind {
   public VWObserverMind(PerceptionRefiner refiner) {
     super(refiner);
   }
-  
+
   @Override
-  public Action decide(Object... parameters) {
-    nextAction = (Action) actions.toArray()[0];
+  public EnvironmentalAction decide(Object... parameters) {
+    nextAction = (EnvironmentalAction) actions.toArray()[0];
     return nextAction;
   }
 
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-    if (o instanceof VWObserverBrain) {
-      perceive(arg);
+    if (o instanceof VWObserverBrain && arg instanceof MonitoringResult) {
+      this.currentPerception = (MonitoringResult)arg;
     }
   }
 
@@ -63,15 +63,15 @@ public class VWObserverMind extends ObserverMind {
    */
   @Override
   public void perceive(Object perceptionWrapper) {
-    if (perceptionWrapper instanceof MonitoringResult) {
-      Perception perception = ((MonitoringResult) perceptionWrapper)
-          .getPerception();
-      this.storePerception(perception);
+    notifyObservers(null, VWObserverBrain.class);
+    //TODO check that the action did not fail?
+    if(currentPerception != null) {
+      this.storePerception(currentPerception.getPerception());
     }
   }
 
   @Override
-  public void execute(Action action) {
+  public void execute(EnvironmentalAction action) {
     notifyObservers(nextAction, VWObserverBrain.class);
   }
 
@@ -80,12 +80,12 @@ public class VWObserverMind extends ObserverMind {
     if (result.getActionResult().equals(ActionResult.ACTION_DONE)) {
       return;
     } else {
-      Logger.getGlobal().log(Level.SEVERE, "WRITE RESULT FAILED ",
+      Logger.getGlobal().log(Level.SEVERE, result.getActionResult().toString(),
           result.getFailureReason());
     }
   }
-  
-  public void setAvailableActions(Set<Action> actions) {
+
+  public void setAvailableActions(Set<EnvironmentalAction> actions) {
     this.actions = actions;
   }
 }

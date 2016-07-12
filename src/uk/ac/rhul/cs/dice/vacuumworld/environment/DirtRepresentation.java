@@ -2,7 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.DirtDatabaseRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.database.DirtDatabaseRepresentation;
 
 /**
  * The representation of a {@link Dirt} used internally by

@@ -17,12 +17,18 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
  */
 public class VWObserverBrain extends ObserverBrain {
 
+  private MonitoringResult currentPerception;
+  
   @Override
   public void updateCon(CustomObservable o, Object arg) {
-    if (o instanceof VWObserverMind && arg instanceof TotalPerceptionAction) {
-      notifyObservers(arg, VWObserverAgent.class);
+    if (o instanceof VWObserverMind ) {
+      if(arg == null) {
+        notifyObservers(currentPerception, VWObserverMind.class);
+      } else if (arg instanceof TotalPerceptionAction) {
+        notifyObservers(arg, VWObserverAgent.class);
+      }
     } else if (o instanceof VWObserverAgent && arg instanceof MonitoringResult) {
-      notifyObservers(arg, VWObserverMind.class);
+      currentPerception = (MonitoringResult)arg;
     }
   }
 }

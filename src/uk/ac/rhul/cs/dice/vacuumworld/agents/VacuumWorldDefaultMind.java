@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -23,12 +23,12 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   private int perceptionRange;
   private boolean canSeeBehind;
   
-  private Set<Action> actions;
-  private ArrayList<Action> availableActions;
+  private Set<EnvironmentalAction> actions;
+  private ArrayList<EnvironmentalAction> availableActions;
   
   private Random rng;
   private DefaultActionResult previousActionResult;
-  private Action nextAction;
+  private EnvironmentalAction nextAction;
 
   public VacuumWorldDefaultMind() {
     this.previousActionResult = null;
@@ -38,25 +38,20 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   @Override
   public void update(CustomObservable o, Object arg) {
     if (o instanceof VacuumWorldDefaultBrain && arg instanceof DefaultActionResult) {
-      perceive(arg);
+      //TODO do a correct check on arg type, it will always a perception from the brain
+      this.previousActionResult = (DefaultActionResult)arg;
     }
   }
 
   @Override
   public void perceive(Object perceptionWrapper) {
-    if (perceptionWrapper instanceof VacuumWorldActionResult) {
-      this.previousActionResult = (VacuumWorldActionResult) perceptionWrapper;
-    } else if (perceptionWrapper instanceof DefaultActionResult) {
-      this.previousActionResult = null;
-    }
+    notifyObservers(null, VacuumWorldDefaultBrain.class); //TODO change null to some action
   }
 
   @Override
-  public Action decide(Object... parameters) {
+  public EnvironmentalAction decide(Object... parameters) {
     availableActions = new ArrayList<>();
     availableActions.addAll(actions);
-    
-    System.out.println(this.getClass().getSimpleName() + ": decide");
     if (this.previousActionResult == null) {
       nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
     } else if (this.previousActionResult instanceof VacuumWorldActionResult) {
@@ -68,11 +63,11 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   }
   
   @Override
-  public void execute(Action action) {
+  public void execute(EnvironmentalAction action) {
     notifyObservers(nextAction, VacuumWorldDefaultBrain.class);
   }
 
-  private Action decideFromPerception(
+  private EnvironmentalAction decideFromPerception(
       VacuumWorldActionResult previousActionResult) {
     if (previousActionResult.getPerception() == null) {
       return decideMove();
@@ -81,14 +76,14 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
     }
   }
 
-  private Action decideMove(VacuumWorldPerception perception) {
+  private EnvironmentalAction decideMove(VacuumWorldPerception perception) {
     if (perception != null) {
       updateAvailableActions(perception);
     }
     return decideMove();
   }
 
-  private Action decideMove() {
+  private EnvironmentalAction decideMove() {
     int size = this.availableActions.size();
     int randomNumber = rng.nextInt(size);
     return availableActions.get(randomNumber);
@@ -114,7 +109,7 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   private void removeCleanIfNecessary() {
     List<CleanAction> toRemove = new ArrayList<>();
 
-    for (Action a : this.availableActions) {
+    for (EnvironmentalAction a : this.availableActions) {
       if (a instanceof CleanAction
           || a.getClass().isAssignableFrom(CleanAction.class)) {
         toRemove.add((CleanAction) a);
@@ -124,7 +119,7 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   }
 
   private void addCleanIfNecessary() {
-    for (Action a : this.availableActions) {
+    for (EnvironmentalAction a : this.availableActions) {
       if (a instanceof CleanAction
           || a.getClass().isAssignableFrom(CleanAction.class)) {
         return;
@@ -134,7 +129,7 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   }
 
   private void addMoveIfNecessary() {
-    for (Action a : this.availableActions) {
+    for (EnvironmentalAction a : this.availableActions) {
       if (a instanceof MoveAction
           || a.getClass().isAssignableFrom(MoveAction.class)) {
         return;
@@ -147,7 +142,7 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
   private void removeMoveIfNecessary() {
     List<MoveAction> toRemove = new ArrayList<>();
 
-    for (Action a : this.availableActions) {
+    for (EnvironmentalAction a : this.availableActions) {
       if (a instanceof MoveAction
           || a.getClass().isAssignableFrom(MoveAction.class)) {
         toRemove.add((MoveAction) a);
@@ -174,7 +169,7 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
     }
   }
   
-  public void setAvailableActions(Set<Action> actions) {
+  public void setAvailableActions(Set<EnvironmentalAction> actions) {
     this.actions = actions;
   }
   

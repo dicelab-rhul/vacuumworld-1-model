@@ -28,7 +28,7 @@ public class VWEvaluatorAgent extends EvaluatorAgent implements
 
   /**
    * Returns the default {@link List} index of the {@link Actuator} that will be
-   * handling {@link Action}s to the environment.
+   * handling {@link EnvironmentalAction}s to the environment.
    * 
    * @return the index
    */

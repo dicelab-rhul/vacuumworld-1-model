@@ -2,7 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
 
 import java.util.List;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.AbstractAgentAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Agent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
@@ -69,7 +69,7 @@ public class VWObserverAgent extends ObserverAgent implements
   @Override
   public void updateCon(CustomObservable o, Object arg) {
     if (o instanceof VWObserverBrain && arg instanceof TotalPerceptionAction) {
-      MonitoringEvent event = new MonitoringEvent((Action) arg, (long) VacuumWorldServer.getCycleNumber(), this);
+      MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) VacuumWorldServer.getCycleNumber(), this);
       event.setActuatorRecipient(((VWObserverActuator) this.getActuators().get(
           this.getActionActuatorIndex())).getActuatorId());
       event.setSensorToCallBackId(((VWObserverSensor) this.getSensors().get(

@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
@@ -53,12 +53,12 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorSensor;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWMongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverMind;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverSensor;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.database.VWMongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 
@@ -67,11 +67,11 @@ public class VacuumWorldServer implements Observer {
   // database)
   private static int cycleNumber = 1;
 
-  private final boolean loadBasicMonitor = true;
-  private final boolean loadEvaluatorObserver = false;
-  private final Set<Action> VACUUMWORLDACTIONS;
+  private final boolean loadBasicMonitor = false;
+  private final boolean loadEvaluatorObserver = true;
+  private final Set<EnvironmentalAction> VACUUMWORLDACTIONS;
   
-  private final Set<Action> MONITORINGWORLDACTIONS;
+  private final Set<EnvironmentalAction> MONITORINGWORLDACTIONS;
   
   private ServerSocket server;
   private Socket clientSocket;
@@ -207,7 +207,7 @@ public class VacuumWorldServer implements Observer {
     createBasicMonitor(container);
 
     List<VacuumWorldMonitorAgent> mas = container.getMonitorAgents();
-    Set<Action> monitoringActions = new HashSet<Action>();
+    Set<EnvironmentalAction> monitoringActions = new HashSet<EnvironmentalAction>();
     monitoringActions.add(new TotalPerceptionAction());
 
     for (VacuumWorldMonitorAgent m : mas) {

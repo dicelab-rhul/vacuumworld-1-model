@@ -4,95 +4,83 @@ import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 
 public class VacuumWorldStepEvaluation implements Evaluation {
 
-  private String id;
-  private int startCycle, endCycle, totalSteps = 0, dirtsCleaned = 0,
-      moves = 0, turns = 0, speech = 0, idle = 0, cost = 0;
+  private int totalPhyicalActions = 0, failedCleans = 0, dirtsCleaned = 0,
+      moves = 0, turns = 0, totalSpeechActions = 0, idle = 0;
 
   public String represent() {
-    return "Evaluation of: " + id + "from time: " + startCycle + " to "
-        + endCycle + ",\n total actions: " + totalSteps
-        + ",\ntotal dirt cleaned: " + dirtsCleaned + ",\ntotal moves: " + moves
-        + ",\ntotal turns" + turns + ",\ntotal communication actions: "
-        + speech + ",\ntotal time idle: " + idle;
+    return "Total physical actions: "
+        + totalPhyicalActions
+        + ",\nTotal dirt cleaned: "
+        + dirtsCleaned
+        + ",\nTotal moves: "
+        + moves
+        + ",\nTotal turns"
+        + turns
+        + ",\nTotal communication actions: "
+        + totalSpeechActions
+        + ",\nTotal time idle: "
+        + idle
+        + ",\nTotal cost defined as (Total actions + Total communication actions): "
+        + this.getCost();
   }
 
-  public int getTotalSteps() {
-    return totalSteps;
+  public void incDirtsCleaned() {
+    this.dirtsCleaned++;
+    this.totalPhyicalActions++;
   }
 
-  public void setTotalSteps(int totalSteps) {
-    this.totalSteps = totalSteps;
+  public void incMoves() {
+    this.moves++;
+    this.totalPhyicalActions++;
+  }
+
+  public void incTurns() {
+    this.turns++;
+    this.totalPhyicalActions++;
+  }
+
+  public void incIdle() {
+    this.idle++;
+  }
+
+  public void incTotalSpeechActions() {
+    this.totalSpeechActions++;
+  }
+
+  public void incFailedCleans() {
+    this.failedCleans++;
+    this.idle++;
+  }
+
+  public int getTotalPhyicalActions() {
+    return totalPhyicalActions;
   }
 
   public int getDirtsCleaned() {
     return dirtsCleaned;
   }
 
-  public void setDirtsCleaned(int dirtsCleaned) {
-    this.dirtsCleaned = dirtsCleaned;
-  }
-
   public int getMoves() {
     return moves;
-  }
-
-  public void setMoves(int moves) {
-    this.moves = moves;
   }
 
   public int getTurns() {
     return turns;
   }
 
-  public void setTurns(int turns) {
-    this.turns = turns;
-  }
-
   public int getIdle() {
     return idle;
   }
 
-  public void setIdle(int idle) {
-    this.idle = idle;
-  }
-
-  public int getStartCycle() {
-    return startCycle;
-  }
-
-  public void setStartCycle(int startCycle) {
-    this.startCycle = startCycle;
-  }
-
-  public int getEndCycle() {
-    return endCycle;
-  }
-
-  public void setEndCycle(int endCycle) {
-    this.endCycle = endCycle;
-  }
-
   public int getCost() {
-    return cost;
+    return totalPhyicalActions + totalSpeechActions;
   }
 
-  public void setCost(int cost) {
-    this.cost = cost;
+  public int getTotalSpeechActions() {
+    return totalSpeechActions;
   }
 
-  public int getSpeech() {
-    return speech;
-  }
-
-  public void setSpeech(int speech) {
-    this.speech = speech;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
+  public int getFailedCleans() {
+    return failedCleans;
   }
 }

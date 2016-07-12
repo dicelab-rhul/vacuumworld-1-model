@@ -1,11 +1,9 @@
 package uk.ac.rhul.cs.dice.vacuumworld.basicmonitor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
@@ -13,83 +11,24 @@ import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
-import util.Utils;
 
 public class VacuumWorldStepEvaluationStrategy implements
     EvaluationStrategy<String> {
 
-  private Map<String, ArrayList<ActionRepresentation>> actionModel;
+  private VacuumWorldStepCollectiveEvaluation evaluations;
   private Map<String, SimpleAgentRepresentation> lastAgentStates;
 
-  private Logger logger;
-
   public VacuumWorldStepEvaluationStrategy() {
-    this.actionModel = new HashMap<>();
+    this.evaluations = new VacuumWorldStepCollectiveEvaluation();
     this.lastAgentStates = new HashMap<>();
-    logger = Utils
-        .fileLogger("C:/Users/Ben/workspace/vacuumworldmodel/logs/eval/evaluation.log");
   }
 
   @Override
   public Evaluation evaluate(String actor, int startCycle, int endCycle) {
     System.out.println("EVALUATING");
-    // logData();
-    if (actor == null) {
-      return evaluateAll(startCycle, endCycle);
-    } else {
-      return null; //TODO evaluation of specific agent
-    }
+    return evaluations;
   }
 
-  public Evaluation evaluateAll(int start, int end) {
-    VacuumWorldStepCollectiveEvaluation eval = new VacuumWorldStepCollectiveEvaluation();
-    Iterator<Entry<String, ArrayList<ActionRepresentation>>> iter = actionModel
-        .entrySet().iterator();
-    while (iter.hasNext()) {
-      Entry<String, ArrayList<ActionRepresentation>> ent = iter.next();
-      VacuumWorldStepEvaluation e = new VacuumWorldStepEvaluation();
-      e.setId(ent.getKey());
-      e.setStartCycle(start);
-      e.setEndCycle(end);
-      for (ActionRepresentation a : ent.getValue()) {
-        switch (a) {
-        case TURN:
-          e.setTurns(e.getTurns() + 1);
-          e.setTotalSteps(e.getTotalSteps() + 1);
-        case MOVE:
-          e.setMoves(e.getMoves() + 1);
-          e.setTotalSteps(e.getTotalSteps() + 1);
-        case SPEAK:
-          e.setSpeech(e.getSpeech() + 1);
-          e.setTotalSteps(e.getTotalSteps() + 1);
-        case CLEAN:
-          e.setIdle(e.getIdle() + 1);
-        case SUCCESSFULCLEAN:
-          e.setDirtsCleaned(e.getDirtsCleaned() + 1);
-          e.setTotalSteps(e.getTotalSteps() + 1);
-        case NONE:
-          e.setIdle(e.getIdle() + 1);
-        default:
-        }
-      }
-      eval.addEvaluation(e.getId(), e);
-    }
-    return eval;
-  }
-
-  public void logData() {
-    Iterator<Entry<String, ArrayList<ActionRepresentation>>> iter = actionModel
-        .entrySet().iterator();
-    StringBuilder builder = new StringBuilder();
-    while (iter.hasNext()) {
-      Entry<String, ArrayList<ActionRepresentation>> ent = iter.next();
-      builder.append(ent.getKey() + ":\n");
-      for (ActionRepresentation a : ent.getValue()) {
-        builder.append(a + "\n");
-      }
-    }
-    logger.info(builder.toString());
-  }
 
   @Override
   public void update(Perception perception) {
@@ -102,9 +41,9 @@ public class VacuumWorldStepEvaluationStrategy implements
       Entry<String, AgentRepresentation> ent = iter.next();
       String id = ent.getKey();
       AgentRepresentation rep = ent.getValue();
-      if (!actionModel.containsKey(id)) {
+      if (!evaluations.getEvaluations().containsKey(id)) {
         // its a new agent so add it
-        actionModel.put(id, new ArrayList<ActionRepresentation>());
+        evaluations.addEvaluation(id, new VacuumWorldStepEvaluation());
         lastAgentStates.put(
             id,
             new SimpleAgentRepresentation(rep.getX(), rep.getY(), rep
@@ -115,16 +54,13 @@ public class VacuumWorldStepEvaluationStrategy implements
       }
 
       // find the action that was performed
-      if (verifyAndUpdate(id, checkTurn(id, rep), rep))
-        continue;
-      if (verifyAndUpdate(id, checkMove(id, rep), rep))
-        continue;
-      if (verifyAndUpdate(id, checkSpeak(id, rep), rep))
-        continue;
-      if (verifyAndUpdate(id, checkClean(id, rep), rep))
-        continue;
-      // no action was performed.
-      actionModel.get(id).add(ActionRepresentation.NONE);
+      if (checkTurn(id, rep)) {
+      } else if (checkMove(id, rep)) {
+      } else if (checkSpeak(id, rep)) {
+      } else if (checkClean(id, rep)) {
+      } else {
+        evaluations.getEvaluations().get(id).incIdle();
+      }
       replaceLastAgentState(id, rep);
     }
   }
@@ -136,53 +72,42 @@ public class VacuumWorldStepEvaluationStrategy implements
             .getDirection()));
   }
 
-  private ActionRepresentation checkSpeak(String id, AgentRepresentation rep) {
+  private boolean checkSpeak(String id, AgentRepresentation rep) {
     // TODO When speech acts are implemented
-    return null;
+    return false;
   }
 
-  private ActionRepresentation checkMove(String id, AgentRepresentation rep) {
+  private boolean checkMove(String id, AgentRepresentation rep) {
     SimpleAgentRepresentation srep = lastAgentStates.get(id);
     if (rep.getX() != srep.x || rep.getY() != srep.y) {
-      return ActionRepresentation.MOVE;
+      evaluations.getEvaluations().get(id).incMoves();
+      return true;
     } else {
-      return null;
+      return false;
     }
   }
 
-  private ActionRepresentation checkTurn(String id, AgentRepresentation rep) {
+  private boolean checkTurn(String id, AgentRepresentation rep) {
     if (rep.getDirection().equals(lastAgentStates.get(id).dir)) {
       // A turn has not been done
-      return null;
-    } else {
-      return ActionRepresentation.TURN;
-    }
-  }
-
-  private ActionRepresentation checkClean(String id, AgentRepresentation rep) {
-    if (rep.isClean()) {
-      if (rep.isSuccessfulClean()) {
-        return ActionRepresentation.SUCCESSFULCLEAN;
-      } else {
-        return ActionRepresentation.CLEAN;
-      }
-    }
-    return null;
-  }
-
-  private boolean verifyAndUpdate(String id, ActionRepresentation action,
-      AgentRepresentation rep) {
-    if (action == null) {
       return false;
     } else {
-      actionModel.get(id).add(action);
-      replaceLastAgentState(id, rep);
+      evaluations.getEvaluations().get(id).incTurns();
       return true;
     }
   }
 
-  private enum ActionRepresentation {
-    CLEAN, SUCCESSFULCLEAN, MOVE, TURN, SPEAK, NONE;
+  private boolean checkClean(String id, AgentRepresentation rep) {
+    if (rep.isClean()) {
+      if (rep.isSuccessfulClean()) {
+        evaluations.getEvaluations().get(id).incDirtsCleaned();
+        return true;
+      } else {
+        evaluations.getEvaluations().get(id).incFailedCleans();
+        return true;
+      }
+    }
+    return false;
   }
 
   private class SimpleAgentRepresentation {

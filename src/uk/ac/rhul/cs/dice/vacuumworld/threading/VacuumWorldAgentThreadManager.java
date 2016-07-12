@@ -12,6 +12,7 @@ import util.Utils;
 public class VacuumWorldAgentThreadManager extends Observable {
   private final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
   private final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
+  private final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
 
   private boolean simulationStarted = false;
 
@@ -28,21 +29,20 @@ public class VacuumWorldAgentThreadManager extends Observable {
 
   public void start() {
     this.simulationStarted = true;
+    System.out.println("START");
+    doMonitors(); // let monitors get the initial state
+    cycle();
+  }
+
+  private void cycle() {
+
     while (this.simulationStarted) {
-      doDecide(this.cleaningRunnables);
-      Utils.log("Cleaning decide phase complete");
-      doExecute(this.cleaningRunnables);
-      Utils.log("Cleaning execute phase complete");
-
-      doDecide(this.monitorRunnables);
-      Utils.log("Monitoring deciding phase complete");
-      doExecute(this.monitorRunnables);
-      Utils.log("Monitoring execute phase complete");
-
+      Utils.log("START CYCLE");
+      doCleaners();
+      doMonitors();
       // next cycle!
       Utils.log("NEXT CYCLE!! \n \n \n \n");
       this.notifyObservers();
-
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
@@ -51,17 +51,40 @@ public class VacuumWorldAgentThreadManager extends Observable {
     }
   }
 
+  private void doMonitors() {
+    doPerceive(this.monitorRunnables);
+    // Utils.log("Monitoring perceive phase complete");
+    doDecide(this.monitorRunnables);
+    // Utils.log("Monitoring deciding phase complete");
+    doExecute(this.monitorRunnables);
+    // Utils.log("Monitoring execute phase complete");
+  }
+
+  private void doCleaners() {
+    doPerceive(this.cleaningRunnables);
+    // Utils.log("Cleaning perceive phase complete");
+    doDecide(this.cleaningRunnables);
+    // Utils.log("Cleaning decide phase complete");
+    doExecute(this.cleaningRunnables);
+    // Utils.log("Cleaning execute phase complete");
+  }
+
+  @Override
   public void notifyObservers() {
     setChanged();
     super.notifyObservers();
   }
 
-  public void doDecide(Set<AgentRunnable> runnables) {
+  private void doDecide(Set<AgentRunnable> runnables) {
     doPhase(this.threadStateDecide, runnables);
   }
 
   private void doExecute(Set<AgentRunnable> runnables) {
     doPhase(this.threadStateExecute, runnables);
+  }
+
+  private void doPerceive(Set<AgentRunnable> runnables) {
+    doPhase(this.threadStatePerceive, runnables);
   }
 
   private void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
@@ -92,13 +115,13 @@ public class VacuumWorldAgentThreadManager extends Observable {
   }
 
   private void waitForAllThreads() {
-    Utils.log("Manager waiting...");
+    //Utils.log("Manager waiting...");
 
     while (checkAlive()) {
       continue;
     }
 
-    Utils.log("... threads finished!");
+    //Utils.log("... threads finished!");
   }
 
   private boolean checkAlive() {

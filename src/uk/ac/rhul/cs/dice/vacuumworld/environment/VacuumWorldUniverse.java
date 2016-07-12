@@ -2,7 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import java.util.Set;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Action;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.UniverseAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Body;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
@@ -13,7 +13,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 
 public class VacuumWorldUniverse extends Universe {
 
-  public VacuumWorldUniverse(EnvironmentalSpace state, Set<Action> admissibleActions, Set<Body> bodies, Physics physics, UniverseAppearance appearance) {
+  public VacuumWorldUniverse(EnvironmentalSpace state, Set<EnvironmentalAction> admissibleActions, Set<Body> bodies, Physics physics, UniverseAppearance appearance) {
 		super(state, admissibleActions, bodies, physics, appearance);
 		
 		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.getState();

@@ -2,7 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.AgentDatabaseRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.database.AgentDatabaseRepresentation;
 
 /**
  * The representation of a {@link VacuumWorldCleaningAgent} used internally by
