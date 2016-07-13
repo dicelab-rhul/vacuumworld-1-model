@@ -15,55 +15,52 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
-  private EvaluationStrategy<?> strategy;
-  private EnvironmentalAction nextAction = null;
-  private MonitoringResult perception;
+	private EvaluationStrategy<?> strategy;
+	private EnvironmentalAction nextAction = null;
+	private MonitoringResult perception;
 
-  private Logger logger;
+	private Logger logger;
 
-  public VacuumWorldMonitorMind(VacuumWorldStepEvaluationStrategy strategy) {
-    this.strategy = strategy;
-    logger = Utils
-        .fileLogger("C:/Users/Ben/workspace/vacuumworldmodel/logs/eval/evaluation.log");
-  }
-
-  @Override
-  public EnvironmentalAction decide(Object... parameters) {
-    nextAction = (EnvironmentalAction) getAvailableActionsForThisCicle().toArray()[0];
-    return nextAction;
-  }
-
-  @Override
-  public void perceive(Object perceptionWrapper) {
-    notifyObservers(null, VacuumWorldMonitorBrain.class);
-    if(perception!= null) {
-      strategy.update(((VacuumWorldSpaceRepresentation) (perception)
-          .getPerception()).clone());
-    }
-  }
-
-  @Override
-  public void execute(EnvironmentalAction action) {
-    notifyObservers(nextAction, VacuumWorldMonitorBrain.class);
-    if (Utils.getCycleNumber() % 5 == 0
-        && Utils.getCycleNumber() != 0) {
-      Evaluation e = strategy.evaluate(null, 0,
-          Utils.getCycleNumber());
-      logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
-    }
-  }
-
-  @Override
-  public void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldMonitorBrain) {
-      this.perception = (MonitoringResult) arg;
-    }
-  }
-
-  public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
-    //this.actions = actions;
-	for(Class<? extends AbstractAction> action : actions) {
-		addAvailableActionForThisCicle(action);
+	public VacuumWorldMonitorMind(VacuumWorldStepEvaluationStrategy strategy) {
+		this.strategy = strategy;
+		this.logger = Utils.fileLogger("evaluation.log");
 	}
-  }
+
+	@Override
+	public EnvironmentalAction decide(Object... parameters) {
+		this.nextAction = (EnvironmentalAction) getAvailableActionsForThisCicle().toArray()[0];
+		return this.nextAction;
+	}
+
+	@Override
+	public void perceive(Object perceptionWrapper) {
+		notifyObservers(null, VacuumWorldMonitorBrain.class);
+		
+		if (this.perception != null) {
+			this.strategy.update(((VacuumWorldSpaceRepresentation) (this.perception).getPerception()).clone());
+		}
+	}
+
+	@Override
+	public void execute(EnvironmentalAction action) {
+		notifyObservers(this.nextAction, VacuumWorldMonitorBrain.class);
+		
+		if (Utils.getCycleNumber() % 5 == 0 && Utils.getCycleNumber() != 0) {
+			Evaluation e = this.strategy.evaluate(null, 0, Utils.getCycleNumber());
+			this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
+		}
+	}
+
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldMonitorBrain) {
+			this.perception = (MonitoringResult) arg;
+		}
+	}
+
+	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
+		for (Class<? extends AbstractAction> action : actions) {
+			addAvailableActionForThisCicle(action);
+		}
+	}
 }
