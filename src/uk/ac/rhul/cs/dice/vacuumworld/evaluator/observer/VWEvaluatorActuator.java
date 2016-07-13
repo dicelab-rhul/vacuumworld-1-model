@@ -5,7 +5,8 @@ import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorActuator;
 
 public class VWEvaluatorActuator extends EvaluatorActuator {
 
-  @Override
-  public void updateCon(CustomObservable o, Object arg) {
-  }
+	@Override
+	public void updateCon(CustomObservable o, Object arg) {
+		// TODO
+	}
 }

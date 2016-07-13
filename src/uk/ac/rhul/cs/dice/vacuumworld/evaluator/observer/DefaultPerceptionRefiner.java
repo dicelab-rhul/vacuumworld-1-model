@@ -17,8 +17,8 @@ import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
  */
 public class DefaultPerceptionRefiner implements PerceptionRefiner {
 
-  @Override
-  public RefinedPerception refinePerception(Perception perception) {
-    return (RefinedPerception) perception;
-  }
+	@Override
+	public RefinedPerception refinePerception(Perception perception) {
+		return (RefinedPerception) perception;
+	}
 }

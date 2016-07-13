@@ -16,10 +16,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
  */
 public class VWObserverActuator extends ObserverActuator {
 
-  @Override
-  public void updateCon(CustomObservable o, Object arg) {
-    if (o instanceof VWObserverAgent && arg instanceof MonitoringEvent) {
-      notifyObservers(arg, VacuumWorldMonitoringContainer.class);
-    }
-  }
+	@Override
+	public void updateCon(CustomObservable o, Object arg) {
+		if (o instanceof VWObserverAgent && arg instanceof MonitoringEvent) {
+			notifyObservers(arg, VacuumWorldMonitoringContainer.class);
+		}
+	}
 }

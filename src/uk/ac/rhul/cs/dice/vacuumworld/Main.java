@@ -5,8 +5,8 @@ import java.io.IOException;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class Main {
-	private Main(){}
-	
+	private Main() {}
+
 	public static void main(String[] args) {
 		startModelServer();
 	}

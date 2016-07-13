@@ -16,11 +16,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
  */
 public class VWObserverSensor extends ObserverSensor {
 
-  @Override
-  public void updateCon(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldMonitoringContainer
-        && arg instanceof MonitoringResult) {
-      notifyObservers(arg, VWObserverAgent.class);
-    }
-  }
+	@Override
+	public void updateCon(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldMonitoringContainer && arg instanceof MonitoringResult) {
+			notifyObservers(arg, VWObserverAgent.class);
+		}
+	}
 }
