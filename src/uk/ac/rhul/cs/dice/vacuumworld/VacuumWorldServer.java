@@ -65,293 +65,267 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 
 public class VacuumWorldServer implements Observer {
-  // counts the number of cycles that have happened (used for updating dirt in
-  // database)
-  private static int cycleNumber = 1;
+	// counts the number of cycles that have happened (used for updating dirt in
+	// database)
+	private static int cycleNumber = 1;
 
-  private final boolean loadBasicMonitor = false;
-  private final boolean loadEvaluatorObserver = true;
-  private final Set<Class<? extends AbstractAction>> VACUUMWORLDACTIONS;
-  
-  private final Set<Class<? extends AbstractAction>> MONITORINGWORLDACTIONS;
-  
-  private ServerSocket server;
-  private Socket clientSocket;
-  private InputStream input;
-  private VacuumWorldUniverse universe;
-  private VacuumWorldAgentThreadManager threadManager;
+	private final boolean loadBasicMonitor = false;
+	private final boolean loadEvaluatorObserver = true;
+	private final Set<Class<? extends AbstractAction>> VACUUMWORLDACTIONS;
 
-  public VacuumWorldServer(int port) throws IOException {
-    this.server = new ServerSocket(port);
-    threadManager = new VacuumWorldAgentThreadManager();
-    
-    VACUUMWORLDACTIONS = new HashSet<>();
-    VACUUMWORLDACTIONS.add(TurnLeftAction.class);
-    VACUUMWORLDACTIONS.add(TurnRightAction.class);
-    VACUUMWORLDACTIONS.add(MoveAction.class);
-    VACUUMWORLDACTIONS.add(CleanAction.class);
-    VACUUMWORLDACTIONS.add(PerceiveAction.class);
-    VACUUMWORLDACTIONS.add(SpeechAction.class);
-    
-    MONITORINGWORLDACTIONS = new HashSet<>();
-    MONITORINGWORLDACTIONS.add(TotalPerceptionAction.class);
-  }
+	private final Set<Class<? extends AbstractAction>> MONITORINGWORLDACTIONS;
 
-  public void startServer(boolean debug) {
-    if (debug) {
-      startServerFromFile();
-    } else {
-      startServer();
-    }
-  }
+	private ServerSocket server;
+	private Socket clientSocket;
+	private InputStream input;
+	private VacuumWorldUniverse universe;
+	private VacuumWorldAgentThreadManager threadManager;
 
-  private void startServerFromFile() {
-    try {
-      String filename = "state_example.json";
-      VacuumWorldMonitoringContainer initialState = VacuumWorldParser
-          .parseInitialState(filename);
-      constructUniverseAndStart(initialState);
-    } catch (IOException e) {
-      Logger.getGlobal().log(Level.INFO, e.getMessage(), e);
-      stopServer();
-    }
-  }
+	public VacuumWorldServer(int port) throws IOException {
+		this.server = new ServerSocket(port);
+		threadManager = new VacuumWorldAgentThreadManager();
 
-  private void startServer() {
-    try {
-      this.clientSocket = this.server.accept();
-      this.input = this.clientSocket.getInputStream();
-      manageRequests();
-    } catch (IOException e) {
-      Logger.getGlobal().log(Level.INFO, e.getMessage(), e);
-      stopServer();
-    }
-  }
+		VACUUMWORLDACTIONS = new HashSet<>();
+		VACUUMWORLDACTIONS.add(TurnLeftAction.class);
+		VACUUMWORLDACTIONS.add(TurnRightAction.class);
+		VACUUMWORLDACTIONS.add(MoveAction.class);
+		VACUUMWORLDACTIONS.add(CleanAction.class);
+		VACUUMWORLDACTIONS.add(PerceiveAction.class);
+		VACUUMWORLDACTIONS.add(SpeechAction.class);
 
-  private void manageRequests() throws IOException {
-    VacuumWorldMonitoringContainer initialState = VacuumWorldParser
-        .parseInitialState(this.input);
-    constructUniverseAndStart(initialState);
-  }
+		MONITORINGWORLDACTIONS = new HashSet<>();
+		MONITORINGWORLDACTIONS.add(TotalPerceptionAction.class);
+	}
 
-  private void constructUniverseAndStart(
-      VacuumWorldMonitoringContainer initialState) {
-    Physics physics = new VacuumWorldPhysics();
-    initialState.getPhysics().setMonitoredContainerPhysics(physics);
-    int[] dimensions = initialState.getSubContainerSpace().getDimensions();
-    Map<SpaceCoordinates, Double[]> dimensionsMap = createDimensionsMap(dimensions);
-    VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld",
-        dimensionsMap, initialState.getSubContainerSpace());
-    this.universe = new VacuumWorldUniverse(initialState, VACUUMWORLDACTIONS,
-        null, null, appearance);
-    startSimulation();
-  }
+	public void startServer(boolean debug) {
+		if (debug) {
+			startServerFromFile();
+		} else {
+			startServer();
+		}
+	}
 
-  private void startSimulation() {
-    VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe
-        .getState();
+	private void startServerFromFile() {
+		try {
+			String filename = "state_example.json";
+			VacuumWorldMonitoringContainer initialState = VacuumWorldParser.parseInitialState(filename);
+			constructUniverseAndStart(initialState);
+		} catch (IOException e) {
+			Logger.getGlobal().log(Level.INFO, e.getMessage(), e);
+			stopServer();
+		}
+	}
 
-    container.createVacuumWorldSpaceRepresentation();
-    // how will the system be monitored
-    if (loadBasicMonitor) {
-      this.loadBasicMonitorModel(container);
-    }
-    if (loadEvaluatorObserver) {
-      this.loadEvaluatorObserverModel(container);
-    }
+	private void startServer() {
+		try {
+			this.clientSocket = this.server.accept();
+			this.input = this.clientSocket.getInputStream();
+			manageRequests();
+		} catch (IOException e) {
+			Logger.getGlobal().log(Level.INFO, e.getMessage(), e);
+			stopServer();
+		}
+	}
 
-    List<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace()
-        .getAgents();
+	private void manageRequests() throws IOException {
+		VacuumWorldMonitoringContainer initialState = VacuumWorldParser.parseInitialState(this.input);
+		constructUniverseAndStart(initialState);
+	}
 
-    for (VacuumWorldCleaningAgent agent : agents) {
-      setUpVacuumWorldCleaningAgent(agent);
-    }
+	private void constructUniverseAndStart(VacuumWorldMonitoringContainer initialState) {
+		Physics physics = new VacuumWorldPhysics();
+		initialState.getPhysics().setMonitoredContainerPhysics(physics);
+		int[] dimensions = initialState.getSubContainerSpace().getDimensions();
+		Map<SpaceCoordinates, Double[]> dimensionsMap = createDimensionsMap(dimensions);
+		VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld", dimensionsMap,
+				initialState.getSubContainerSpace());
+		this.universe = new VacuumWorldUniverse(initialState, VACUUMWORLDACTIONS, null, null, appearance);
+		startSimulation();
+	}
 
-    // START!
-    threadManager.addObserver(this);
-    threadManager.start();
-  }
+	private void startSimulation() {
+		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe.getState();
 
-  /**
-   * Called from notify in the {@link VacuumWorldThreadManager} showing that a
-   * cycle has ended and that the view should be updated.
-   */
-  @Override
-  public void update(Observable arg0, Object arg1) {
-    cycleNumber++;
-    printState();
-  }
+		container.createVacuumWorldSpaceRepresentation();
+		// how will the system be monitored
+		if (loadBasicMonitor) {
+			this.loadBasicMonitorModel(container);
+		}
+		if (loadEvaluatorObserver) {
+			this.loadEvaluatorObserverModel(container);
+		}
 
-  // ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
+		List<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace().getAgents();
 
-  private void setUpVacuumWorldCleaningAgent(VacuumWorldCleaningAgent agent) {
-    VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe
-        .getState();
+		for (VacuumWorldCleaningAgent agent : agents) {
+			setUpVacuumWorldCleaningAgent(agent);
+		}
 
-    container.getSubContainerSpace().addObserver(
-        agent.getSensors().get(agent.getActionResultSensorIndex()));
+		// START!
+		threadManager.addObserver(this);
+		threadManager.start();
+	}
 
-    VacuumWorldDefaultActuator actuator = (VacuumWorldDefaultActuator) agent
-        .getActuators().get(agent.getActionActuatorIndex());
-    actuator.addObserver(container.getSubContainerSpace());
+	/**
+	 * Called from notify in the {@link VacuumWorldThreadManager} showing that a
+	 * cycle has ended and that the view should be updated.
+	 */
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		cycleNumber++;
+		printState();
+	}
 
-    ((VacuumWorldDefaultMind) agent.getMind()).setCanSeeBehind(agent
-        .canSeeBehind());
-    ((VacuumWorldDefaultMind) agent.getMind()).setPerceptionRange(agent
-        .getPerceptionRange());
-    ((VacuumWorldDefaultMind) agent.getMind()).setAvailableActions(VACUUMWORLDACTIONS);
+	// ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
 
-    threadManager.addAgent(new AgentRunnable(agent.getMind()));
-  }
+	private void setUpVacuumWorldCleaningAgent(VacuumWorldCleaningAgent agent) {
+		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe.getState();
 
-  // ******** LOAD BASIC MONITOR MODEL ******** //
+		container.getSubContainerSpace().addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
 
-  private void loadBasicMonitorModel(VacuumWorldMonitoringContainer container) {
-    createBasicMonitor(container);
+		VacuumWorldDefaultActuator actuator = (VacuumWorldDefaultActuator) agent.getActuators()
+				.get(agent.getActionActuatorIndex());
+		actuator.addObserver(container.getSubContainerSpace());
 
-    List<VacuumWorldMonitorAgent> mas = container.getMonitorAgents();
-    Set<EnvironmentalAction> monitoringActions = new HashSet<EnvironmentalAction>();
-    monitoringActions.add(new TotalPerceptionAction());
+		((VacuumWorldDefaultMind) agent.getMind()).setCanSeeBehind(agent.canSeeBehind());
+		((VacuumWorldDefaultMind) agent.getMind()).setPerceptionRange(agent.getPerceptionRange());
+		((VacuumWorldDefaultMind) agent.getMind()).setAvailableActions(VACUUMWORLDACTIONS);
 
-    for (VacuumWorldMonitorAgent m : mas) {
-      System.out.println("Starting monitor agent thread");
-      threadManager.addAgent(new AgentRunnable(m.getMind()));
-      ((VacuumWorldMonitorMind) m.getMind()).setAvailableActions(MONITORINGWORLDACTIONS);
-    }
-  }
+		threadManager.addAgent(new AgentRunnable(agent.getMind()));
+	}
 
-  private void createBasicMonitor(VacuumWorldMonitoringContainer container) {
-    List<Sensor> sensors = new ArrayList<>();
-    List<Actuator> actuators = new ArrayList<>();
-    sensors.add(new VacuumWorldMonitorSensor());
-    actuators.add(new VacuumWorldMonitorActuator());
+	// ******** LOAD BASIC MONITOR MODEL ******** //
 
-    VacuumWorldMonitorAgent a = new VacuumWorldMonitorAgent(
-        new DefaultAgentAppearance(null, null), sensors, actuators,
-        new VacuumWorldMonitorMind(new VacuumWorldStepEvaluationStrategy()),
-        new VacuumWorldMonitorBrain());
-    container.addMonitorAgent(a);
-  }
+	private void loadBasicMonitorModel(VacuumWorldMonitoringContainer container) {
+		createBasicMonitor(container);
 
-  // ******** LOAD OBSERVER EVAULATOR MONITOR MODEL ******** //
+		List<VacuumWorldMonitorAgent> mas = container.getMonitorAgents();
+		Set<EnvironmentalAction> monitoringActions = new HashSet<EnvironmentalAction>();
+		monitoringActions.add(new TotalPerceptionAction());
 
-  private void loadEvaluatorObserverModel(
-      VacuumWorldMonitoringContainer container) {
-    CollectionRepresentation collectionRepresentation = new CollectionRepresentation(
-        "Test", null);
-    MongoBridge bridge = createDatabase(container, collectionRepresentation);
-    createObserver(container, bridge, collectionRepresentation);
-    createEvaluator(container, bridge, collectionRepresentation);
+		for (VacuumWorldMonitorAgent m : mas) {
+			System.out.println("Starting monitor agent thread");
+			threadManager.addAgent(new AgentRunnable(m.getMind()));
+			((VacuumWorldMonitorMind) m.getMind()).setAvailableActions(MONITORINGWORLDACTIONS);
+		}
+	}
 
-    List<VWObserverAgent> oas = container.getObserverAgents();
-    List<VWEvaluatorAgent> eas = container.getEvaluatorAgents();
+	private void createBasicMonitor(VacuumWorldMonitoringContainer container) {
+		List<Sensor> sensors = new ArrayList<>();
+		List<Actuator> actuators = new ArrayList<>();
+		sensors.add(new VacuumWorldMonitorSensor());
+		actuators.add(new VacuumWorldMonitorActuator());
 
-    for (VWObserverAgent oa : oas) {
-      System.out.println("Starting observer agent thread");
-      threadManager.addAgent(new AgentRunnable(oa.getMind()));
-      ((VWObserverMind) oa.getMind()).setAvailableActions(MONITORINGWORLDACTIONS);
-    }
+		VacuumWorldMonitorAgent a = new VacuumWorldMonitorAgent(new DefaultAgentAppearance(null, null), sensors,
+				actuators, new VacuumWorldMonitorMind(new VacuumWorldStepEvaluationStrategy()),
+				new VacuumWorldMonitorBrain());
+		container.addMonitorAgent(a);
+	}
 
-    for (VWEvaluatorAgent ea : eas) {
-      System.out.println("Starting evaluator agent thread");
-      threadManager.addAgent(new AgentRunnable(ea.getMind()));
-    }
-  }
+	// ******** LOAD OBSERVER EVAULATOR MONITOR MODEL ******** //
 
-  private MongoBridge createDatabase(VacuumWorldMonitoringContainer container,
-      CollectionRepresentation collectionRepresentation) {
-    MongoConnector connector = new MongoConnector();
-    connector.connect("localhost", "27017", null, null);
-    connector.setDatabase("Test");
-    connector.dropCollection("Test");
+	private void loadEvaluatorObserverModel(VacuumWorldMonitoringContainer container) {
+		CollectionRepresentation collectionRepresentation = new CollectionRepresentation("Test", null);
+		MongoBridge bridge = createDatabase(container, collectionRepresentation);
+		createObserver(container, bridge, collectionRepresentation);
+		createEvaluator(container, bridge, collectionRepresentation);
 
-    return new VWMongoBridge(connector,
-        container.getVacuumWorldSpaceRepresentation(), collectionRepresentation);
-  }
+		List<VWObserverAgent> oas = container.getObserverAgents();
+		List<VWEvaluatorAgent> eas = container.getEvaluatorAgents();
 
-  private void createEvaluator(VacuumWorldMonitoringContainer container,
-      MongoBridge bridge, CollectionRepresentation collectionRepresentation) {
-    List<Sensor> sensors = new ArrayList<>();
-    List<Actuator> actuators = new ArrayList<>();
-    sensors.add(new VWEvaluatorSensor());
-    actuators.add(new VWEvaluatorActuator());
-    AgentClassModel evaluatorClassModel = new AgentClassModel(
-        VWEvaluatorBrain.class, VWEvaluatorAgent.class, VWEvaluatorMind.class,
-        VWEvaluatorSensor.class, VWEvaluatorActuator.class);
+		for (VWObserverAgent oa : oas) {
+			System.out.println("Starting observer agent thread");
+			threadManager.addAgent(new AgentRunnable(oa.getMind()));
+			((VWObserverMind) oa.getMind()).setAvailableActions(MONITORINGWORLDACTIONS);
+		}
 
-    VWEvaluatorAgent e = new VWEvaluatorAgent(new DefaultAgentAppearance(null,
-        null), sensors, actuators, new VWEvaluatorMind(
-        new DefaultEvaluationStrategy()), new VWEvaluatorBrain(),
-        evaluatorClassModel, (AbstractMongoBridge) bridge,
-        collectionRepresentation);
-    container.addEvaluatorAgent(e);
-  }
+		for (VWEvaluatorAgent ea : eas) {
+			System.out.println("Starting evaluator agent thread");
+			threadManager.addAgent(new AgentRunnable(ea.getMind()));
+		}
+	}
 
-  private void createObserver(VacuumWorldMonitoringContainer container,
-      MongoBridge bridge, CollectionRepresentation collectionRepresentation) {
-    List<Sensor> sensors = new ArrayList<>();
-    List<Actuator> actuators = new ArrayList<>();
-    sensors.add(new VWObserverSensor());
-    actuators.add(new VWObserverActuator());
+	private MongoBridge createDatabase(VacuumWorldMonitoringContainer container,
+			CollectionRepresentation collectionRepresentation) {
+		MongoConnector connector = new MongoConnector();
+		connector.connect("localhost", "27017", null, null);
+		connector.setDatabase("Test");
+		connector.dropCollection("Test");
 
-    AgentClassModel observerClassModel = new AgentClassModel(
-        VWObserverBrain.class, VWObserverAgent.class, VWObserverMind.class,
-        VWObserverSensor.class, VWObserverActuator.class);
+		return new VWMongoBridge(connector, container.getVacuumWorldSpaceRepresentation(), collectionRepresentation);
+	}
 
-    VWObserverAgent a = new VWObserverAgent(new DefaultAgentAppearance(null,
-        null), sensors, actuators, new VWObserverMind(
-        new DefaultPerceptionRefiner()), new VWObserverBrain(),
-        observerClassModel, (AbstractMongoBridge) bridge,
-        collectionRepresentation);
-    container.addObserverAgent(a);
-  }
+	private void createEvaluator(VacuumWorldMonitoringContainer container, MongoBridge bridge,
+			CollectionRepresentation collectionRepresentation) {
+		List<Sensor> sensors = new ArrayList<>();
+		List<Actuator> actuators = new ArrayList<>();
+		sensors.add(new VWEvaluatorSensor());
+		actuators.add(new VWEvaluatorActuator());
+		AgentClassModel evaluatorClassModel = new AgentClassModel(VWEvaluatorBrain.class, VWEvaluatorAgent.class,
+				VWEvaluatorMind.class, VWEvaluatorSensor.class, VWEvaluatorActuator.class);
 
-  private Map<SpaceCoordinates, Double[]> createDimensionsMap(int[] dimensions) {
-    Map<SpaceCoordinates, Double[]> dimensionsMap = new EnumMap<>(
-        SpaceCoordinates.class);
+		VWEvaluatorAgent e = new VWEvaluatorAgent(new DefaultAgentAppearance(null, null), sensors, actuators,
+				new VWEvaluatorMind(new DefaultEvaluationStrategy()), new VWEvaluatorBrain(), evaluatorClassModel,
+				(AbstractMongoBridge) bridge, collectionRepresentation);
+		container.addEvaluatorAgent(e);
+	}
 
-    dimensionsMap.put(SpaceCoordinates.NORTH, new Double[] { Double.valueOf(0),
-        null });
-    dimensionsMap.put(SpaceCoordinates.SOUTH,
-        new Double[] { Double.valueOf(dimensions[1]), null });
-    dimensionsMap.put(SpaceCoordinates.WEST, new Double[] { Double.valueOf(0),
-        null });
-    dimensionsMap.put(SpaceCoordinates.EAST,
-        new Double[] { Double.valueOf(dimensions[0]), null });
+	private void createObserver(VacuumWorldMonitoringContainer container, MongoBridge bridge,
+			CollectionRepresentation collectionRepresentation) {
+		List<Sensor> sensors = new ArrayList<>();
+		List<Actuator> actuators = new ArrayList<>();
+		sensors.add(new VWObserverSensor());
+		actuators.add(new VWObserverActuator());
 
-    return dimensionsMap;
-  }
+		AgentClassModel observerClassModel = new AgentClassModel(VWObserverBrain.class, VWObserverAgent.class,
+				VWObserverMind.class, VWObserverSensor.class, VWObserverActuator.class);
 
-  private void stopServer() {
-    try {
-      closeClientSocket();
-      closeServerSocket();
-    } catch (IOException e) {
-      Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
-      return;
-    }
-  }
+		VWObserverAgent a = new VWObserverAgent(new DefaultAgentAppearance(null, null), sensors, actuators,
+				new VWObserverMind(new DefaultPerceptionRefiner()), new VWObserverBrain(), observerClassModel,
+				(AbstractMongoBridge) bridge, collectionRepresentation);
+		container.addObserverAgent(a);
+	}
 
-  private void closeClientSocket() throws IOException {
-    if (!this.clientSocket.isClosed()) {
-      this.clientSocket.close();
-    }
-  }
+	private Map<SpaceCoordinates, Double[]> createDimensionsMap(int[] dimensions) {
+		Map<SpaceCoordinates, Double[]> dimensionsMap = new EnumMap<>(SpaceCoordinates.class);
 
-  private void closeServerSocket() throws IOException {
-    if (!this.server.isClosed()) {
-      this.server.close();
-    }
-  }
+		dimensionsMap.put(SpaceCoordinates.NORTH, new Double[] { Double.valueOf(0), null });
+		dimensionsMap.put(SpaceCoordinates.SOUTH, new Double[] { Double.valueOf(dimensions[1]), null });
+		dimensionsMap.put(SpaceCoordinates.WEST, new Double[] { Double.valueOf(0), null });
+		dimensionsMap.put(SpaceCoordinates.EAST, new Double[] { Double.valueOf(dimensions[0]), null });
 
-  public void printState() {
-    ((VacuumWorldAppearance) this.universe.getAppearance())
-        .updateRepresentation((VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe
-            .getState()).getSubContainerSpace());
-    System.out.println(this.universe.getAppearance().represent());
-  }
+		return dimensionsMap;
+	}
 
-  public static int getCycleNumber() {
-    return cycleNumber;
-  }
+	private void stopServer() {
+		try {
+			closeClientSocket();
+			closeServerSocket();
+		} catch (IOException e) {
+			Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
+			return;
+		}
+	}
+
+	private void closeClientSocket() throws IOException {
+		if (!this.clientSocket.isClosed()) {
+			this.clientSocket.close();
+		}
+	}
+
+	private void closeServerSocket() throws IOException {
+		if (!this.server.isClosed()) {
+			this.server.close();
+		}
+	}
+
+	public void printState() {
+		((VacuumWorldAppearance) this.universe.getAppearance()).updateRepresentation(
+				(VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe.getState()).getSubContainerSpace());
+		System.out.println(this.universe.getAppearance().represent());
+	}
+
+	public static int getCycleNumber() {
+		return cycleNumber;
+	}
 }

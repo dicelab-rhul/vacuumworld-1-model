@@ -31,41 +31,46 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private List<Class<? extends EnvironmentalAction>> availableActions;
 
 	private Random rng;
-	private DefaultActionResult previousActionResult;
+	private List<DefaultActionResult> lastCyclePerceptions;
 	private EnvironmentalAction nextAction;
 
 	public VacuumWorldDefaultMind() {
-		this.previousActionResult = null;
+		this.lastCyclePerceptions = new ArrayList<>();
 		this.rng = new Random();
 	}
 
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if (o instanceof VacuumWorldDefaultBrain && arg instanceof DefaultActionResult) {
-			// TODO do a correct check on arg type, it will always a perception
-			// from the brain
-			this.previousActionResult = (DefaultActionResult) arg;
+		if (o instanceof VacuumWorldDefaultBrain && arg instanceof List<?>) {
+			for(Object result : (List<?>) arg) {
+				if(result instanceof DefaultActionResult) {
+					this.lastCyclePerceptions.add((DefaultActionResult) result);
+				}
+			}
 		}
 	}
 
 	@Override
 	public void perceive(Object perceptionWrapper) {
-		notifyObservers(null, VacuumWorldDefaultBrain.class); // TODO change
-																// null to some
-																// action
+		while(this.lastCyclePerceptions.isEmpty()) {
+			notifyObservers(null, VacuumWorldDefaultBrain.class);
+		}
 	}
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		availableActions = new ArrayList<>();
 		availableActions.addAll(actions);
-		if (this.previousActionResult == null) {
+		
+		if (this.lastCyclePerceptions.isEmpty()) {
 			nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
-		} else if (this.previousActionResult instanceof VacuumWorldActionResult) {
-			nextAction = decideFromPerception((VacuumWorldActionResult) this.previousActionResult);
-		} else {
-			nextAction = decideAction();
 		}
+		else {
+			nextAction = decideFromPerceptions();
+		}
+		
+		this.lastCyclePerceptions.clear();
+		
 		return nextAction;
 	}
 
@@ -74,12 +79,20 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
 		notifyObservers(nextAction, VacuumWorldDefaultBrain.class);
 	}
 
-	private EnvironmentalAction decideFromPerception(VacuumWorldActionResult previousActionResult) {
-		if (previousActionResult.getPerception() == null) {
-			return decideAction();
-		} else {
-			return decideAction(previousActionResult.getPerception());
+	private EnvironmentalAction decideFromPerceptions() {
+		//this completely ignores the speeches
+		
+		for(DefaultActionResult result : this.lastCyclePerceptions) {
+			if(result instanceof VacuumWorldActionResult) {
+				VacuumWorldPerception p = ((VacuumWorldActionResult) result).getPerception();
+				
+				if(p != null) {
+					return decideAction(p);
+				}
+			}
 		}
+		
+		return decideAction();
 	}
 
 	private EnvironmentalAction decideAction(VacuumWorldPerception perception) {

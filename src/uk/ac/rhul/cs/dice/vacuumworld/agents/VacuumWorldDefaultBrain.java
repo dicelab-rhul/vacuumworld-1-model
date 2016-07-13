@@ -1,39 +1,58 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 
 public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
+	private ConcurrentLinkedQueue<DefaultActionResult> receivedResults;
+	private List<DefaultActionResult> resultsToSend;
+	private boolean actionResultReturned;
+	
+	public VacuumWorldDefaultBrain() {
+		this.receivedResults = new ConcurrentLinkedQueue<>();
+		this.resultsToSend = new ArrayList<>();
+		this.actionResultReturned = false;
+	}
 
-  //TODO change to include speech
-  private VacuumWorldActionResult currentResult;
-  
-  @Override
-  public void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldDefaultMind) {
-      manageMindRequest(arg);
-    } else if (o instanceof VacuumWorldCleaningAgent) {
-      manageBodyRequest(arg);
-    }
-  }
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldDefaultMind) {
+			manageMindRequest(arg);
+		} else if (o instanceof VacuumWorldCleaningAgent) {
+			manageBodyRequest(arg);
+		}
+	}
 
-  private void manageBodyRequest(Object arg) {
-    //TODO emanuele change this to include speech
-    if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-      currentResult = (VacuumWorldActionResult)arg;
-    }
-  }
+	private void manageBodyRequest(Object arg) {
+		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+			this.receivedResults.add((DefaultActionResult) arg);
+			this.actionResultReturned = true;
+		}
+	}
 
-  private void manageMindRequest(Object arg) {
-    //TODO potentially change to some getPercepts related action
-    if(arg == null) { 
-      //notify the mind with the current perception
-      notifyObservers(currentResult, VacuumWorldDefaultMind.class);
-    } else if (AbstractAction.class.isAssignableFrom(arg.getClass())) {
-      notifyObservers(arg, VacuumWorldCleaningAgent.class);
-    } 
-  }
+	private void manageMindRequest(Object arg) {
+		if (arg == null) {
+			updateResultsToSend();
+			
+			if(this.actionResultReturned) {
+				notifyObservers(this.resultsToSend, VacuumWorldDefaultMind.class);
+			}
+		}
+		else if (AbstractAction.class.isAssignableFrom(arg.getClass())) {
+			this.actionResultReturned = false;
+			notifyObservers(arg, VacuumWorldCleaningAgent.class);
+		}
+	}
+
+	private void updateResultsToSend() {
+		while(!this.receivedResults.isEmpty()) {
+			this.resultsToSend.add(this.receivedResults.poll());
+		}
+	}
 }
