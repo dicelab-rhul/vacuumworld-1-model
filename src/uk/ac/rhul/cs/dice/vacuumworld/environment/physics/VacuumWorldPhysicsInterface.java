@@ -5,6 +5,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
 
@@ -33,4 +34,9 @@ public interface VacuumWorldPhysicsInterface {
 	public boolean isNecessary(PerceiveAction action, Space context);
 	public Result perform(PerceiveAction action, Space context);
 	public boolean succeeded(PerceiveAction action, Space context);
+	
+	public boolean isPossible(SpeechAction action, Space context);
+	public boolean isNecessary(SpeechAction action, Space context);
+	public Result perform(SpeechAction action, Space context);
+	public boolean succeeded(SpeechAction action, Space context);
 }

@@ -3,6 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.basicmonitor;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -17,7 +18,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
   private EvaluationStrategy<?> strategy;
   private EnvironmentalAction nextAction = null;
-  private Set<EnvironmentalAction> actions;
+  //private Set<EnvironmentalAction> actions;
   private MonitoringResult perception;
 
   private Logger logger;
@@ -30,7 +31,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
   @Override
   public EnvironmentalAction decide(Object... parameters) {
-    nextAction = (EnvironmentalAction) actions.toArray()[0];
+    nextAction = (EnvironmentalAction) getAvailableActionsForThisCicle().toArray()[0];
     return nextAction;
   }
 
@@ -61,7 +62,10 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
     }
   }
 
-  public void setAvailableActions(Set<EnvironmentalAction> actions) {
-    this.actions = actions;
+  public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
+    //this.actions = actions;
+	for(Class<? extends AbstractAction> action : actions) {
+		addAvailableActionForThisCicle(action);
+	}
   }
 }

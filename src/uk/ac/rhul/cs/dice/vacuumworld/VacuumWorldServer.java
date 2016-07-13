@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
@@ -29,6 +30,7 @@ import uk.ac.rhul.cs.dice.monitor.mongo.MongoConnector;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
@@ -69,9 +71,9 @@ public class VacuumWorldServer implements Observer {
 
   private final boolean loadBasicMonitor = false;
   private final boolean loadEvaluatorObserver = true;
-  private final Set<EnvironmentalAction> VACUUMWORLDACTIONS;
+  private final Set<Class<? extends AbstractAction>> VACUUMWORLDACTIONS;
   
-  private final Set<EnvironmentalAction> MONITORINGWORLDACTIONS;
+  private final Set<Class<? extends AbstractAction>> MONITORINGWORLDACTIONS;
   
   private ServerSocket server;
   private Socket clientSocket;
@@ -84,14 +86,15 @@ public class VacuumWorldServer implements Observer {
     threadManager = new VacuumWorldAgentThreadManager();
     
     VACUUMWORLDACTIONS = new HashSet<>();
-    VACUUMWORLDACTIONS.add(new TurnLeftAction());
-    VACUUMWORLDACTIONS.add(new TurnRightAction());
-    VACUUMWORLDACTIONS.add(new MoveAction());
-    VACUUMWORLDACTIONS.add(new CleanAction());
-    VACUUMWORLDACTIONS.add(new PerceiveAction());
+    VACUUMWORLDACTIONS.add(TurnLeftAction.class);
+    VACUUMWORLDACTIONS.add(TurnRightAction.class);
+    VACUUMWORLDACTIONS.add(MoveAction.class);
+    VACUUMWORLDACTIONS.add(CleanAction.class);
+    VACUUMWORLDACTIONS.add(PerceiveAction.class);
+    VACUUMWORLDACTIONS.add(SpeechAction.class);
     
     MONITORINGWORLDACTIONS = new HashSet<>();
-    MONITORINGWORLDACTIONS.add(new TotalPerceptionAction());
+    MONITORINGWORLDACTIONS.add(TotalPerceptionAction.class);
   }
 
   public void startServer(boolean debug) {

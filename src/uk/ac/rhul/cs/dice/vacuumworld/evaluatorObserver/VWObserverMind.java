@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -26,7 +27,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
  */
 public class VWObserverMind extends ObserverMind {
 
-  private Set<EnvironmentalAction> actions;
+  //private Set<EnvironmentalAction> actions;
   private EnvironmentalAction nextAction;
   private MonitoringResult currentPerception;
 
@@ -46,7 +47,7 @@ public class VWObserverMind extends ObserverMind {
 
   @Override
   public EnvironmentalAction decide(Object... parameters) {
-    nextAction = (EnvironmentalAction) actions.toArray()[0];
+    nextAction = (EnvironmentalAction) getAvailableActionsForThisCicle().toArray()[0];
     return nextAction;
   }
 
@@ -85,7 +86,10 @@ public class VWObserverMind extends ObserverMind {
     }
   }
 
-  public void setAvailableActions(Set<EnvironmentalAction> actions) {
-    this.actions = actions;
+  public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
+    //this.actions = actions;
+	for(Class<? extends AbstractAction> action : actions) {
+		super.addAvailableActionForThisCicle(action);
+	}
   }
 }

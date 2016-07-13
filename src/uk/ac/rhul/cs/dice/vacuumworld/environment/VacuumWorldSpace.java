@@ -205,8 +205,16 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	private void managePhysicsRequest(DefaultActionResult result) {		
-		notifyAgentSensor(result, result.getRecipientId());
+	private void managePhysicsRequest(DefaultActionResult result) {	
+		notifyAgentsSensors(result);
+	}
+
+	private void notifyAgentsSensors(DefaultActionResult result) {
+		List<String> sensors = result.getRecipientsIds();
+		
+		for(String sensor: sensors) {
+			notifyAgentSensor(result, sensor);
+		}
 	}
 
 	private void manageActuatorRequest(VacuumWorldEvent event) {

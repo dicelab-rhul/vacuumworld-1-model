@@ -177,7 +177,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   }
 
   private void managePhysicsRequest(DefaultActionResult result) {
-    notifyAgentSensor(result, result.getRecipientId());
+    notifyAgentsSensors(result, result.getRecipientsIds());
   }
 
   private void manageActuatorRequest(MonitoringEvent event) {
@@ -185,21 +185,22 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
         VacuumWorldMonitoringPhysics.class);
   }
 
-  private void notifyAgentSensor(Object arg, String sensorId) {
+  private void notifyAgentsSensors(Object arg, List<String> sensorsIds) {
     List<CustomObserver> recipients = this.getObservers();
 
     for (CustomObserver recipient : recipients) {
-      notifyIfNeeded(recipient, arg, sensorId);
+      notifyIfNeeded(recipient, arg, sensorsIds);
     }
   }
 
-  private void notifyIfNeeded(CustomObserver recipient, Object arg,
-      String sensorId) {
+  private void notifyIfNeeded(CustomObserver recipient, Object arg, List<String> sensorsIds) {
     if (recipient instanceof AbstractSensor) {
       AbstractSensor s = (AbstractSensor) recipient;
 
-      if (s.getSensorId().equals(sensorId)) {
-        s.update(this, arg);
+      for(String sensorId : sensorsIds) {
+    	  if (s.getSensorId().equals(sensorId)) {
+    	        s.update(this, arg);
+    	      }
       }
     }
   }
