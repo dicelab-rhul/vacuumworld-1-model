@@ -3,7 +3,6 @@ package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,7 +51,6 @@ import com.mongodb.BasicDBObject;
  *
  */
 public class VWMongoBridge extends AbstractMongoBridge {
-
 	// Connector to the MongoDB
 	private MongoConnector connector;
 	// Used to map java objects to JSON Strings for read and write operations
@@ -70,8 +68,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
 	 *            a representation of the collection that will be used in the
 	 *            database
 	 */
-	public VWMongoBridge(MongoConnector connector, VacuumWorldSpaceRepresentation representation,
-			CollectionRepresentation collectionRepresentation) {
+	public VWMongoBridge(MongoConnector connector, VacuumWorldSpaceRepresentation representation, CollectionRepresentation collectionRepresentation) {
 		this.connector = connector;
 		this.initialiseCollection(collectionRepresentation, representation);
 	}
@@ -82,45 +79,54 @@ public class VWMongoBridge extends AbstractMongoBridge {
 	@Override
 	public synchronized WriteResult insert(CollectionRepresentation collectionRep, RefinedPerception perception) {
 		VacuumWorldSpaceRepresentation p = (VacuumWorldSpaceRepresentation) perception;
-		// check the agents to see if they exist, if they don't - add them
-		Iterator<AgentRepresentation> iter = p.getAgents().values().iterator();
-		while (iter.hasNext()) {
-			AgentRepresentation value = iter.next();
-			// update the cycle list.
-			connector.pushToList(collectionRep.getCollectionName(), value.get_id(), "cycleList",
-					createNewCycleObject(value.getX(), value.getY(), value.getDirection()),
-					new BasicDBObject("_id", value.get_id()));
-			if (value.isClean()) {
-				// increment total cleans.
-				connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", value.get_id(),
-						"totalCleans", 1);
-				if (value.isSuccessfulClean()) {
-					connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", value.get_id(),
-							"successfulCleans", 1);
-				}
-			}
-		}
-		if (!p.getRemovedDirts().isEmpty()) {
-			System.out.println("SOME DIRT WAS REMOVED!");
-			Iterator<DirtRepresentation> dirtIter = p.getRemovedDirts().iterator();
-			while (dirtIter.hasNext()) {
-				DirtRepresentation rep = dirtIter.next();
-				connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", rep.get_id(),
-						"endCycle", Utils.getCycleNumber());
-				p.getRemovedDirts().remove(rep);
-			}
-		}
-		// notifyObservers(new ChangedResult(new
-		// CollectionRepresentation("lol",null)));
+		checkForAgents(collectionRep, p);
+		checkForDirt(collectionRep, p);
+		
 		return new WriteResult(ActionResult.ACTION_DONE, null);
+	}
+
+	private void checkForDirt(CollectionRepresentation collectionRep, VacuumWorldSpaceRepresentation p) {
+		if (!p.getRemovedDirts().isEmpty()) {
+			Utils.log("SOME DIRT WAS REMOVED!");
+			checkForDirts(collectionRep, p);
+		}
+	}
+
+	private void checkForDirts(CollectionRepresentation collectionRep, VacuumWorldSpaceRepresentation p) {
+		for(DirtRepresentation rep : p.getRemovedDirts()) {
+			this.connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", rep.get_id(), "endCycle", Utils.getCycleNumber());
+			p.getRemovedDirts().remove(rep);
+		}
+	}
+
+	private void checkForAgents(CollectionRepresentation collectionRep, VacuumWorldSpaceRepresentation p) {
+		// check the agents to see if they exist, if they don't - add them
+		for(AgentRepresentation value : p.getAgents().values()) {
+			// update the cycle list.
+			this.connector.pushToList(collectionRep.getCollectionName(), value.get_id(), "cycleList", createNewCycleObject(value.getX(), value.getY(), value.getDirection()), new BasicDBObject("_id", value.get_id()));
+			checkForClean(collectionRep, value);
+		}
+	}
+
+	private void checkForClean(CollectionRepresentation collectionRep, AgentRepresentation value) {
+		if (value.isClean()) {
+			// increment total cleans.
+			this.connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", value.get_id(), "totalCleans", 1);
+			checkForSuccessfulClean(collectionRep, value);
+		}
+	}
+
+	private void checkForSuccessfulClean(CollectionRepresentation collectionRep, AgentRepresentation value) {
+		if (value.isSuccessfulClean()) {
+			this.connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", value.get_id(), "successfulCleans", 1);
+		}
 	}
 
 	/*
 	 * Creates the initial collection and all the dirts and agents that are in
 	 * the initial state of Vacuum World.
 	 */
-	private void initialiseCollection(CollectionRepresentation collectionRepresentation,
-			VacuumWorldSpaceRepresentation representation) {
+	private void initialiseCollection(CollectionRepresentation collectionRepresentation, VacuumWorldSpaceRepresentation representation) {
 		insertAgents(collectionRepresentation, representation.getAgents().values());
 		insertDirts(collectionRepresentation, representation.getDirts());
 	}
@@ -137,21 +143,20 @@ public class VWMongoBridge extends AbstractMongoBridge {
 	 *            a mapping of {@link VacuumWorldCoordinates} to
 	 *            {@link DirtRepresentation} specifying new {@link Dirt} to add
 	 */
-	public synchronized void insertDirts(CollectionRepresentation collectionRepresentation,
-			Map<VacuumWorldCoordinates, DirtRepresentation> map) {
+	public synchronized void insertDirts(CollectionRepresentation collectionRepresentation, Map<VacuumWorldCoordinates, DirtRepresentation> map) {
 		String json;
-		Iterator<Entry<VacuumWorldCoordinates, DirtRepresentation>> iter = map.entrySet().iterator();
-		while (iter.hasNext()) {
-			Entry<VacuumWorldCoordinates, DirtRepresentation> dirtRep = iter.next();
-			VacuumWorldCoordinates coord = dirtRep.getKey();
-			DirtRepresentation value = dirtRep.getValue();
+		
+		for(Entry<VacuumWorldCoordinates, DirtRepresentation> entry : map.entrySet()) {
+			VacuumWorldCoordinates coord = entry.getKey();
+			DirtRepresentation value = entry.getValue();
+			
 			try {
-				json = mapper.writeValueAsString(new DirtDatabaseRepresentation(value.get_id(), value.getType(),
-						coord.getX(), coord.getY(), 0, 0));
-				System.out.println(json);
-				connector.insertDocument(collectionRepresentation.getCollectionName(), json);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				json = this.mapper.writeValueAsString(new DirtDatabaseRepresentation(value.get_id(), value.getType(), coord.getX(), coord.getY(), 0, 0));
+				Utils.log(json);
+				this.connector.insertDocument(collectionRepresentation.getCollectionName(), json);
+			}
+			catch (JsonProcessingException e) {
+				Utils.log(e);
 			}
 		}
 	}
@@ -170,19 +175,17 @@ public class VWMongoBridge extends AbstractMongoBridge {
 	 *            AgentRepresentations} specifying new
 	 *            {@link VacuumWorldCleaningAgent Agents} to add
 	 */
-	public void insertAgents(CollectionRepresentation collectionRepresentation,
-			Collection<AgentRepresentation> agents) {
+	public void insertAgents(CollectionRepresentation collectionRepresentation, Collection<AgentRepresentation> agents) {
 		String json;
-		Iterator<AgentRepresentation> iter = agents.iterator();
-		while (iter.hasNext()) {
+		
+		for(AgentRepresentation agent : agents) {
 			try {
-				AgentRepresentation agent = iter.next();
-				json = mapper.writeValueAsString(new AgentDatabaseRepresentation(agent.get_id(), agent.getType(),
-						agent.getSensors(), agent.getActuators(), 0, 0, new CycleDataRepresentation[] {}));
-				System.out.println(json);
-				connector.insertDocument(collectionRepresentation.getCollectionName(), json);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				json = this.mapper.writeValueAsString(new AgentDatabaseRepresentation(agent.get_id(), agent.getType(), agent.getSensors(), agent.getActuators(), 0, 0, new CycleDataRepresentation[] {}));
+				Utils.log(json);
+				this.connector.insertDocument(collectionRepresentation.getCollectionName(), json);
+			}
+			catch (JsonProcessingException e) {
+				Utils.log(e);
 			}
 		}
 	}
@@ -198,7 +201,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
 
 	@Override
 	public synchronized ReadResult get(CollectionRepresentation collectionRep) {
-		HashSet<RefinedPerception> ps = new HashSet<RefinedPerception>();
+		HashSet<RefinedPerception> ps = new HashSet<>();
 		ps.add(new DirtDatabaseRepresentation(null, null, 0, 0, 0, 0));
 		return new ReadResult(ActionResult.ACTION_DONE, ps, null);
 	}
@@ -211,15 +214,19 @@ public class VWMongoBridge extends AbstractMongoBridge {
 	@Override
 	public synchronized void update(CustomObservable o, Object arg) {
 		if (o instanceof ObserverActuator || o instanceof EvaluatorActuator) {
-			if (arg instanceof DatabaseEvent) {
-				System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM " + o.getClass().getSimpleName() + " " + arg);
-				DatabaseEvent event = (DatabaseEvent) arg;
-				Result result = event.attempt(this, event.getCollectionRepresentation());
-				List<String> recipients = new ArrayList<>();
-				recipients.add((String) ((DatabaseAgent) event.getActor()).getId());
-				result.setRecipientsIds(recipients);
-				notifyObservers(result);
-			}
+			manageActuator(o, arg);
+		}
+	}
+
+	private void manageActuator(CustomObservable o, Object arg) {
+		if (arg instanceof DatabaseEvent) {
+			Utils.log("UPDATE " + this.getClass().getSimpleName() + " FROM " + o.getClass().getSimpleName() + " " + arg);
+			DatabaseEvent event = (DatabaseEvent) arg;
+			Result result = event.attempt(this, event.getCollectionRepresentation());
+			List<String> recipients = new ArrayList<>();
+			recipients.add((String) ((DatabaseAgent) event.getActor()).getId());
+			result.setRecipientsIds(recipients);
+			notifyObservers(result);
 		}
 	}
 }
