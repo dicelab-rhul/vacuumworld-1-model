@@ -2,7 +2,6 @@ package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -39,220 +38,233 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
-  private List<Agent> monitoringAgents;
-  private VacuumWorldMonitoringPhysics physics;
-  private VacuumWorldSpace subContainerSpace;
-  private VacuumWorldSpaceRepresentation vacuumWorldSpaceRepresentation;
+	private List<Agent> monitoringAgents;
+	private VacuumWorldMonitoringPhysics physics;
+	private VacuumWorldSpace subContainerSpace;
+	private VacuumWorldSpaceRepresentation vacuumWorldSpaceRepresentation;
 
-  private Logger logger;
-  
-  public VacuumWorldMonitoringContainer(VacuumWorldMonitoringPhysics physics,
-      VacuumWorldSpace space) {
-    this.physics = physics;
-    this.subContainerSpace = space;
-    this.monitoringAgents = new ArrayList<>();
-    vacuumWorldSpaceRepresentation = new VacuumWorldSpaceRepresentation();
-    logger = Utils.fileLogger("C:/Users/Ben/workspace/vacuumworldmodel/logs/eval/container.log");
-  }
+	private Logger logger;
 
-  public List<VacuumWorldMonitorAgent> getMonitorAgents() {
-    List<VacuumWorldMonitorAgent> list = new ArrayList<>();
-    for (Agent a : monitoringAgents) {
-      if (a instanceof VacuumWorldMonitorAgent) {
-        list.add((VacuumWorldMonitorAgent) a);
-      }
-    }
-    return list;
-  }
+	public VacuumWorldMonitoringContainer(VacuumWorldMonitoringPhysics physics, VacuumWorldSpace space) {
+		this.physics = physics;
+		this.subContainerSpace = space;
+		this.monitoringAgents = new ArrayList<>();
+		this.vacuumWorldSpaceRepresentation = new VacuumWorldSpaceRepresentation();
+		this.logger = Utils.fileLogger("container.log");
+	}
 
-  public List<VWObserverAgent> getObserverAgents() {
-    List<VWObserverAgent> list = new ArrayList<>();
-    for (Agent a : monitoringAgents) {
-      if (a instanceof VWObserverAgent) {
-        list.add((VWObserverAgent) a);
-      }
-    }
-    return list;
-  }
+	public List<VacuumWorldMonitorAgent> getMonitorAgents() {
+		List<VacuumWorldMonitorAgent> list = new ArrayList<>();
+		for (Agent a : this.monitoringAgents) {
+			if (a instanceof VacuumWorldMonitorAgent) {
+				list.add((VacuumWorldMonitorAgent) a);
+			}
+		}
+		return list;
+	}
 
-  public List<VWEvaluatorAgent> getEvaluatorAgents() {
-    List<VWEvaluatorAgent> list = new ArrayList<>();
-    for (Agent a : monitoringAgents) {
-      if (a instanceof VWEvaluatorAgent) {
-        list.add((VWEvaluatorAgent) a);
-      }
-    }
-    return list;
-  }
+	public List<VWObserverAgent> getObserverAgents() {
+		List<VWObserverAgent> list = new ArrayList<>();
+		for (Agent a : this.monitoringAgents) {
+			if (a instanceof VWObserverAgent) {
+				list.add((VWObserverAgent) a);
+			}
+		}
+		return list;
+	}
 
-  public VacuumWorldMonitoringPhysics getPhysics() {
-    return this.physics;
-  }
+	public List<VWEvaluatorAgent> getEvaluatorAgents() {
+		List<VWEvaluatorAgent> list = new ArrayList<>();
+		for (Agent a : this.monitoringAgents) {
+			if (a instanceof VWEvaluatorAgent) {
+				list.add((VWEvaluatorAgent) a);
+			}
+		}
+		return list;
+	}
 
-  public VacuumWorldSpace getSubContainerSpace() {
-    return this.subContainerSpace;
+	public VacuumWorldMonitoringPhysics getPhysics() {
+		return this.physics;
+	}
 
-  }
+	public VacuumWorldSpace getSubContainerSpace() {
+		return this.subContainerSpace;
 
-  public void addMonitorAgent(VacuumWorldMonitorAgent agent) {
-    this.monitoringAgents.add(agent);
-    this.addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
-    ((VacuumWorldMonitorActuator) agent.getActuators().get(
-        agent.getActionActuatorIndex())).addObserver(this);
-  }
+	}
 
-  public void addObserverAgent(VWObserverAgent agent) {
-    this.monitoringAgents.add(agent);
-    this.addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
-    ((VWObserverActuator) agent.getActuators().get(
-        agent.getActionActuatorIndex())).addObserver(this);
-  }
+	public void addMonitorAgent(VacuumWorldMonitorAgent agent) {
+		this.monitoringAgents.add(agent);
+		this.addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
+		((VacuumWorldMonitorActuator) agent.getActuators().get(agent.getActionActuatorIndex())).addObserver(this);
+	}
 
-  public void addEvaluatorAgent(VWEvaluatorAgent agent) {
-    this.monitoringAgents.add(agent);
-    ((VWEvaluatorActuator) agent.getActuators().get(
-        agent.getActionActuatorIndex())).addObserver(this);
-  }
+	public void addObserverAgent(VWObserverAgent agent) {
+		this.monitoringAgents.add(agent);
+		this.addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
+		((VWObserverActuator) agent.getActuators().get(agent.getActionActuatorIndex())).addObserver(this);
+	}
 
-  @Override
-  public void update(CustomObservable o, Object arg) {
-    //System.out.println("UPDATE " + this.getClass().getSimpleName() + " FROM "
-        //+ o.getClass().getSimpleName() + " " + arg);
-    // Manage sub container message
-    if (o instanceof VacuumWorldPhysics && arg instanceof MonitoringUpdateEvent) {
-      manageSubContainerMessage((MonitoringUpdateEvent) arg);
-      return;
-    }
-    // Manage Actuator message
-    if ((o instanceof VWObserverActuator || o instanceof VacuumWorldMonitorActuator)  && arg instanceof MonitoringEvent) {
-      manageActuatorRequest((MonitoringEvent) arg);
-    }
-    // Manage Physics message
-    else if (o instanceof VacuumWorldMonitoringPhysics
-        && DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-      managePhysicsRequest((DefaultActionResult) arg);
-    }
-  }
+	public void addEvaluatorAgent(VWEvaluatorAgent agent) {
+		this.monitoringAgents.add(agent);
+		((VWEvaluatorActuator) agent.getActuators().get(agent.getActionActuatorIndex())).addObserver(this);
+	}
 
-  private void manageSubContainerMessage(MonitoringUpdateEvent event) {
-    System.out.println("MESSAGE FROM SUBCONTAINER! : " + event.represent());
-    
-    logger.info(event.getAction() + ":" + event.getResult());
-    
-    // if the action was not done then it is not relevant
-    if (event.getResult().equals(ActionResult.ACTION_DONE)) {
-      AgentRepresentation agent = vacuumWorldSpaceRepresentation
-          .getAgent((String) ((AbstractAgent) event.getActor()).getId());
-      EnvironmentalAction a = event.getAction();
-      agent.setClean(false);
-      agent.setSuccessfulClean(false);
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldPhysics && arg instanceof MonitoringUpdateEvent) {
+			manageSubContainerMessage((MonitoringUpdateEvent) arg);
+		}
+		else if ((o instanceof VWObserverActuator || o instanceof VacuumWorldMonitorActuator) && arg instanceof MonitoringEvent) {
+			manageActuatorRequest((MonitoringEvent) arg);
+		}
+		else if (o instanceof VacuumWorldMonitoringPhysics && DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+			managePhysicsRequest((DefaultActionResult) arg);
+		}
+	}
 
-      if (a instanceof CleanAction) {
-        agent.setClean(true);
-        // if the agent was on top of some dirt then remove it from the map
-        VacuumWorldCoordinates coord = new VacuumWorldCoordinates(agent.getX(),
-            agent.getY());
-        if (vacuumWorldSpaceRepresentation.getDirts().get(coord) != null) {
-          // remove the dirt as some was found on the location of an agent who
-          // is cleaning
-          vacuumWorldSpaceRepresentation.dirtCleaned(coord);
-          agent.setSuccessfulClean(true);
-        }
-        // cleaning failed!
-      } else if (a instanceof MoveAction) {
-        VacuumWorldCoordinates coord = new VacuumWorldCoordinates(agent.getX(),
-            agent.getY());
-        coord = coord.getNewCoordinates(agent.getDirection());
-        agent.setX(coord.getX());
-        agent.setY(coord.getY());
-      } else if (a instanceof TurningAction) {
-        if (a instanceof TurnLeftAction) {
-          agent.setDirection(agent.getDirection().getLeftDirection());
-        }
-        if (a instanceof TurnRightAction) {
-          agent.setDirection(agent.getDirection().getRightDirection());
-        }
-      }
-    }
-  }
+	private void manageSubContainerMessage(MonitoringUpdateEvent event) {
+		Utils.log("MESSAGE FROM SUBCONTAINER! : " + event.represent());
+		this.logger.info(event.getAction() + ":" + event.getResult());
 
-  private void managePhysicsRequest(DefaultActionResult result) {
-    notifyAgentsSensors(result, result.getRecipientsIds());
-  }
+		
+		if (event.getResult().equals(ActionResult.ACTION_DONE)) {
+			AgentRepresentation agent = this.vacuumWorldSpaceRepresentation.getAgent((String) ((AbstractAgent) event.getActor()).getId());
+			EnvironmentalAction a = event.getAction();
+			agent.setClean(false);
+			agent.setSuccessfulClean(false);
+			
+			manageAction(a, agent);
+		}
+	}
 
-  private void manageActuatorRequest(MonitoringEvent event) {
-    notifyObservers(new Object[] { event, this },
-        VacuumWorldMonitoringPhysics.class);
-  }
+	private void manageAction(EnvironmentalAction a, AgentRepresentation agent) {
+		if (a instanceof CleanAction) {
+			manageClean(agent);
+		}
+		else if (a instanceof MoveAction) {
+			manageMove(agent);
+		}
+		else if (a instanceof TurningAction) {
+			manageTurn(a, agent);
+		}
+	}
 
-  private void notifyAgentsSensors(Object arg, List<String> sensorsIds) {
-    List<CustomObserver> recipients = this.getObservers();
+	private void manageTurn(EnvironmentalAction a, AgentRepresentation agent) {
+		if (a instanceof TurnLeftAction) {
+			agent.setDirection(agent.getDirection().getLeftDirection());
+		}
+		else if (a instanceof TurnRightAction) {
+			agent.setDirection(agent.getDirection().getRightDirection());
+		}
+	}
 
-    for (CustomObserver recipient : recipients) {
-      notifyIfNeeded(recipient, arg, sensorsIds);
-    }
-  }
+	private void manageMove(AgentRepresentation agent) {
+		VacuumWorldCoordinates coord = new VacuumWorldCoordinates(agent.getX(), agent.getY());
+		coord = coord.getNewCoordinates(agent.getDirection());
+		agent.setX(coord.getX());
+		agent.setY(coord.getY());
+	}
 
-  private void notifyIfNeeded(CustomObserver recipient, Object arg, List<String> sensorsIds) {
-    if (recipient instanceof AbstractSensor) {
-      AbstractSensor s = (AbstractSensor) recipient;
+	private void manageClean(AgentRepresentation agent) {
+		agent.setClean(true);
+		VacuumWorldCoordinates coord = new VacuumWorldCoordinates(agent.getX(), agent.getY());
+		
+		if (this.vacuumWorldSpaceRepresentation.getDirts().get(coord) != null) {
+			this.vacuumWorldSpaceRepresentation.dirtCleaned(coord);
+			agent.setSuccessfulClean(true);
+		}
+	}
 
-      for(String sensorId : sensorsIds) {
-    	  if (s.getSensorId().equals(sensorId)) {
-    	        s.update(this, arg);
-    	      }
-      }
-    }
-  }
+	private void managePhysicsRequest(DefaultActionResult result) {
+		notifyAgentsSensors(result, result.getRecipientsIds());
+	}
 
-  public VacuumWorldSpaceRepresentation getVacuumWorldSpaceRepresentation() {
-    return vacuumWorldSpaceRepresentation;
-  }
+	private void manageActuatorRequest(MonitoringEvent event) {
+		notifyObservers(new Object[] { event, this }, VacuumWorldMonitoringPhysics.class);
+	}
 
-  public void setVacuumWorldSpaceRepresentation(
-      VacuumWorldSpaceRepresentation vacuumWorldSpaceRepresentation) {
-    this.vacuumWorldSpaceRepresentation = vacuumWorldSpaceRepresentation;
-  }
+	private void notifyAgentsSensors(Object arg, List<String> sensorsIds) {
+		List<CustomObserver> recipients = this.getObservers();
 
-  /**
-   * Creates the representation of VacuumWorldSpace. Should only be called when
-   * the real VacuumWorldSpace is fully set up; contains all agents and dirt
-   * etc.
-   */
-  public void createVacuumWorldSpaceRepresentation() {
-    Collection<Location> locations = subContainerSpace.getLocations();
-    Iterator<Location> iter = locations.iterator();
-    Random rand = new Random();
-    while (iter.hasNext()) {
-      VacuumWorldLocation loc = (VacuumWorldLocation) iter.next();
-      if (loc.isAnAgentPresent()) {
-        // create the agent representation
-        String agentId = (String) loc.getAgent().getId();
-        AgentRepresentation rep = new AgentRepresentation(agentId,
-            ((VacuumWorldAgentAppearance) loc.getAgent()
-                .getExternalAppearance()).getType(), loc.getAgent()
-                .getSensors().size(), loc.getAgent().getActuators().size(), loc
-                .getAgent().getFacingDirection(), loc.getAgent()
-                .getCurrentLocation().getX(), loc.getAgent()
-                .getCurrentLocation().getY());
-        vacuumWorldSpaceRepresentation.getAgents().put(agentId, rep);
-      }
-      if (loc.isAnObstaclePresent()) {
-        // create the obstacle representation
-        Dirt dirt = loc.getDirt();
-        if (dirt != null) {
-          vacuumWorldSpaceRepresentation.getDirts()
-              .put(
-                  new VacuumWorldCoordinates(loc.getCoordinates().getX(), loc
-                      .getCoordinates().getY()),
-                  new DirtRepresentation(String.valueOf(rand.nextLong()),
-                      ((DirtAppearance) dirt.getExternalAppearance())
-                          .getDirtType()));
-        } else {
-          Logger.getGlobal().log(Level.SEVERE, "CANNOT REPRESENT: " + loc.getObstacle() + "IN "
-              + VacuumWorldSpaceRepresentation.class.getSimpleName());
-        }
-      }
-    }
-  }
+		for (CustomObserver recipient : recipients) {
+			notifyIfNeeded(recipient, arg, sensorsIds);
+		}
+	}
+
+	private void notifyIfNeeded(CustomObserver recipient, Object arg, List<String> sensorsIds) {
+		if (recipient instanceof AbstractSensor) {
+			AbstractSensor s = (AbstractSensor) recipient;
+			notifySensorsIfNeeded(s, arg, sensorsIds);
+		}
+	}
+
+	private void notifySensorsIfNeeded(AbstractSensor s, Object arg, List<String> sensorsIds) {
+		for (String sensorId : sensorsIds) {
+			if (s.getSensorId().equals(sensorId)) {
+				s.update(this, arg);
+			}
+		}
+	}
+
+	public VacuumWorldSpaceRepresentation getVacuumWorldSpaceRepresentation() {
+		return vacuumWorldSpaceRepresentation;
+	}
+
+	public void setVacuumWorldSpaceRepresentation(VacuumWorldSpaceRepresentation vacuumWorldSpaceRepresentation) {
+		this.vacuumWorldSpaceRepresentation = vacuumWorldSpaceRepresentation;
+	}
+
+	/**
+	 * Creates the representation of VacuumWorldSpace. Should only be called
+	 * when the real VacuumWorldSpace is fully set up; contains all agents and
+	 * dirt etc.
+	 */
+	public void createVacuumWorldSpaceRepresentation() {
+		Collection<Location> locations = this.subContainerSpace.getLocations();
+		
+		for(Location location : locations) {
+			Random rand = new Random();
+			
+			if(location instanceof VacuumWorldLocation) {
+				createVacuumWorldSpaceRepresentation((VacuumWorldLocation) location, rand);
+			}
+		}
+	}
+
+	private void createVacuumWorldSpaceRepresentation(VacuumWorldLocation location, Random rand) {
+		checkForAgent(location);
+		checkForObstacle(location, rand);
+	}
+
+	private void checkForObstacle(VacuumWorldLocation location, Random rand) {
+		if (location.isDirtPresent()) {
+			Dirt dirt = location.getDirt();
+			checkForDirt(dirt, location, rand);
+		}
+	}
+
+	private void checkForDirt(Dirt dirt, VacuumWorldLocation location, Random rand) {
+		if (dirt != null) {
+			this.vacuumWorldSpaceRepresentation.getDirts().put(
+					new VacuumWorldCoordinates(location.getCoordinates().getX(), location.getCoordinates().getY()),
+					new DirtRepresentation(String.valueOf(rand.nextLong()),
+							((DirtAppearance) dirt.getExternalAppearance()).getDirtType()));
+		}
+		else {
+			Utils.log(Level.SEVERE, "CANNOT REPRESENT: " + location.getObstacle() + "IN "+ VacuumWorldSpaceRepresentation.class.getSimpleName());
+		}
+	}
+
+	private void checkForAgent(VacuumWorldLocation location) {
+		if (location.isAnAgentPresent()) {
+			String agentId = (String) location.getAgent().getId();
+			AgentRepresentation rep = new AgentRepresentation(agentId,
+					((VacuumWorldAgentAppearance) location.getAgent().getExternalAppearance()).getType(),
+					location.getAgent().getSensors().size(), location.getAgent().getActuators().size(),
+					location.getAgent().getFacingDirection(), location.getAgent().getCurrentLocation().getX(),
+					location.getAgent().getCurrentLocation().getY());
+			
+			this.vacuumWorldSpaceRepresentation.getAgents().put(agentId, rep);
+		}
+	}
 }

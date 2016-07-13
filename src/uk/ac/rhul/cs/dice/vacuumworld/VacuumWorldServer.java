@@ -65,7 +65,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldServer implements Observer {
 	private static final boolean LOAD_BASIC_MONITOR = false;
-	private static final boolean LOAD_EVALUATOR_OBSERVER = true;
+	private static final boolean LOAD_EVALUATOR_OBSERVER = false;
 	
 	private final Set<Class<? extends AbstractAction>> vacuumWorldActions;
 	private final Set<Class<? extends AbstractAction>> monitoringWorldActions;
@@ -103,7 +103,7 @@ public class VacuumWorldServer implements Observer {
 
 	private void startServerFromFile() {
 		try {
-			String filename = "state_example.json";
+			String filename = "state_example2.json";
 			VacuumWorldMonitoringContainer initialState = VacuumWorldParser.parseInitialState(filename);
 			constructUniverseAndStart(initialState);
 		}
