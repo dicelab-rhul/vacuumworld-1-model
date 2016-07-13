@@ -22,6 +22,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private int perceptionRange;
@@ -59,24 +60,24 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		availableActions = new ArrayList<>();
-		availableActions.addAll(actions);
+		this.availableActions = new ArrayList<>();
+		this.availableActions.addAll(this.actions);
 		
 		if (this.lastCyclePerceptions.isEmpty()) {
-			nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
+			this.nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
 		}
 		else {
-			nextAction = decideFromPerceptions();
+			this.nextAction = decideFromPerceptions();
 		}
 		
 		this.lastCyclePerceptions.clear();
 		
-		return nextAction;
+		return this.nextAction;
 	}
 
 	@Override
 	public void execute(EnvironmentalAction action) {
-		notifyObservers(nextAction, VacuumWorldDefaultBrain.class);
+		notifyObservers(this.nextAction, VacuumWorldDefaultBrain.class);
 	}
 
 	private EnvironmentalAction decideFromPerceptions() {
@@ -104,8 +105,8 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
 
 	private EnvironmentalAction decideAction() {
 		int size = this.availableActions.size();
-		int randomNumber = rng.nextInt(size);
-		Class<? extends EnvironmentalAction> actionPrototype = availableActions.get(randomNumber);
+		int randomNumber = this.rng.nextInt(size);
+		Class<? extends EnvironmentalAction> actionPrototype = this.availableActions.get(randomNumber);
 
 		return buildNewAction(actionPrototype);
 	}
@@ -121,7 +122,9 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
+			Utils.log(e);
 			return null;
 		}
 	}
@@ -132,10 +135,11 @@ public class VacuumWorldDefaultMind extends AbstractAgentMind {
 		VacuumWorldSpeechPayload payload = getPayload();
 
 		try {
-			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class,
-					Payload.class);
+			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
 			return constructor.newInstance(senderId, recipientsIds, payload);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
+			Utils.log(e);
 			return null;
 		}
 	}

@@ -29,26 +29,33 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	public void start() {
 		this.simulationStarted = true;
 		Utils.log("START");
-		doCycleStep(this.monitorRunnables); // let monitors get the initial state
 		cycle();
 	}
 
 	private void cycle() {
-
+		boolean doPerceive = false;
+		
 		while (this.simulationStarted) {
 			Utils.log("START CYCLE");
-			doCycleStep(this.cleaningRunnables);
 			doCycleStep(this.monitorRunnables);
-			// next cycle!
+			doCycleStep(this.cleaningRunnables, doPerceive);
+			
 			Utils.log("NEXT CYCLE!! \n \n \n \n");
+			doPerceive = true;
 			this.notifyObservers();
 			
 			Utils.doWait(1000);
 		}
 	}
 	
-	private void doCycleStep(Set<AgentRunnable> agentsRunnables) {
-		doPerceive(agentsRunnables);
+	private void doCycleStep(Set<AgentRunnable> agentsRunnables, boolean... flags) {
+		boolean doPerceive = true;
+		
+		if(flags.length > 0) {
+			doPerceive = flags[0];
+		}
+		
+		doPerceive(agentsRunnables, doPerceive);
 		doDecide(agentsRunnables);
 		doExecute(agentsRunnables);
 	}
@@ -67,8 +74,10 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		doPhase(this.threadStateExecute, runnables);
 	}
 
-	private void doPerceive(Set<AgentRunnable> runnables) {
-		doPhase(this.threadStatePerceive, runnables);
+	private void doPerceive(Set<AgentRunnable> runnables, boolean doPerceive) {
+		if(doPerceive) {
+			doPhase(this.threadStatePerceive, runnables);
+		}
 	}
 
 	private void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
