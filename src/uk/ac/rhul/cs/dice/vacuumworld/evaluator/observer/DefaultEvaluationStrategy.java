@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;

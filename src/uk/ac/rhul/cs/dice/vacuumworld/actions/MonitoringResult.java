@@ -21,20 +21,19 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation
  *
  */
 public class MonitoringResult extends DefaultActionResult {
-  private VacuumWorldSpaceRepresentation representation;
+	private VacuumWorldSpaceRepresentation representation;
 
-  public MonitoringResult(ActionResult result, Exception failureReason,
-      List<String> recipientsIds, VacuumWorldSpaceRepresentation representation) {
-    super(result, failureReason, recipientsIds);
-    this.representation = representation;
-  }
+	public MonitoringResult(ActionResult result, Exception failureReason, List<String> recipientsIds, VacuumWorldSpaceRepresentation representation) {
+		super(result, failureReason, recipientsIds);
+		this.representation = representation;
+	}
 
-  public Perception getPerception() {
-    return this.representation;
-  }
+	public Perception getPerception() {
+		return this.representation;
+	}
 
-  @Override
-  public String toString() {
-    return this.getClass().getSimpleName();
-  }
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName();
+	}
 }

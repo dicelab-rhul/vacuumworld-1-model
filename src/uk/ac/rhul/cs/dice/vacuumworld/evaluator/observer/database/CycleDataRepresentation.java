@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.database;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -32,11 +32,11 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWEvaluatorAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
-import util.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWEvaluatorActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWEvaluatorAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   private List<Agent> monitoringAgents;

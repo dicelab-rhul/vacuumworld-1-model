@@ -10,11 +10,11 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitorAgent extends AbstractAgent implements
     VacuumWorldAgentInterface {
@@ -29,7 +29,7 @@ public class VacuumWorldMonitorAgent extends AbstractAgent implements
   public void update(CustomObservable o, Object arg) {
     if (o instanceof VacuumWorldMonitorBrain
         && arg instanceof TotalPerceptionAction) {
-      MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) VacuumWorldServer.getCycleNumber(), this);
+      MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) Utils.getCycleNumber(), this);
       event.setActuatorRecipient(((VacuumWorldMonitorActuator) this.getActuators().get(
           this.getActionActuatorIndex())).getActuatorId());
       event.setSensorToCallBackId(((VacuumWorldMonitorSensor) this.getSensors().get(

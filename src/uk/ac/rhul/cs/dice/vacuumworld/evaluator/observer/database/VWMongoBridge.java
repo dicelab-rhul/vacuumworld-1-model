@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.database;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +23,6 @@ import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
 import uk.ac.rhul.cs.dice.monitor.mongo.MongoConnector;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
@@ -31,6 +30,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -106,7 +106,7 @@ public class VWMongoBridge extends AbstractMongoBridge {
 			while (dirtIter.hasNext()) {
 				DirtRepresentation rep = dirtIter.next();
 				connector.incrementSingleValueInDocument(collectionRep.getCollectionName(), "_id", rep.get_id(),
-						"endCycle", VacuumWorldServer.getCycleNumber());
+						"endCycle", Utils.getCycleNumber());
 				p.getRemovedDirts().remove(rep);
 			}
 		}

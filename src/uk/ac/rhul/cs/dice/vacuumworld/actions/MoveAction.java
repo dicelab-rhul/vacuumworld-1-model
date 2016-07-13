@@ -20,11 +20,7 @@ public class MoveAction extends PhysicalAction {
 
 	@Override
 	public boolean isPossible(Physics physics, Space context) {
-		boolean result = ((VacuumWorldPhysics) physics).isPossible(MoveAction.this, context);
-		
-		System.out.println("Thread " + Thread.currentThread().getId() + ": action move: " + (result ? "possible." : "impossible."));
-		
-		return result;
+		return ((VacuumWorldPhysics) physics).isPossible(MoveAction.this, context);
 	}
 	
 	@Override

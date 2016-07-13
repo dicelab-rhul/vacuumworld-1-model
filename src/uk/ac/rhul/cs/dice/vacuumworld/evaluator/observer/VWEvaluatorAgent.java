@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer;
 
 import java.util.List;
 

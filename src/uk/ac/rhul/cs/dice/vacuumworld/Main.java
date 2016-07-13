@@ -1,8 +1,8 @@
 package uk.ac.rhul.cs.dice.vacuumworld;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class Main {
 	private Main(){}
@@ -15,8 +15,9 @@ public class Main {
 		try {
 			VacuumWorldServer server = new VacuumWorldServer(13337);
 			server.startServer(true);
-		} catch (IOException e) {
-			Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
+		}
+		catch (IOException e) {
+			Utils.log(e);
 		}
 	}
 }

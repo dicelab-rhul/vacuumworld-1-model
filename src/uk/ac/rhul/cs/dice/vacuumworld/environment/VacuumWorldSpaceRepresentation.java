@@ -13,7 +13,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringUpdateEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver.VWObserverAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
 
 /**
  * The representation of {@link VacuumWorldSpace} used by

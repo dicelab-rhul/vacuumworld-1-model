@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
@@ -38,6 +36,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPhysicsInterface {
 	private ConcurrentMap<Long, VacuumWorldCleaningAgent> activeAgents;
@@ -89,53 +88,23 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 			agentLocation.getExclusiveWriteLock();
 
 			action.setAgentOldFacingDirection(agentLocation.getAgent().getFacingDirection());
-			// System.out.println(Thread.currentThread().getId() + "Local
-			// variable before turning left: " +
-			// agentLocation.getAgent().getFacingDirection());
-			// System.out.println(Thread.currentThread().getId() + "List
-			// variable before turning left: " +
-			// this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
 			agentLocation.getAgent().turnLeft();
 
-			// System.out.println(Thread.currentThread().getId() + "Local
-			// variable after turning left: " +
-			// agentLocation.getAgent().getFacingDirection());
-			// System.out.println(Thread.currentThread().getId() + "List
-			// variable after turning left: " +
-			// this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
-
-			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context,
-					this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(),
-					this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
+			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context, this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(), this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
 			agentLocation.releaseExclusiveWriteLock();
 
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		} catch (Exception e) {
-			e.printStackTrace();
+			Utils.log(e);
 			this.activeAgents.remove(Thread.currentThread().getId());
 			releaseWriteLockIfNecessary(agentLocation);
-			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 	}
 
 	@Override
 	public synchronized boolean succeeded(TurnLeftAction action, Space context) {
-		boolean check = this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection() == action
-				.getAgentOldFacingDirection().getLeftDirection();
-
-		if (!check) {
-			Logger.getGlobal().log(Level.SEVERE,
-					Thread.currentThread().getId() + "FAILED: succeeded:TurnLeftAction : List variable:"
-							+ this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection()
-							+ ", Local variable.getLeft():" + action.getAgentOldFacingDirection().getLeftDirection());
-
-			Logger.getGlobal().log(Level.SEVERE,
-					Thread.currentThread().getId() + "Furthermore, the old direction (from Local variable) was "
-							+ action.getAgentOldFacingDirection());
-		}
-		return check;
+		return this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection() == action.getAgentOldFacingDirection().getLeftDirection();
 	}
 
 	/**
@@ -160,68 +129,37 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 			agentLocation.getExclusiveWriteLock();
 
 			action.setAgentOldFacingDirection(agentLocation.getAgent().getFacingDirection());
-			// System.out.println(Thread.currentThread().getId() + "Local
-			// variable before turning right: " +
-			// agentLocation.getAgent().getFacingDirection());
-			// System.out.println(Thread.currentThread().getId() + "List
-			// variable before turning right: " +
-			// this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
 			agentLocation.getAgent().turnRight();
-			// System.out.println(Thread.currentThread().getId() + "Local
-			// variable after turning right: " +
-			// agentLocation.getAgent().getFacingDirection());
-			// System.out.println(Thread.currentThread().getId() + "List
-			// variable after turning right: " +
-			// this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection());
 
-			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context,
-					this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(),
-					this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
+			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context, this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(), this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
 			agentLocation.releaseExclusiveWriteLock();
 
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
-		} catch (Exception e) {
-			e.printStackTrace();
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		}
+		catch (Exception e) {
+			Utils.log(e);
 			this.activeAgents.remove(Thread.currentThread().getId());
 			releaseWriteLockIfNecessary(agentLocation);
-			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 	}
 
 	@Override
 	public synchronized boolean succeeded(TurnRightAction action, Space context) {
-		boolean check = this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection() == action
-				.getAgentOldFacingDirection().getRightDirection();
-
-		if (!check) {
-			Logger.getGlobal().log(Level.SEVERE,
-					Thread.currentThread().getId() + "FAILED: succeeded:TurnRightAction : List variable:"
-							+ this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection()
-							+ ", Local variable.getRight():" + action.getAgentOldFacingDirection().getRightDirection());
-
-			Logger.getGlobal().log(Level.SEVERE,
-					Thread.currentThread().getId() + "Furthermore, the old direction (from Local variable) was "
-							+ action.getAgentOldFacingDirection());
-		}
-		return check;
+		return this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection() == action.getAgentOldFacingDirection().getRightDirection();
 	}
 
 	@Override
 	public synchronized boolean isPossible(MoveAction action, Space context) {
-		AgentFacingDirection agentFacingDirection = this.activeAgents.get(Thread.currentThread().getId())
-				.getFacingDirection();
+		AgentFacingDirection agentFacingDirection = this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection();
 		VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 		VacuumWorldCoordinates originalCooridinates = agentLocation.getCoordinates();
-		VacuumWorldLocation targetLocation = ((VacuumWorldSpace) context).getFrontLocation(originalCooridinates,
-				agentFacingDirection);
+		VacuumWorldLocation targetLocation = ((VacuumWorldSpace) context).getFrontLocation(originalCooridinates, agentFacingDirection);
 
 		return !checkForWall(agentLocation, agentFacingDirection) && !checkForObstacle(targetLocation);
 	}
 
-	private synchronized boolean checkForWall(VacuumWorldLocation agentLocation,
-			AgentFacingDirection agentFacingDirection) {
+	private synchronized boolean checkForWall(VacuumWorldLocation agentLocation, AgentFacingDirection agentFacingDirection) {
 		return agentLocation.getNeighborLocation(agentFacingDirection) == VacuumWorldLocationType.WALL;
 	}
 
@@ -258,8 +196,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		VacuumWorldLocation targetLocation = null;
 
 		try {
-			AgentFacingDirection agentFacingDirection = this.activeAgents.get(Thread.currentThread().getId())
-					.getFacingDirection();
+			AgentFacingDirection agentFacingDirection = this.activeAgents.get(Thread.currentThread().getId()).getFacingDirection();
 			agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 			VacuumWorldCoordinates originalCooridinates = agentLocation.getCoordinates();
 			targetLocation = ((VacuumWorldSpace) context).getFrontLocation(originalCooridinates, agentFacingDirection);
@@ -273,35 +210,29 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 					.removeAgent();
 			targetLocation.addAgent(this.activeAgents.get(Thread.currentThread().getId()));
 			targetLocation.getAgent().setCurrentLocation(originalCooridinates.getNewCoordinates(agentFacingDirection));
-			this.activeAgents.get(Thread.currentThread().getId())
-					.setCurrentLocation(originalCooridinates.getNewCoordinates(agentFacingDirection));
+			this.activeAgents.get(Thread.currentThread().getId()).setCurrentLocation(originalCooridinates.getNewCoordinates(agentFacingDirection));
 
-			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context,
-					this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(),
-					this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
+			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context, this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(), this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
 			agentLocation.releaseExclusiveWriteLock();
 			targetLocation.releaseExclusiveWriteLock();
 
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		} catch (Exception e) {
-			e.printStackTrace();
+			Utils.log(e);
 			this.activeAgents.remove(Thread.currentThread().getId());
 			releaseWriteLockIfNecessary(agentLocation);
 			releaseWriteLockIfNecessary(targetLocation);
-			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			
+			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 	}
 
 	@Override
 	public synchronized boolean succeeded(MoveAction action, Space context) {
 		VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
-		VacuumWorldLocation agentOldLocation = (VacuumWorldLocation) ((EnvironmentalSpace) context)
-				.getLocation(action.getOldLocationCoordinates());
+		VacuumWorldLocation agentOldLocation = (VacuumWorldLocation) ((EnvironmentalSpace) context).getLocation(action.getOldLocationCoordinates());
 
-		return !(agentOldLocation.isAnAgentPresent())
-				&& this.activeAgents.get(Thread.currentThread().getId()).equals(agentLocation.getAgent());
+		return !(agentOldLocation.isAnAgentPresent()) && this.activeAgents.get(Thread.currentThread().getId()).equals(agentLocation.getAgent());
 	}
 
 	@Override
@@ -330,19 +261,16 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 
 			agentLocation.removeDirt();
 
-			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context,
-					this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(),
-					this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
+			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context, this.activeAgents.get(Thread.currentThread().getId()).getPerceptionRange(), this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
 			agentLocation.releaseExclusiveWriteLock();
 
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
-		} catch (Exception e) {
-			e.printStackTrace();
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		}
+		catch (Exception e) {
+			Utils.log(e);
 			this.activeAgents.remove(Thread.currentThread().getId());
 			releaseWriteLockIfNecessary(agentLocation);
-			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 	}
 
@@ -374,18 +302,16 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 
 			VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context, perceptionRange, canSeeBehind);
 
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
-		} catch (Exception e) {
-			e.printStackTrace();
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, newPerception, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		} 
+		catch (Exception e) {
+			Utils.log(e);
 			this.activeAgents.remove(Thread.currentThread().getId());
-			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null,
-					this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 	}
 
-	private synchronized VacuumWorldPerception perceive(VacuumWorldSpace context, int perceptionRange,
-			boolean canSeeBehind) {
+	private synchronized VacuumWorldPerception perceive(VacuumWorldSpace context, int perceptionRange, boolean canSeeBehind) {
 		VacuumWorldCleaningAgent current = this.activeAgents.get(Thread.currentThread().getId());
 		AgentFacingDirection direction = current.getFacingDirection();
 
@@ -399,8 +325,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return perceive(context, overheads);
 	}
 
-	private synchronized int getEasternOverhead(int perceptionRange, boolean canSeeBehind,
-			AgentFacingDirection direction) {
+	private synchronized int getEasternOverhead(int perceptionRange, boolean canSeeBehind, AgentFacingDirection direction) {
 		int baseOverhead = perceptionRange - 1;
 
 		if (!canSeeBehind && direction == AgentFacingDirection.WEST) {
@@ -410,8 +335,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return baseOverhead;
 	}
 
-	private synchronized int getWesternOverhead(int perceptionRange, boolean canSeeBehind,
-			AgentFacingDirection direction) {
+	private synchronized int getWesternOverhead(int perceptionRange, boolean canSeeBehind, AgentFacingDirection direction) {
 		int baseOverhead = perceptionRange - 1;
 
 		if (!canSeeBehind && direction == AgentFacingDirection.EAST) {
@@ -421,8 +345,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return baseOverhead;
 	}
 
-	private synchronized int getSouthernOverhead(int perceptionRange, boolean canSeeBehind,
-			AgentFacingDirection direction) {
+	private synchronized int getSouthernOverhead(int perceptionRange, boolean canSeeBehind, AgentFacingDirection direction) {
 		int baseOverhead = perceptionRange - 1;
 
 		if (!canSeeBehind && direction == AgentFacingDirection.NORTH) {
@@ -432,8 +355,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return baseOverhead;
 	}
 
-	private synchronized int getNorthernOverhead(int perceptionRange, boolean canSeeBehind,
-			AgentFacingDirection direction) {
+	private synchronized int getNorthernOverhead(int perceptionRange, boolean canSeeBehind, AgentFacingDirection direction) {
 		int baseOverhead = perceptionRange - 1;
 
 		if (!canSeeBehind && direction == AgentFacingDirection.SOUTH) {
@@ -452,8 +374,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return new VacuumWorldPerception(perception, currentCoordinates);
 	}
 
-	private synchronized Map<VacuumWorldCoordinates, VacuumWorldLocation> perceive(VacuumWorldSpace context,
-			int[] overheads, int currentX, int currentY) {
+	private synchronized Map<VacuumWorldCoordinates, VacuumWorldLocation> perceive(VacuumWorldSpace context, int[] overheads, int currentX, int currentY) {
 		Map<VacuumWorldCoordinates, VacuumWorldLocation> perception = new HashMap<>();
 
 		for (int i = currentX - overheads[2]; i <= currentX + overheads[3]; i++) {
@@ -518,8 +439,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	private synchronized void attemptEvent(VacuumWorldEvent event, VacuumWorldSpace context) {
 		Result result = event.attempt(this, context);
 		ActionResult code = ((DefaultActionResult) result).getActionResult();
-		MonitoringUpdateEvent ue = new MonitoringUpdateEvent(event.getAction(), event.getTimestamp(), event.getActor(),
-				code);
+		MonitoringUpdateEvent ue = new MonitoringUpdateEvent(event.getAction(), event.getTimestamp(), event.getActor(), code);
 		notifyObservers(ue, VacuumWorldMonitoringContainer.class);
 
 		if (result.getRecipientsIds() == null) {

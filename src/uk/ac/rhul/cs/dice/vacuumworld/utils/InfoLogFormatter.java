@@ -1,4 +1,4 @@
-package util;
+package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;

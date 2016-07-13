@@ -9,16 +9,14 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
-import util.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
   private EvaluationStrategy<?> strategy;
   private EnvironmentalAction nextAction = null;
-  //private Set<EnvironmentalAction> actions;
   private MonitoringResult perception;
 
   private Logger logger;
@@ -47,10 +45,10 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
   @Override
   public void execute(EnvironmentalAction action) {
     notifyObservers(nextAction, VacuumWorldMonitorBrain.class);
-    if (VacuumWorldServer.getCycleNumber() % 5 == 0
-        && VacuumWorldServer.getCycleNumber() != 0) {
+    if (Utils.getCycleNumber() % 5 == 0
+        && Utils.getCycleNumber() != 0) {
       Evaluation e = strategy.evaluate(null, 0,
-          VacuumWorldServer.getCycleNumber());
+          Utils.getCycleNumber());
       logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
     }
   }

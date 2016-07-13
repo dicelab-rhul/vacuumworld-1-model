@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.evaluatorObserver;
+package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer;
 
 import java.util.List;
 
@@ -14,12 +14,12 @@ import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgent;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 /**
  * The Vacuum World implementation of {@link ObserverAgent}. This {@link Agent}
@@ -69,7 +69,7 @@ public class VWObserverAgent extends ObserverAgent implements
   @Override
   public void updateCon(CustomObservable o, Object arg) {
     if (o instanceof VWObserverBrain && arg instanceof TotalPerceptionAction) {
-      MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) VacuumWorldServer.getCycleNumber(), this);
+      MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) Utils.getCycleNumber(), this);
       event.setActuatorRecipient(((VWObserverActuator) this.getActuators().get(
           this.getActionActuatorIndex())).getActuatorId());
       event.setSensorToCallBackId(((VWObserverSensor) this.getSensors().get(
