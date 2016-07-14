@@ -68,7 +68,7 @@ public class VacuumWorldServer implements Observer {
   private static int cycleNumber = 1;
 
   private final boolean loadBasicMonitor = false;
-  private final boolean loadEvaluatorObserver = true;
+  private final boolean loadEvaluatorObserver = false;
   private final Set<EnvironmentalAction> VACUUMWORLDACTIONS;
   
   private final Set<EnvironmentalAction> MONITORINGWORLDACTIONS;
@@ -104,7 +104,7 @@ public class VacuumWorldServer implements Observer {
 
   private void startServerFromFile() {
     try {
-      String filename = "state_example.json";
+      String filename = "test.json";
       VacuumWorldMonitoringContainer initialState = VacuumWorldParser
           .parseInitialState(filename);
       constructUniverseAndStart(initialState);
