@@ -45,7 +45,7 @@ public class VWObserverMind extends ObserverMind {
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		this.nextAction = (EnvironmentalAction) getAvailableActionsForThisCicle().toArray()[0];
+		this.nextAction = (EnvironmentalAction) getAvailableActionsForThisCycle().toArray()[0];
 		return this.nextAction;
 	}
 
@@ -86,7 +86,7 @@ public class VWObserverMind extends ObserverMind {
 
 	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
 		for (Class<? extends AbstractAction> action : actions) {
-			super.addAvailableActionForThisCicle(action);
+			super.addAvailableActionForThisCycle(action);
 		}
 	}
 }

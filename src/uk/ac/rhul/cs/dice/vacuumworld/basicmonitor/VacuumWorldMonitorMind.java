@@ -28,7 +28,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		this.nextAction = (EnvironmentalAction) getAvailableActionsForThisCicle().toArray()[0];
+		this.nextAction = (EnvironmentalAction) getAvailableActionsForThisCycle().toArray()[0];
 		return this.nextAction;
 	}
 
@@ -60,7 +60,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
 	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
 		for (Class<? extends AbstractAction> action : actions) {
-			addAvailableActionForThisCicle(action);
+			addAvailableActionForThisCycle(action);
 		}
 	}
 }
