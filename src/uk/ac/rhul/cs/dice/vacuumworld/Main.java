@@ -1,12 +1,12 @@
 package uk.ac.rhul.cs.dice.vacuumworld;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class Main {
-	private Main(){}
-	
+	private Main() {}
+
 	public static void main(String[] args) {
 		startModelServer();
 	}
@@ -14,9 +14,10 @@ public class Main {
 	private static void startModelServer() {
 		try {
 			VacuumWorldServer server = new VacuumWorldServer(13337);
-			server.startServer(true);
-		} catch (IOException e) {
-			Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
+			server.startServer("debug","state_example2.json");
+		}
+		catch (IOException e) {
+			Utils.log(e);
 		}
 	}
 }

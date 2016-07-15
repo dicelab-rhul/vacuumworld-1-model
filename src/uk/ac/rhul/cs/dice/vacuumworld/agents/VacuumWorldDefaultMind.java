@@ -1,230 +1,240 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldDefaultMind extends AbstractAgentMind {
-  
-  private int perceptionRange;
-  private boolean canSeeBehind;
-  
-  private Set<EnvironmentalAction> actions;
-  private ArrayList<EnvironmentalAction> availableActions;
-  
-  private Random rng;
-  private DefaultActionResult previousActionResult;
-  private EnvironmentalAction nextAction;
+	private int perceptionRange;
+	private boolean canSeeBehind;
 
-  public VacuumWorldDefaultMind() {
-    this.previousActionResult = null;
-    this.rng = new Random();
-  }
+	private Set<Class<? extends AbstractAction>> actions;
+	private List<Class<? extends EnvironmentalAction>> availableActions;
 
-  @Override
-  public void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldDefaultBrain && arg instanceof DefaultActionResult) {
-      //TODO do a correct check on arg type, it will always a perception from the brain
-      this.previousActionResult = (DefaultActionResult)arg;
-    }
-  }
+	private Random rng;
+	private List<DefaultActionResult> lastCyclePerceptions;
+	private EnvironmentalAction nextAction;
 
-  @Override
-  public void perceive(Object perceptionWrapper) {
-    notifyObservers(null, VacuumWorldDefaultBrain.class); //TODO change null to some action
-  }
+	public VacuumWorldDefaultMind() {
+		this.lastCyclePerceptions = new ArrayList<>();
+		this.rng = new Random();
+	}
+	
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldDefaultBrain && arg instanceof List<?>) {
+			for(Object result : (List<?>) arg) {
+				if(result instanceof DefaultActionResult) {
+					this.lastCyclePerceptions.add((DefaultActionResult) result);
+				}
+			}
+		}
+	}
 
-  @Override
-  public EnvironmentalAction decide(Object... parameters) {
-    availableActions = new ArrayList<>();
-    availableActions.addAll(actions);
-    if (this.previousActionResult == null) {
-      nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
-    } else if (this.previousActionResult instanceof VacuumWorldActionResult) {
-      nextAction = decideFromPerception((VacuumWorldActionResult) this.previousActionResult);
-    } else {
-      nextAction = decideMove();
-    }
-    return nextAction;
-  }
-  
-  @Override
-  public void execute(EnvironmentalAction action) {
-    notifyObservers(nextAction, VacuumWorldDefaultBrain.class);
-  }
+	@Override
+	public void perceive(Object perceptionWrapper) {
+		while(this.lastCyclePerceptions.isEmpty()) {
+			notifyObservers(null, VacuumWorldDefaultBrain.class);
+		}
+	}
 
-  private EnvironmentalAction decideFromPerception(
-      VacuumWorldActionResult previousActionResult) {
-    if (previousActionResult.getPerception() == null) {
-      return decideMove();
-    } else {
-      return decideMove(previousActionResult.getPerception());
-    }
-  }
+	@Override
+	public EnvironmentalAction decide(Object... parameters) {
+		this.availableActions = new ArrayList<>();
+		this.availableActions.addAll(this.actions);
+		
+		if (this.lastCyclePerceptions.isEmpty()) {
+			this.nextAction = new PerceiveAction(this.perceptionRange, this.canSeeBehind);
+		}
+		else {
+			this.nextAction = decideFromPerceptions();
+		}
+		
+		this.lastCyclePerceptions.clear();
+		
+		return this.nextAction;
+	}
 
-  private EnvironmentalAction decideMove(VacuumWorldPerception perception) {
-    if (perception != null) {
-      updateAvailableActions(perception);
-    }
-    return decideMove();
-  }
+	@Override
+	public void execute(EnvironmentalAction action) {
+		notifyObservers(this.nextAction, VacuumWorldDefaultBrain.class);
+	}
 
-  private EnvironmentalAction decideMove() {
-    int size = this.availableActions.size();
-    int randomNumber = rng.nextInt(size);
-    return availableActions.get(randomNumber);
-  }
+	private EnvironmentalAction decideFromPerceptions() {
+		//this completely ignores the speeches
+		
+		for(DefaultActionResult result : this.lastCyclePerceptions) {
+			if(result instanceof VacuumWorldActionResult) {
+				VacuumWorldPerception p = ((VacuumWorldActionResult) result).getPerception();
+				
+				if(p != null) {
+					return decideAction(p);
+				}
+			}
+		}
+		
+		return decideAction();
+	}
 
-  private void updateAvailableActions(VacuumWorldPerception perception) {
-    updateMoveActionIfNecessary(perception);
-    updateCleaningActionIfNecessary(perception);
-  }
+	private EnvironmentalAction decideAction(VacuumWorldPerception perception) {
+		if (perception != null) {
+			updateAvailableActions(perception);
+		}
+		return decideAction();
+	}
 
-  private void updateCleaningActionIfNecessary(VacuumWorldPerception perception) {
-    VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
-    VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(
-        agentCoordinates);
+	private EnvironmentalAction decideAction() {
+		int size = this.availableActions.size();
+		int randomNumber = this.rng.nextInt(size);
+		Class<? extends EnvironmentalAction> actionPrototype = this.availableActions.get(randomNumber);
 
-    if (agentLocation.isDirtPresent()) {
-      addCleanIfNecessary();
-    } else {
-      removeCleanIfNecessary();
-    }
-  }
+		return buildNewAction(actionPrototype);
+	}
 
-  private void removeCleanIfNecessary() {
-    List<CleanAction> toRemove = new ArrayList<>();
+	private EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
+		if (actionPrototype.equals(SpeechAction.class)) {
+			return buildSpeechAction();
+		} else {
+			return buildPhysicalAction(actionPrototype);
+		}
+	}
 
-    for (EnvironmentalAction a : this.availableActions) {
-      if (a instanceof CleanAction
-          || a.getClass().isAssignableFrom(CleanAction.class)) {
-        toRemove.add((CleanAction) a);
-      }
-    }
-    this.availableActions.removeAll(toRemove);
-  }
+	private EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+		try {
+			return actionPrototype.newInstance();
+		}
+		catch (Exception e) {
+			Utils.log(e);
+			return null;
+		}
+	}
 
-  private void addCleanIfNecessary() {
-    for (EnvironmentalAction a : this.availableActions) {
-      if (a instanceof CleanAction
-          || a.getClass().isAssignableFrom(CleanAction.class)) {
-        return;
-      }
-    }
-    this.availableActions.add(new CleanAction());
-  }
+	private SpeechAction buildSpeechAction() {
+		String senderId = null;
+		List<String> recipientsIds = getRecipientsIds();
+		VacuumWorldSpeechPayload payload = getPayload();
 
-  private void addMoveIfNecessary() {
-    for (EnvironmentalAction a : this.availableActions) {
-      if (a instanceof MoveAction
-          || a.getClass().isAssignableFrom(MoveAction.class)) {
-        return;
-      }
-    }
+		try {
+			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
+			return constructor.newInstance(senderId, recipientsIds, payload);
+		} 
+		catch (Exception e) {
+			Utils.log(e);
+			return null;
+		}
+	}
 
-    this.availableActions.add(new MoveAction());
-  }
+	private VacuumWorldSpeechPayload getPayload() {
+		// TODO implement this
+		return null;
+	}
 
-  private void removeMoveIfNecessary() {
-    List<MoveAction> toRemove = new ArrayList<>();
+	private List<String> getRecipientsIds() {
+		// TODO implement this
+		return null;
+	}
 
-    for (EnvironmentalAction a : this.availableActions) {
-      if (a instanceof MoveAction
-          || a.getClass().isAssignableFrom(MoveAction.class)) {
-        toRemove.add((MoveAction) a);
-      }
-    }
+	private void updateAvailableActions(VacuumWorldPerception perception) {
+		updateMoveActionIfNecessary(perception);
+		updateCleaningActionIfNecessary(perception);
+	}
 
-    this.availableActions.removeAll(toRemove);
-  }
+	private void updateCleaningActionIfNecessary(VacuumWorldPerception perception) {
+		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
 
-  private void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
-    VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
-    VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(
-        agentCoordinates);
-    VacuumWorldCleaningAgent agent = agentLocation.getAgent();
+		if (agentLocation.isDirtPresent()) {
+			addCleanIfNecessary();
+		} else {
+			removeCleanIfNecessary();
+		}
+	}
 
-    if (agent != null) {
-      AgentFacingDirection facingDirection = agent.getFacingDirection();
+	private void removeCleanIfNecessary() {
+		List<Class<CleanAction>> toRemove = new ArrayList<>();
 
-      if (agentLocation.getNeighborLocation(facingDirection) == VacuumWorldLocationType.WALL) {
-        removeMoveIfNecessary();
-      } else {
-        addMoveIfNecessary();
-      }
-    }
-  }
-  
-  public void setAvailableActions(Set<EnvironmentalAction> actions) {
-    this.actions = actions;
-  }
-  
-  public void setCanSeeBehind(boolean canSeeBehind) {
-    this.canSeeBehind = canSeeBehind;
-  }
-  
-  public void setPerceptionRange(int preceptionRange) {
-    this.perceptionRange = preceptionRange;
-  }
-  
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result
-        + ((availableActions == null) ? 0 : availableActions.hashCode());
-    result = prime * result + (canSeeBehind ? 1231 : 1237);
-    result = prime * result
-        + ((nextAction == null) ? 0 : nextAction.hashCode());
-    result = prime * result + perceptionRange;
-    result = prime
-        * result
-        + ((previousActionResult == null) ? 0 : previousActionResult.hashCode());
-    return result;
-  }
+		for (Class<? extends EnvironmentalAction> a : this.availableActions) {
+			if (a.getClass().isAssignableFrom(CleanAction.class)) {
+				toRemove.add(CleanAction.class);
+			}
+		}
+		this.availableActions.removeAll(toRemove);
+	}
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (!super.equals(obj))
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    VacuumWorldDefaultMind other = (VacuumWorldDefaultMind) obj;
-    if (availableActions == null) {
-      if (other.availableActions != null)
-        return false;
-    } else if (!availableActions.equals(other.availableActions))
-      return false;
-    if (canSeeBehind != other.canSeeBehind)
-      return false;
-    if (nextAction == null) {
-      if (other.nextAction != null)
-        return false;
-    } else if (!nextAction.equals(other.nextAction))
-      return false;
-    if (perceptionRange != other.perceptionRange)
-      return false;
-    if (previousActionResult == null) {
-      if (other.previousActionResult != null)
-        return false;
-    } else if (!previousActionResult.equals(other.previousActionResult))
-      return false;
-    return true;
-  }
+	private void addCleanIfNecessary() {
+		for (Class<? extends EnvironmentalAction> a : this.availableActions) {
+			if (a.getClass().isAssignableFrom(CleanAction.class)) {
+				return;
+			}
+		}
+		this.availableActions.add(CleanAction.class);
+	}
+
+	private void addMoveIfNecessary() {
+		for (Class<? extends EnvironmentalAction> a : this.availableActions) {
+			if (a.getClass().isAssignableFrom(MoveAction.class)) {
+				return;
+			}
+		}
+		this.availableActions.add(MoveAction.class);
+	}
+
+	private void removeMoveIfNecessary() {
+		List<Class<MoveAction>> toRemove = new ArrayList<>();
+
+		for (Class<? extends EnvironmentalAction> a : this.availableActions) {
+			if (a.getClass().isAssignableFrom(MoveAction.class)) {
+				toRemove.add(MoveAction.class);
+			}
+		}
+		this.availableActions.removeAll(toRemove);
+	}
+
+	private void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
+		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
+		VacuumWorldCleaningAgent agent = agentLocation.getAgent();
+
+		if (agent != null) {
+			AgentFacingDirection facingDirection = agent.getFacingDirection();
+
+			if (agentLocation.getNeighborLocation(facingDirection) == VacuumWorldLocationType.WALL) {
+				removeMoveIfNecessary();
+			} else {
+				addMoveIfNecessary();
+			}
+		}
+	}
+
+	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
+		this.actions = actions;
+	}
+
+	public void setCanSeeBehind(boolean canSeeBehind) {
+		this.canSeeBehind = canSeeBehind;
+	}
+
+	public void setPerceptionRange(int preceptionRange) {
+		this.perceptionRange = preceptionRange;
+	}
 }

@@ -50,9 +50,6 @@ public class PerceiveAction extends SensingAction {
 	
 	@Override
 	public String toString() {
-	  return "{" + this.getClass().getSimpleName() + ":" + this.getPerceptionRange() + ":" + this.canAgentSeeBehind() + "}";
+		return "{" + this.getClass().getSimpleName() + ":" + this.getPerceptionRange() + ":" + this.canAgentSeeBehind() + "}";
 	}
-	
-	
-	
 }

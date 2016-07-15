@@ -1,25 +1,24 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorMind;
-import util.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldAgentThreadManager extends Observable {
-  private final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
-  private final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
-  private final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
+  protected final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
+  protected final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
+  protected final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
 
-  private boolean simulationStarted = false;
+  protected boolean simulationStarted = false;
 
-  private Set<Thread> activeThreads;
+  protected Set<Thread> activeThreads;
 
-  private Set<AgentRunnable> cleaningRunnables;
-  private Set<AgentRunnable> monitorRunnables;
+  protected Set<AgentRunnable> cleaningRunnables;
+  protected Set<AgentRunnable> monitorRunnables;
 
   public VacuumWorldAgentThreadManager() {
     this.activeThreads = new HashSet<>();
@@ -29,44 +28,36 @@ public class VacuumWorldAgentThreadManager extends Observable {
 
   public void start() {
     this.simulationStarted = true;
-    System.out.println("START");
-    doMonitors(); // let monitors get the initial state
+    //Utils.log("START");
     cycle();
   }
 
-  private void cycle() {
-
+  protected void cycle() {
+    boolean doPerceive = false;
     while (this.simulationStarted) {
       Utils.log("START CYCLE");
-      doCleaners();
-      doMonitors();
-      // next cycle!
+      doCycleStep(this.monitorRunnables);
+      doCycleStep(this.cleaningRunnables, doPerceive);
+
       Utils.log("NEXT CYCLE!! \n \n \n \n");
+      doPerceive = true;
       this.notifyObservers();
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+
+      Utils.doWait(1000);
     }
   }
 
-  private void doMonitors() {
-    doPerceive(this.monitorRunnables);
-    // Utils.log("Monitoring perceive phase complete");
-    doDecide(this.monitorRunnables);
-    // Utils.log("Monitoring deciding phase complete");
-    doExecute(this.monitorRunnables);
-    // Utils.log("Monitoring execute phase complete");
-  }
+  protected void doCycleStep(Set<AgentRunnable> agentsRunnables,
+      boolean... flags) {
+    boolean doPerceive = true;
 
-  private void doCleaners() {
-    doPerceive(this.cleaningRunnables);
-    // Utils.log("Cleaning perceive phase complete");
-    doDecide(this.cleaningRunnables);
-    // Utils.log("Cleaning decide phase complete");
-    doExecute(this.cleaningRunnables);
-    // Utils.log("Cleaning execute phase complete");
+    if (flags.length > 0) {
+      doPerceive = flags[0];
+    }
+
+    doPerceive(agentsRunnables, doPerceive);
+    doDecide(agentsRunnables);
+    doExecute(agentsRunnables);
   }
 
   @Override
@@ -75,19 +66,21 @@ public class VacuumWorldAgentThreadManager extends Observable {
     super.notifyObservers();
   }
 
-  private void doDecide(Set<AgentRunnable> runnables) {
+  protected void doDecide(Set<AgentRunnable> runnables) {
     doPhase(this.threadStateDecide, runnables);
   }
 
-  private void doExecute(Set<AgentRunnable> runnables) {
+  protected void doExecute(Set<AgentRunnable> runnables) {
     doPhase(this.threadStateExecute, runnables);
   }
 
-  private void doPerceive(Set<AgentRunnable> runnables) {
-    doPhase(this.threadStatePerceive, runnables);
+  protected void doPerceive(Set<AgentRunnable> runnables, boolean doPerceive) {
+    if (doPerceive) {
+      doPhase(this.threadStatePerceive, runnables);
+    }
   }
 
-  private void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
+  protected void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
     buildThreads(runnables);
     setNextPhase(state, runnables);
     startAllThreads();
@@ -101,27 +94,23 @@ public class VacuumWorldAgentThreadManager extends Observable {
   }
 
   private void setNextPhase(ThreadState state, Set<AgentRunnable> runnables) {
-    Iterator<AgentRunnable> iter = runnables.iterator();
-    while (iter.hasNext()) {
-      iter.next().setState(state);
+    for (AgentRunnable runnable : runnables) {
+      runnable.setState(state);
     }
   }
 
   private void buildThreads(Set<AgentRunnable> runnables) {
     this.activeThreads.clear();
+
     for (AgentRunnable a : runnables) {
       this.activeThreads.add(new Thread(a));
     }
   }
 
   private void waitForAllThreads() {
-    //Utils.log("Manager waiting...");
-
     while (checkAlive()) {
       continue;
     }
-
-    //Utils.log("... threads finished!");
   }
 
   private boolean checkAlive() {
@@ -139,13 +128,14 @@ public class VacuumWorldAgentThreadManager extends Observable {
       throw new IllegalThreadStateException(
           "Cannot add a new agent at runtime.");
     }
+
     if (runnable.getAgent() instanceof DatabaseAgentMind
         || runnable.getAgent() instanceof VacuumWorldMonitorMind) {
-      System.out.println("Adding monitoring runnable");
-      monitorRunnables.add(runnable);
+      // Utils.log("Adding monitoring runnable");
+      this.monitorRunnables.add(runnable);
     } else {
-      System.out.println("Adding cleaning runnable");
-      cleaningRunnables.add(runnable);
+      // Utils.log("Adding cleaning runnable");
+      this.cleaningRunnables.add(runnable);
     }
   }
 }

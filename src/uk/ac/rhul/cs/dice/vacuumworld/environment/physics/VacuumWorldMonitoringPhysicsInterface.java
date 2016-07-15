@@ -5,10 +5,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 
 public interface VacuumWorldMonitoringPhysicsInterface {
-  
-  public boolean isPossible(TotalPerceptionAction action, Space context);
-  public boolean isNecessary(TotalPerceptionAction action, Space context);
-  public Result perform(TotalPerceptionAction action, Space context);
-  public boolean succeeded(TotalPerceptionAction action, Space context);
-  
+	public boolean isPossible(TotalPerceptionAction action, Space context);
+	public boolean isNecessary(TotalPerceptionAction action, Space context);
+	public Result perform(TotalPerceptionAction action, Space context);
+	public boolean succeeded(TotalPerceptionAction action, Space context);
 }

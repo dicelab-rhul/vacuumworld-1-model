@@ -1,5 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
+import java.util.List;
+
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
@@ -19,36 +21,19 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation
  *
  */
 public class MonitoringResult extends DefaultActionResult {
+	private VacuumWorldSpaceRepresentation representation;
 
-  private VacuumWorldSpaceRepresentation representation;
+	public MonitoringResult(ActionResult result, Exception failureReason, List<String> recipientsIds, VacuumWorldSpaceRepresentation representation) {
+		super(result, failureReason, recipientsIds);
+		this.representation = representation;
+	}
 
-  /**
-   * Constructor.
-   * 
-   * @param result
-   *          of the {@link TotalPerceptionAction} that was performed
-   * @param failureReason
-   *          the exception that was thrown if this
-   *          {@link TotalPerceptionAction} {@link ActionResult#ACTION_FAILED
-   *          failed} or was {@link ActionResult#ACTION_IMPOSSIBLE impossible}
-   * @param recipientId
-   *          the id of {@link ObserverAgent} that performed the action -
-   *          allowing this result to be sent back correctly
-   * @param representation
-   *          the perception that was made
-   */
-  public MonitoringResult(ActionResult result, Exception failureReason,
-      String recipientId, VacuumWorldSpaceRepresentation representation) {
-    super(result, failureReason, recipientId);
-    this.representation = representation;
-  }
+	public Perception getPerception() {
+		return this.representation;
+	}
 
-  public Perception getPerception() {
-    return representation;
-  }
-
-  @Override
-  public String toString() {
-    return this.getClass().getSimpleName();
-  }
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName();
+	}
 }
