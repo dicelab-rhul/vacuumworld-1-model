@@ -46,7 +46,7 @@ public class VWObserverMind extends ObserverMind {
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 	  try {
-      this.nextAction = getAvailableActionsForThisCicle().get(0).newInstance();
+      this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
     } catch (InstantiationException | IllegalAccessException e) {
       e.printStackTrace();
     }
@@ -90,7 +90,7 @@ public class VWObserverMind extends ObserverMind {
 
 	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
 		for (Class<? extends AbstractAction> action : actions) {
-			super.addAvailableActionForThisCicle(action);
+			super.addAvailableActionForThisCycle(action);
 		}
 	}
 }

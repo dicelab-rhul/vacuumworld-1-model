@@ -32,7 +32,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		try {
-      this.nextAction = getAvailableActionsForThisCicle().get(0).newInstance();
+      this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
     } catch (InstantiationException | IllegalAccessException e ) {
       e.printStackTrace();
     }
@@ -68,7 +68,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
 	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
 		for (Class<? extends AbstractAction> action : actions) {
-			addAvailableActionForThisCicle(action);
+			addAvailableActionForThisCycle(action);
 		}
 	}
 }
