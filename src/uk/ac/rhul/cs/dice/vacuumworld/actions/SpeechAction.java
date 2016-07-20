@@ -9,9 +9,9 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 
-public class SpeechAction extends CommunicationAction {
+public class SpeechAction extends CommunicationAction<String> {
 
-	public SpeechAction(String senderId, List<String> recipientsIds, Payload payload) {
+	public SpeechAction(String senderId, List<String> recipientsIds, Payload<String> payload) {
 		super(senderId, recipientsIds, payload);
 	}
 

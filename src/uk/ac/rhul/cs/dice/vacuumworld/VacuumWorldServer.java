@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
@@ -71,13 +72,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 public class VacuumWorldServer implements Observer {
 
   /* Control */
-  private static final boolean LOAD_BASIC_MONITOR = false;
-  private static final boolean LOAD_OBSERVER = true;
+  private static final boolean LOAD_BASIC_MONITOR = true;
+  private static final boolean LOAD_OBSERVER = false;
   private static final boolean LOAD_EVALUATOR = false;
-  private static final boolean LOAD_EVALUATOR_OBSERVER = LOAD_OBSERVER || LOAD_EVALUATOR;
+  private static final boolean LOAD_EVALUATOR_OBSERVER = LOAD_OBSERVER
+      || LOAD_EVALUATOR;
   public static final boolean LOG = false;
   public static final boolean PRINTMAP = true;
-  
+
   private static final String DATABASENAME = "VacuumWorld";
   private static final String COLLECTIONNAME = "collection";
   private final Set<Class<? extends AbstractAction>> vacuumWorldActions;
@@ -201,13 +203,15 @@ public class VacuumWorldServer implements Observer {
   }
 
   private void startSimulation(VacuumWorldMonitoringContainer container) {
-    List<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace()
+    Set<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace()
         .getAgents();
 
-    for (VacuumWorldCleaningAgent agent : agents) {
-      setUpVacuumWorldCleaningAgent(agent);
-    }
-
+    agents.forEach(new Consumer<VacuumWorldCleaningAgent>() {
+      @Override
+      public void accept(VacuumWorldCleaningAgent agent) {
+        setUpVacuumWorldCleaningAgent(agent);
+      }
+    });
     // START!
     this.threadManager.addObserver(this);
     this.threadManager.start();
@@ -404,7 +408,6 @@ public class VacuumWorldServer implements Observer {
     ((VacuumWorldAppearance) this.universe.getAppearance())
         .updateRepresentation((VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe
             .getState()).getSubContainerSpace());
-
-    Utils.log(this.universe.getAppearance().represent());
+    System.out.println(this.universe.getAppearance().represent());
   }
 }

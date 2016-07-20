@@ -147,15 +147,20 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   }
 
   private void manageAction(EnvironmentalAction a, AgentRepresentation agent) {
-    if (a instanceof CleanAction) {
-      manageClean(agent);
-    } else if (a instanceof MoveAction) {
-      manageMove(agent);
-    } else if (a instanceof TurningAction) {
-      manageTurn(a, agent);
-    } else if (a instanceof SpeechAction) {
+    if (a instanceof SpeechAction) {
       manageSpeechAction((SpeechAction) a, agent);
+    } else {
+      //There is no last speech action
+      agent.setLastSpeechAction(null);
+      if (a instanceof CleanAction) {
+        manageClean(agent);
+      } else if (a instanceof MoveAction) {
+        manageMove(agent);
+      } else if (a instanceof TurningAction) {
+        manageTurn(a, agent);
+      }
     }
+    
   }
 
   private void manageSpeechAction(SpeechAction a, AgentRepresentation agent) {

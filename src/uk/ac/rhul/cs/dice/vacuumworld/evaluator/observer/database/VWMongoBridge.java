@@ -122,10 +122,10 @@ public class VWMongoBridge extends AbstractMongoBridge {
         // TODO payload needs a representation for the database!
         this.connector.pushToList(
             collectionRep.getCollectionName(),
-            "speechList",
             value.get_id(),
+            "speechList",
             createNewSpeechObject(
-                value.getLastSpeechAction().getPayload().toString(),
+                value.getLastSpeechAction().getPayload().getPayload(),
                 Utils.getCycleNumber(),
                 value.getLastSpeechAction().getRecipientsIds()
                     .toArray(new String[] {})),
