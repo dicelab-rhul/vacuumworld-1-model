@@ -40,11 +40,10 @@ public class VacuumWorldAgentThreadExperimentManager extends
     }
     
     StringBuilder builder = new StringBuilder();
-    builder.append(testCase + "\n");
+    builder.append(testCase + " ");
     for(int j = 0; j < pdeTimes.size(); j++) {
       long[] v = pdeTimes.get(j);
-      builder.append("P:" + v[0] + " D:" + v[1] + " E:" + v[2] + "\n");
-      System.out.println("P:" + v[0] + " D:" + v[1] + " E:" + v[2]);
+      builder.append((v[0] + v[1] + v[2]) + " ");
     }
     Logger log = Utils.fileLogger("logs/test/results.txt", true);
     log.info(builder.toString());

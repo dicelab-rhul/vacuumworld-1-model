@@ -181,7 +181,7 @@ public class VacuumWorldParser {
     Double[] dimensions = new Double[] { (double) 1, (double) 1 };
     String name = "Dirt";
     DirtAppearance appearance = new DirtAppearance(name, dimensions, type);
-
+    
     return new Dirt(appearance);
   }
 

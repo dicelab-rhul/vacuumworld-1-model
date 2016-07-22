@@ -19,6 +19,7 @@ public class AgentAwarenessRepresentation {
     this.myactuatorids = myactuatorids;
     this.myEars = myEars;
     this.myEyes = myEyes;
+    this.type = type;
   }
 
   public String getMyid() {

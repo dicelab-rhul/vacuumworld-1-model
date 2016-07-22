@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
@@ -58,8 +61,37 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
         new ArrayList<>());
     this.sensorsToNotify.get(Thread.currentThread().getId()).add(
         ((VacuumWorldEvent) event).getSensorToCallBackId());
-
-    return event.getAction().attempt(this, context);
+    
+    // we always need to return a perception it is handled here!
+    Result r = event.getAction().attempt(this, context);
+    VacuumWorldActionResult result = null;
+    if(r instanceof VacuumWorldActionResult) {
+      result = (VacuumWorldActionResult) r;
+    } else if (r instanceof VacuumWorldSpeechPerceptionResultWrapper) {
+      doPerceptionAndSensorIds(((VacuumWorldSpeechPerceptionResultWrapper)r).getPerceptionResult(), context);
+      return r;
+    } else if (r instanceof DefaultActionResult) {
+      //this is usually the case when an fail/impossible
+      result = new VacuumWorldActionResult((DefaultActionResult)r);
+    } else {
+      Logger.getGlobal().log(Level.SEVERE, "An unknown Result has been encountered in VacuumWorldPhysics: " + r.getClass());
+    }
+    doPerceptionAndSensorIds(result, context);
+    return result;
+    
+  }
+  
+  private void doPerceptionAndSensorIds(VacuumWorldActionResult result, Space context) {
+    VacuumWorldPerception newPerception = perceive((VacuumWorldSpace) context,
+        this.activeAgents.get(Thread.currentThread().getId())
+            .getPerceptionRange(),
+        this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
+    result.setPerception(newPerception);
+    // if an action failed or was impossible then we still need the id to send
+    // back
+    if (!result.getActionResult().equals(ActionResult.ACTION_DONE)) {
+      result.setRecipientsIds(this.sensorsToNotify.get(Thread.currentThread().getId()));
+    }
   }
 
   private synchronized VacuumWorldLocation getCurrentActorLocation(
@@ -94,21 +126,14 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     try {
       agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
       agentLocation.getExclusiveWriteLock();
-
       action.setAgentOldFacingDirection(agentLocation.getAgent()
           .getFacingDirection());
       agentLocation.getAgent().turnLeft();
-
-      VacuumWorldPerception newPerception = perceive(
-          (VacuumWorldSpace) context,
-          this.activeAgents.get(Thread.currentThread().getId())
-              .getPerceptionRange(),
-          this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
       agentLocation.releaseExclusiveWriteLock();
 
-      return new VacuumWorldActionResult(ActionResult.ACTION_DONE,
-          newPerception, this.sensorsToNotify.get(Thread.currentThread()
-              .getId()));
+      return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null,
+          this.sensorsToNotify.get(Thread.currentThread().getId()));
+
     } catch (Exception e) {
       Utils.log(e);
       this.activeAgents.remove(Thread.currentThread().getId());
@@ -145,21 +170,14 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     try {
       agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
       agentLocation.getExclusiveWriteLock();
-
       action.setAgentOldFacingDirection(agentLocation.getAgent()
           .getFacingDirection());
       agentLocation.getAgent().turnRight();
-
-      VacuumWorldPerception newPerception = perceive(
-          (VacuumWorldSpace) context,
-          this.activeAgents.get(Thread.currentThread().getId())
-              .getPerceptionRange(),
-          this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
       agentLocation.releaseExclusiveWriteLock();
 
-      return new VacuumWorldActionResult(ActionResult.ACTION_DONE,
-          newPerception, this.sensorsToNotify.get(Thread.currentThread()
-              .getId()));
+      return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null,
+          this.sensorsToNotify.get(Thread.currentThread().getId()));
+
     } catch (Exception e) {
       Utils.log(e);
       this.activeAgents.remove(Thread.currentThread().getId());
@@ -253,18 +271,12 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
           originalCooridinates.getNewCoordinates(agentFacingDirection));
       this.activeAgents.get(Thread.currentThread().getId()).setCurrentLocation(
           originalCooridinates.getNewCoordinates(agentFacingDirection));
-
-      VacuumWorldPerception newPerception = perceive(
-          (VacuumWorldSpace) context,
-          this.activeAgents.get(Thread.currentThread().getId())
-              .getPerceptionRange(),
-          this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
       agentLocation.releaseExclusiveWriteLock();
       targetLocation.releaseExclusiveWriteLock();
 
-      return new VacuumWorldActionResult(ActionResult.ACTION_DONE,
-          newPerception, this.sensorsToNotify.get(Thread.currentThread()
-              .getId()));
+      return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null,
+          this.sensorsToNotify.get(Thread.currentThread().getId()));
+
     } catch (Exception e) {
       Utils.log(e);
       this.activeAgents.remove(Thread.currentThread().getId());
@@ -310,19 +322,11 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
     try {
       agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
       agentLocation.getExclusiveWriteLock();
-
       agentLocation.removeDirt();
-
-      VacuumWorldPerception newPerception = perceive(
-          (VacuumWorldSpace) context,
-          this.activeAgents.get(Thread.currentThread().getId())
-              .getPerceptionRange(),
-          this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
       agentLocation.releaseExclusiveWriteLock();
 
-      return new VacuumWorldActionResult(ActionResult.ACTION_DONE,
-          newPerception, this.sensorsToNotify.get(Thread.currentThread()
-              .getId()));
+      return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null,
+          this.sensorsToNotify.get(Thread.currentThread().getId()));
     } catch (Exception e) {
       Utils.log(e);
       this.activeAgents.remove(Thread.currentThread().getId());
@@ -335,13 +339,9 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   @Override
   public synchronized boolean succeeded(CleanAction action, Space context) {
     VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
-
     return !(agentLocation.isDirtPresent());
   }
 
-  /**
-   * A perceiving action is always possible.
-   */
   @Override
   public synchronized boolean isPossible(PerceiveAction action, Space context) {
     return true;
@@ -355,15 +355,13 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   @Override
   public synchronized Result perform(PerceiveAction action, Space context) {
     try {
-      int perceptionRange = action.getPerceptionRange();
-      boolean canSeeBehind = action.canAgentSeeBehind();
+      /*
+       * Perceptions will be added by the attempt methods in this class. This
+       * method essentially does nothing.
+       */
 
-      VacuumWorldPerception newPerception = perceive(
-          (VacuumWorldSpace) context, perceptionRange, canSeeBehind);
-
-      return new VacuumWorldActionResult(ActionResult.ACTION_DONE,
-          newPerception, this.sensorsToNotify.get(Thread.currentThread()
-              .getId()));
+      return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null,
+          this.sensorsToNotify.get(Thread.currentThread().getId()));
     } catch (Exception e) {
       Utils.log(e);
       this.activeAgents.remove(Thread.currentThread().getId());
@@ -488,45 +486,48 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
 
   @Override
   public Result perform(SpeechAction action, Space context) {
-    VacuumWorldSpeechActionResult r = new VacuumWorldSpeechActionResult(
-        ActionResult.ACTION_DONE, action);
-    ArrayList<String> sensorids = new ArrayList<String>();
-    VacuumWorldSpace space = (VacuumWorldSpace) context;
-    if (r.getRecipientsIds() == null || r.getRecipientsIds().isEmpty()) {
-      // send to everyone
-      space.getAgents().forEach(new Consumer<VacuumWorldCleaningAgent>() {
-        @Override
-        public void accept(VacuumWorldCleaningAgent agent) {
-          String sensorId = ((VacuumWorldDefaultSensor) agent.getSensors().get(
-              agent.getActionResultSensorIndex())).getSensorId();
-          if (!agent.getId().equals(r.getSender())) {
-            sensorids.add(sensorId);
-          }
-        }
-      });
-      r.setRecipientsIds(sensorids);
-    } else {
-      // convert the agent ids to their sensors ids that should be notified
-      action.getRecipientsIds().forEach(new Consumer<String>() {
-        @Override
-        public void accept(String t) {
-          VacuumWorldCleaningAgent agent = space.getAgentById(t);
-          sensorids.add(((VacuumWorldDefaultSensor) agent.getSensors().get(
-              agent.getActionResultSensorIndex())).getSensorId());
-        }
-      });
-      r.setRecipientsIds(sensorids);
-    }
-    VacuumWorldPerception newPerception = perceive(
-        (VacuumWorldSpace) context,
-        this.activeAgents.get(Thread.currentThread().getId())
-            .getPerceptionRange(),
-        this.activeAgents.get(Thread.currentThread().getId()).canSeeBehind());
+    try {
 
-    VacuumWorldActionResult ar = new VacuumWorldActionResult(ActionResult.ACTION_DONE,
-        newPerception, this.sensorsToNotify.get(Thread.currentThread()
-            .getId()));
-    return new VacuumWorldSpeechPerceptionResultWrapper(r, ar);
+      VacuumWorldSpeechActionResult r = new VacuumWorldSpeechActionResult(
+          ActionResult.ACTION_DONE, action);
+      ArrayList<String> sensorids = new ArrayList<String>();
+      VacuumWorldSpace space = (VacuumWorldSpace) context;
+      if (r.getRecipientsIds() == null || r.getRecipientsIds().isEmpty()) {
+        // send to everyone
+        space.getAgents().forEach(new Consumer<VacuumWorldCleaningAgent>() {
+          @Override
+          public void accept(VacuumWorldCleaningAgent agent) {
+            String sensorId = ((VacuumWorldDefaultSensor) agent.getSensors()
+                .get(agent.getActionResultSensorIndex())).getSensorId();
+            if (!agent.getId().equals(r.getSender())) {
+              sensorids.add(sensorId);
+            }
+          }
+        });
+        r.setRecipientsIds(sensorids);
+      } else {
+        // convert the agent ids to their sensors ids that should be notified
+        action.getRecipientsIds().forEach(new Consumer<String>() {
+          @Override
+          public void accept(String t) {
+            VacuumWorldCleaningAgent agent = space.getAgentById(t);
+            sensorids.add(((VacuumWorldDefaultSensor) agent.getSensors().get(
+                agent.getActionResultSensorIndex())).getSensorId());
+          }
+        });
+        r.setRecipientsIds(sensorids);
+      }
+
+      VacuumWorldActionResult ar = new VacuumWorldActionResult(
+          ActionResult.ACTION_DONE, null, this.sensorsToNotify.get(Thread
+              .currentThread().getId()));
+      return new VacuumWorldSpeechPerceptionResultWrapper(r, ar);
+    } catch (Exception e) {
+      Utils.log(e);
+      this.activeAgents.remove(Thread.currentThread().getId());
+      return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null,
+          this.sensorsToNotify.get(Thread.currentThread().getId()));
+    }
   }
 
   @Override
@@ -555,16 +556,10 @@ public class VacuumWorldPhysics extends AbstractPhysics implements
   private synchronized void attemptEvent(VacuumWorldEvent event,
       VacuumWorldSpace context) {
     Result result = event.attempt(this, context);
-    ActionResult code = ((Result) result).getActionResult(); //changed DefaultActionResult to result
+    ActionResult code = ((Result) result).getActionResult();
     MonitoringUpdateEvent ue = new MonitoringUpdateEvent(event.getAction(),
         event.getTimestamp(), event.getActor(), code);
     notifyObservers(ue, VacuumWorldMonitoringContainer.class);
-    if (result.getRecipientsIds() == null
-        || result.getRecipientsIds().isEmpty()) {
-      // result.setRecipientsIds(this.sensorsToNotify.get(Thread.currentThread()
-      // .getId()));
-      System.out.println("DIDNT SUPPLY VALID SENSOR ID TO NOTIFY BACK!");
-    }
 
     this.activeAgents.remove(Thread.currentThread().getId());
     this.sensorsToNotify.remove(Thread.currentThread().getId());

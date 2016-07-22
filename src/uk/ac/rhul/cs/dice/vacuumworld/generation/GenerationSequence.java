@@ -8,7 +8,7 @@ public class GenerationSequence {
 
   private int[] sizes;
   private int[] agents;
-  
+
   private HashMap<Integer, String> directoryMap = new HashMap<>();
   private HashMap<Integer, String> fileNameMap = new HashMap<>();
   private HashSet<File> completeFilePaths = new HashSet<>();
@@ -37,8 +37,7 @@ public class GenerationSequence {
       int size) {
     File f = new File(filePath + getDirName(size) + getFileName(agents));
     completeFilePaths.add(f);
-    gen.generate(f,
-        size, size, agents, calculateNumDirts(size));
+    gen.generate(f, size, size, agents, calculateNumDirts(size));
   }
 
   private void generateDirectories(String path) {

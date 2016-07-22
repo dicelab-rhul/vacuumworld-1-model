@@ -250,7 +250,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
   }
   
   private void manageSpeechActionResult(VacuumWorldSpeechPerceptionResultWrapper wrapper) {
-    System.out.println("MANAGING SPEECH");
     List<String> recipientSensors = wrapper.getSpeechResult().getRecipientsIds();
     List<String> senderSensor = wrapper.getRecipientsIds();
     
@@ -259,7 +258,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
     }
     
     for(String ss : senderSensor) {
-      System.out.println("SENDING PERCEPTION");
       notifyAgentSensor(wrapper.getPerceptionResult(), ss);
     }
   }

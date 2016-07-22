@@ -25,7 +25,7 @@ public class Generator {
   private final String AGENT = "agent";
   private final String[] DIRECTIONS = new String[] { "north", "south", "east",
       "west" };
-  private final String[] COLORS = new String[] { "orange", "green", "white" };
+  private final String[] COLORS = new String[] { "orange", "green"};
 
   public Generator() {
   }

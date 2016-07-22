@@ -67,13 +67,11 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
     VacuumWorldActionResult result = null;
     for (DefaultActionResult r : this.getLastCyclePerceptions()) {
       if (r instanceof VacuumWorldSpeechActionResult) {
-        VacuumWorldSpeechActionResult s = (VacuumWorldSpeechActionResult) r;
-        System.out.println(me.getMyid() + " Recieved: "
-            + s.getClass().getSimpleName() + " : " + s.getSender() + ", "
-            + s.getPayload().getPayload());
+        //VacuumWorldSpeechActionResult s = (VacuumWorldSpeechActionResult) r;
+        //System.out.println(me.getMyid() + " Recieved: "
+           // + s.getClass().getSimpleName() + " : " + s.getSender() + ", "
+           // + s.getPayload().getPayload());
       } else if (r instanceof VacuumWorldActionResult) {
-        System.out.println(r.getClass().getSimpleName() + ":"
-            + r.getActionResult());
         result = (VacuumWorldActionResult) r;
       }
     }
@@ -90,7 +88,6 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 
   private EnvironmentalAction decideFromSpacePerception(
       VacuumWorldPerception perception) {
-    System.out.println("DECIDING FROM PERCEPTION");
     // clean if we are on some dirt!
     EnvironmentalAction a = cleanAction(perception);
     if (a != null) {
@@ -112,7 +109,6 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
         .getPerceivedMap().entrySet().iterator();
     while (iter.hasNext()) {
       Entry<VacuumWorldCoordinates, VacuumWorldLocation> ent = iter.next();
-
       if (ent.getValue().isAnAgentPresent()) {
         String id = (String) ent.getValue().getAgent().getId();
         if (me.getMyid().equals(id)) {

@@ -78,7 +78,7 @@ public class VacuumWorldServer implements Observer {
   private static final boolean LOAD_EVALUATOR_OBSERVER = LOAD_OBSERVER
       || LOAD_EVALUATOR;
   public static final boolean LOG = false;
-  public static final boolean PRINTMAP = true;
+  public static final boolean PRINTMAP = false;
 
   private static final String DATABASENAME = "VacuumWorld";
   private static final String COLLECTIONNAME = "collection";
@@ -92,7 +92,7 @@ public class VacuumWorldServer implements Observer {
   private VacuumWorldAgentThreadManager threadManager;
 
   private ExperimentConnector tester;
-  private final int TESTCYCLES = 10;
+  private final int TESTCYCLES = 100;
 
   public VacuumWorldServer(int port) throws IOException {
     this.server = new ServerSocket(port);
@@ -109,11 +109,35 @@ public class VacuumWorldServer implements Observer {
     this.monitoringWorldActions.add(TotalPerceptionAction.class);
   }
 
-  public void test() {
+  public void startServer(String[] args) {
+    if (args[0].equals(Main.TEST)) {
+      test(args);
+    } else {
+      this.threadManager = new VacuumWorldAgentThreadManager();
+      if (args[0].equals(Main.DEBUG)) {
+        startServerFromFile(args[1]);
+      } else {
+        startServer();
+      }
+    }
+  }
+  
+  public boolean checkTestArgs(String[] args, String toCheck) {
+    for(int i = 1; i < args.length; i++) {
+      if(args[i].equals(toCheck)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public void test(String[] args) {
     try {
       threadManager = new VacuumWorldAgentThreadExperimentManager(TESTCYCLES);
       tester = new ExperimentConnector();
-      tester.generateTestFiles();
+      if(checkTestArgs(args, Main.GENERATEFILES)) {
+        tester.generateTestFiles();
+      }
       HashSet<File> files = tester.getFilePaths();
       Iterator<File> iter = files.iterator();
       while (iter.hasNext()) {
@@ -128,20 +152,6 @@ public class VacuumWorldServer implements Observer {
     } catch (ConfigFileException e) {
       e.printStackTrace();
     }
-  }
-
-  public void startServer(String arg, String fileName) {
-    if (arg.equals("test")) {
-      test();
-    } else {
-      this.threadManager = new VacuumWorldAgentThreadManager();
-      if (arg.equals("debug")) {
-        startServerFromFile(fileName);
-      } else {
-        startServer();
-      }
-    }
-
   }
 
   private void startServerFromFile(String fileName) {

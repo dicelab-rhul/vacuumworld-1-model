@@ -35,7 +35,7 @@
       "agent": {
         "id": "89cb0dbe-ba2d-4bf9-ad62-80383ae99be1",
         "name": "agent2",
-        "color": "east",
+        "color": "green",
         "sensors": 2,
         "actuators": 2,
         "width": 1,

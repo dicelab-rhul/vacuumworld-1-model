@@ -131,7 +131,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   }
 
   private void manageSubContainerMessage(MonitoringUpdateEvent event) {
-    Utils.log("MESSAGE FROM SUBCONTAINER! : " + event.represent());
+    //Utils.log("MESSAGE FROM SUBCONTAINER! : " + event.represent());
     if (VacuumWorldServer.LOG) {
       this.logger.info(event.getAction() + ":" + event.getResult());
     }
