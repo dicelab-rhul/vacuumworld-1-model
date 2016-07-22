@@ -78,7 +78,7 @@ public class VacuumWorldServer implements Observer {
   private static final boolean LOAD_EVALUATOR_OBSERVER = LOAD_OBSERVER
       || LOAD_EVALUATOR;
   public static final boolean LOG = false;
-  public static final boolean PRINTMAP = false;
+  public static final boolean PRINTMAP = true;
 
   private static final String DATABASENAME = "VacuumWorld";
   private static final String COLLECTIONNAME = "collection";
