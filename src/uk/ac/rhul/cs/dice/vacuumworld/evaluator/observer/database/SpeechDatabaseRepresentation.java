@@ -1,16 +1,14 @@
 package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database;
 
 public class SpeechDatabaseRepresentation {
-
+  
+  public final static String ALLRECIPIENTS = "A";
   private String payload;
-  private int cycle;
   private String[] recipients;
 
-  public SpeechDatabaseRepresentation(String payload, int cycle,
-      String[] recipients) {
+  public SpeechDatabaseRepresentation(String payload, String[] recipients) {
     super();
     this.payload = payload;
-    this.cycle = cycle;
     this.recipients = recipients;
   }
 
@@ -26,14 +24,6 @@ public class SpeechDatabaseRepresentation {
     this.payload = payload;
   }
 
-  public int getCycle() {
-    return cycle;
-  }
-
-  public void setCycle(int cycle) {
-    this.cycle = cycle;
-  }
-
   public String[] getRecipients() {
     return recipients;
   }
@@ -41,5 +31,4 @@ public class SpeechDatabaseRepresentation {
   public void setRecipients(String[] recipients) {
     this.recipients = recipients;
   }
-
 }

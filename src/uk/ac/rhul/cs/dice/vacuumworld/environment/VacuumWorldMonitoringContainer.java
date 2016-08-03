@@ -1,9 +1,11 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +56,17 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
     this.monitoringAgents = new ArrayList<>();
     this.vacuumWorldSpaceRepresentation = new VacuumWorldSpaceRepresentation();
     if (VacuumWorldServer.LOG) {
-      this.logger = Utils.fileLogger("logs/eval/container.log", true);
+      File lck = new File("logs/eval/container.log.lck");
+      File log = new File("logs/eval/container.log");
+      try {
+        if(lck.exists()) {
+          Files.delete(lck.toPath());
+          Files.delete(log.toPath());
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      this.logger = Utils.fileLogger(log.getPath(), true);
     }
   }
 
@@ -131,9 +143,9 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
   }
 
   private void manageSubContainerMessage(MonitoringUpdateEvent event) {
-    //Utils.log("MESSAGE FROM SUBCONTAINER! : " + event.represent());
     if (VacuumWorldServer.LOG) {
-      this.logger.info(event.getAction() + ":" + event.getResult());
+      Utils.log("MESSAGE FROM SUBCONTAINER! : " + event.represent());
+      this.logger.info(event.getAction().getClass().getSimpleName() + ":" + event.getResult() + ":" + event.getActor().toString());
     }
 
     if (event.getResult().equals(ActionResult.ACTION_DONE)) {
@@ -150,7 +162,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
     if (a instanceof SpeechAction) {
       manageSpeechAction((SpeechAction) a, agent);
     } else {
-      //There is no last speech action
+      // There is no last speech action
       agent.setLastSpeechAction(null);
       if (a instanceof CleanAction) {
         manageClean(agent);
@@ -160,7 +172,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
         manageTurn(a, agent);
       }
     }
-    
+
   }
 
   private void manageSpeechAction(SpeechAction a, AgentRepresentation agent) {
@@ -247,39 +259,41 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
     Collection<Location> locations = this.subContainerSpace.getLocations();
 
     for (Location location : locations) {
-      Random rand = new Random();
-
       if (location instanceof VacuumWorldLocation) {
-        createVacuumWorldSpaceRepresentation((VacuumWorldLocation) location,
-            rand);
+        createVacuumWorldSpaceRepresentation((VacuumWorldLocation) location);
       }
     }
   }
 
-  private void createVacuumWorldSpaceRepresentation(
-      VacuumWorldLocation location, Random rand) {
+  private void createVacuumWorldSpaceRepresentation(VacuumWorldLocation location) {
     checkForAgent(location);
-    checkForObstacle(location, rand);
+    checkForObstacle(location);
   }
 
-  private void checkForObstacle(VacuumWorldLocation location, Random rand) {
+  private void checkForObstacle(VacuumWorldLocation location) {
     if (location.isDirtPresent()) {
       Dirt dirt = location.getDirt();
-      checkForDirt(dirt, location, rand);
+      checkForDirt(dirt, location);
     }
   }
 
-  private void checkForDirt(Dirt dirt, VacuumWorldLocation location, Random rand) {
+  private void checkForDirt(Dirt dirt, VacuumWorldLocation location) {
     if (dirt != null) {
+
       this.vacuumWorldSpaceRepresentation.getDirts().put(
           new VacuumWorldCoordinates(location.getCoordinates().getX(), location
               .getCoordinates().getY()),
-          new DirtRepresentation(String.valueOf(rand.nextLong()),
+          new DirtRepresentation(generateDirtId(location.getCoordinates()
+              .getX(), location.getCoordinates().getY()),
               ((DirtAppearance) dirt.getExternalAppearance()).getDirtType()));
     } else {
       Utils.log(Level.SEVERE, "CANNOT REPRESENT: " + location.getObstacle()
           + "IN " + VacuumWorldSpaceRepresentation.class.getSimpleName());
     }
+  }
+
+  private String generateDirtId(int x, int y) {
+    return "d_" + String.valueOf(x)+String.valueOf(y);
   }
 
   private void checkForAgent(VacuumWorldLocation location) {

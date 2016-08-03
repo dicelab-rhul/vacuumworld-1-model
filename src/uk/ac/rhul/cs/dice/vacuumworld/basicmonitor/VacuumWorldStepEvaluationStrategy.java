@@ -61,7 +61,7 @@ public class VacuumWorldStepEvaluationStrategy implements
     } else if (checkSpeak(id, rep)) {
     } else if (checkClean(id, rep)) {
     } else {
-      this.evaluations.getEvaluations().get(id).incIdle();
+      this.evaluations.getEvaluations().get(id).incIdle(1);
     }
     replaceLastAgentState(id, rep);
   }
@@ -78,7 +78,7 @@ public class VacuumWorldStepEvaluationStrategy implements
     if (rep.getLastSpeechAction().equals(this.lastAgentStates.get(id).lastSpeechAction)) {
       return false;
     } else {
-      this.evaluations.getEvaluations().get(id).incTotalSpeechActions();
+      this.evaluations.getEvaluations().get(id).incTotalSpeechActions(1);
       return true;
     }
   }
@@ -87,7 +87,7 @@ public class VacuumWorldStepEvaluationStrategy implements
     SimpleAgentRepresentation srep = this.lastAgentStates.get(id);
 
     if (rep.getX() != srep.x || rep.getY() != srep.y) {
-      this.evaluations.getEvaluations().get(id).incMoves();
+      this.evaluations.getEvaluations().get(id).incMoves(1);
       return true;
     } else {
       return false;
@@ -99,7 +99,7 @@ public class VacuumWorldStepEvaluationStrategy implements
       // A turn has not been done
       return false;
     } else {
-      this.evaluations.getEvaluations().get(id).incTurns();
+      this.evaluations.getEvaluations().get(id).incTurns(1);
       return true;
     }
   }
@@ -108,10 +108,10 @@ public class VacuumWorldStepEvaluationStrategy implements
     if (!rep.isClean()) {
       return false;
     } else if (rep.isSuccessfulClean()) {
-      this.evaluations.getEvaluations().get(id).incDirtsCleaned();
+      this.evaluations.getEvaluations().get(id).incDirtsCleaned(1);
       return true;
     } else {
-      this.evaluations.getEvaluations().get(id).incFailedCleans();
+      this.evaluations.getEvaluations().get(id).incIdle(1);
       return true;
     }
   }

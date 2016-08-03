@@ -89,5 +89,4 @@ public class VacuumWorldAgentThreadExperimentManager extends
   public void setTestCase(String testCase) {
     this.testCase = testCase;
   }
-
 }

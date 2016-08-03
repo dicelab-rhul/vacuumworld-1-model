@@ -131,10 +131,8 @@ public class VacuumWorldAgentThreadManager extends Observable {
 
     if (runnable.getAgent() instanceof DatabaseAgentMind
         || runnable.getAgent() instanceof VacuumWorldMonitorMind) {
-      // Utils.log("Adding monitoring runnable");
       this.monitorRunnables.add(runnable);
     } else {
-      // Utils.log("Adding cleaning runnable");
       this.cleaningRunnables.add(runnable);
     }
   }
