@@ -21,7 +21,7 @@ public class Main {
 	private static void startModelServer() {
 		try {
 			VacuumWorldServer server = new VacuumWorldServer(13337);
-			server.startServer(new String[]{TEST});
+			server.startServer(new String[]{DEBUG, EXAMPLEFILE});
 		}
 		catch (IOException e) {
 			Utils.log(e);

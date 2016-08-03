@@ -74,12 +74,12 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 public class VacuumWorldServer implements Observer {
 
   /* Control */
-  private static final boolean LOAD_BASIC_MONITOR = false;
-  private static final boolean LOAD_OBSERVER = true;
-  private static final boolean LOAD_EVALUATOR = true;
+  private static final boolean LOAD_BASIC_MONITOR = true;
+  private static final boolean LOAD_OBSERVER = false;
+  private static final boolean LOAD_EVALUATOR = false;
 
   public static final boolean LOG = false;
-  public static final boolean PRINTMAP = false;
+  public static final boolean PRINTMAP = true;
   
   private static final String DATABASENAME = "VacuumWorld";
   private static final String DATABASEADDRESS = "localhost";
