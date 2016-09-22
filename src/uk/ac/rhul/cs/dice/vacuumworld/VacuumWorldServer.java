@@ -2,7 +2,6 @@ package uk.ac.rhul.cs.dice.vacuumworld;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -119,13 +118,20 @@ public class VacuumWorldServer implements Observer {
 	public void startServer(String[] args) throws ClassNotFoundException, HandshakeException {
 		if (args[0].equals(Main.TEST)) {
 			test(args);
-		} else {
-			this.threadManager = new VacuumWorldAgentThreadManager();
-			if (args[0].equals(Main.DEBUG)) {
-				startServerFromFile(args[1]);
-			} else {
-				startServer();
-			}
+		} 
+		else {
+			startWithoutTest(args);
+		}
+	}
+
+	private void startWithoutTest(String[] args) throws ClassNotFoundException, HandshakeException {
+		this.threadManager = new VacuumWorldAgentThreadManager();
+		
+		if (args[0].equals(Main.DEBUG)) {
+			startServerFromFile(args[1]);
+		}
+		else {
+			startServer();
 		}
 	}
 
@@ -140,19 +146,19 @@ public class VacuumWorldServer implements Observer {
 
 	public void test(String[] args) {
 		try {
-			threadManager = new VacuumWorldAgentThreadExperimentManager(TESTCYCLES);
-			tester = new ExperimentConnector();
+			this.threadManager = new VacuumWorldAgentThreadExperimentManager(TESTCYCLES);
+			this.tester = new ExperimentConnector();
 			if (checkTestArgs(args, Main.GENERATEFILES)) {
-				tester.generateTestFiles();
+				this.tester.generateTestFiles();
 			}
-			HashSet<File> files = tester.getFilePaths();
+			HashSet<File> files = this.tester.getFilePaths();
 			Iterator<File> iter = files.iterator();
 			while (iter.hasNext()) {
 				File f = iter.next();
 				String name = f.getParent() + "\\" + f.getName();
-				((VacuumWorldAgentThreadExperimentManager) threadManager).setTestCase(name);
+				((VacuumWorldAgentThreadExperimentManager) this.threadManager).setTestCase(name);
 				startServerFromFile(f.getAbsolutePath());
-				((VacuumWorldAgentThreadExperimentManager) threadManager).clear();
+				((VacuumWorldAgentThreadExperimentManager) this.threadManager).clear();
 				System.gc();
 			}
 		} catch (ConfigFileException e) {
@@ -196,6 +202,7 @@ public class VacuumWorldServer implements Observer {
 
 		Object codeFromController = i.readObject();
 		Handshake.attemptHanshakeWithController(candidate, codeFromController);
+		
 		return candidate;
 	}
 
@@ -209,8 +216,7 @@ public class VacuumWorldServer implements Observer {
 		initialState.getPhysics().setMonitoredContainerPhysics(physics);
 		int[] dimensions = initialState.getSubContainerSpace().getDimensions();
 		Map<SpaceCoordinates, Double[]> dimensionsMap = createDimensionsMap(dimensions);
-		VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld", dimensionsMap,
-				initialState.getSubContainerSpace());
+		VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld", dimensionsMap, initialState.getSubContainerSpace());
 		this.universe = new VacuumWorldUniverse(initialState, this.vacuumWorldActions, null, null, appearance);
 
 		prepareAndStartSimulation();
@@ -240,9 +246,17 @@ public class VacuumWorldServer implements Observer {
 				setUpVacuumWorldCleaningAgent(agent);
 			}
 		});
+		
+		startListeningService();
+		
 		// START!
 		this.threadManager.addObserver(this);
 		this.threadManager.start();
+	}
+
+	private void startListeningService() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
