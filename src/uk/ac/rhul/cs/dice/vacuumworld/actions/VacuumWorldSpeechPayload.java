@@ -2,16 +2,21 @@ package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
 
-public class VacuumWorldSpeechPayload implements Payload {
-	private Object payload;
-	
-	@Override
-	public void setPayload(Object payload) {
-		this.payload = payload;
-	}
+public class VacuumWorldSpeechPayload implements Payload<String> {
 
-	@Override
-	public Object getPayload() {
-		return this.payload;
-	}
+  private String payload;
+  
+  public VacuumWorldSpeechPayload(String payload) {
+    this.payload = payload;
+  }
+
+  @Override
+  public void setPayload(String payload) {
+    this.payload = payload;
+  }
+
+  @Override
+  public String getPayload() {
+    return this.payload;
+  }
 }

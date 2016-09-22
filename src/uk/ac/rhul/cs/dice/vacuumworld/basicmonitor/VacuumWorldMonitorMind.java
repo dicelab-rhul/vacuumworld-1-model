@@ -9,6 +9,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
+import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
@@ -23,19 +24,24 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
 	public VacuumWorldMonitorMind(VacuumWorldStepEvaluationStrategy strategy) {
 		this.strategy = strategy;
-		this.logger = Utils.fileLogger("evaluation.log");
+		if(VacuumWorldServer.LOG) {
+		  this.logger = Utils.fileLogger("logs/eval/evaluation.log", false);
+		}
 	}
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		this.nextAction = (EnvironmentalAction) getAvailableActionsForThisCycle().toArray()[0];
+		try {
+      this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
+    } catch (InstantiationException | IllegalAccessException e ) {
+      e.printStackTrace();
+    }
 		return this.nextAction;
 	}
 
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, VacuumWorldMonitorBrain.class);
-		
 		if (this.perception != null) {
 			this.strategy.update(((VacuumWorldSpaceRepresentation) (this.perception).getPerception()).clone());
 		}
@@ -47,7 +53,9 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 		
 		if (Utils.getCycleNumber() % 5 == 0 && Utils.getCycleNumber() != 0) {
 			Evaluation e = this.strategy.evaluate(null, 0, Utils.getCycleNumber());
-			this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
+			if(VacuumWorldServer.LOG) {
+			  this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
+			}
 		}
 	}
 

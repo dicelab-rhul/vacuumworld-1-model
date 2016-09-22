@@ -19,7 +19,16 @@ public class VacuumWorldActionResult extends DefaultActionResult {
 		this.perception = perception;
 	}
 	
+	public VacuumWorldActionResult(DefaultActionResult replace) {
+	  super(replace.getActionResult(), replace.getFailureReason(), null);
+	  this.perception = null;
+	}
+	
 	public VacuumWorldPerception getPerception() {
 		return this.perception;
+	}
+	
+	public void setPerception(VacuumWorldPerception perception) {
+	  this.perception = perception;
 	}
 }

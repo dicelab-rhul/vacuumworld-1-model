@@ -13,7 +13,6 @@ import uk.ac.rhul.cs.dice.monitor.agents.AgentClassModel;
 import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgent;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverAgent;
 import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
-import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
@@ -48,8 +47,6 @@ public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentIn
 	 *            agent
 	 * @param database
 	 *            that will be used in the {@link DatabaseAgent}
-	 * @param collectionRepresentation
-	 *            that will be used in {@link DatabaseAgent}
 	 * @param brainObserver
 	 *            the class of the {@link Brain} that will interact with this
 	 *            agent
@@ -58,9 +55,8 @@ public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentIn
 	 *            with this agent
 	 */
 	public VWObserverAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators,
-			VWObserverMind mind, VWObserverBrain brain, AgentClassModel classModel, AbstractMongoBridge database,
-			CollectionRepresentation collectionRepresentation) {
-		super(appearance, sensors, actuators, mind, brain, classModel, database, collectionRepresentation);
+			VWObserverMind mind, VWObserverBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
+		super(appearance, sensors, actuators, mind, brain, classModel, database);
 	}
 
 	@Override

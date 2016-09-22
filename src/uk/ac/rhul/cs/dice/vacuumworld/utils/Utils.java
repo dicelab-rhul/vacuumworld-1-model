@@ -11,12 +11,12 @@ public class Utils {
 	
 	private Utils(){}
 	
-	public static final Logger fileLogger(String file) {
+	public static final Logger fileLogger(String file, boolean append) {
 		FileHandler fileHandler = null;
 		Logger logger = null;
 		
 		try {
-			fileHandler = new FileHandler(file);
+			fileHandler = new FileHandler(file, append);
 			logger = Logger.getAnonymousLogger();
 			fileHandler.setFormatter(new InfoLogFormatter());
 			logger.addHandler(fileHandler);

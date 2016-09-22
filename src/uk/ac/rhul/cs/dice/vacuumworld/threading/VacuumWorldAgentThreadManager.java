@@ -9,132 +9,131 @@ import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldAgentThreadManager extends Observable {
-	private final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
-	private final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
-	private final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
+  protected final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
+  protected final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
+  protected final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
 
-	private boolean simulationStarted = false;
+  protected boolean simulationStarted = false;
 
-	private Set<Thread> activeThreads;
+  protected Set<Thread> activeThreads;
 
-	private Set<AgentRunnable> cleaningRunnables;
-	private Set<AgentRunnable> monitorRunnables;
+  protected Set<AgentRunnable> cleaningRunnables;
+  protected Set<AgentRunnable> monitorRunnables;
 
-	public VacuumWorldAgentThreadManager() {
-		this.activeThreads = new HashSet<>();
-		this.cleaningRunnables = new HashSet<>();
-		this.monitorRunnables = new HashSet<>();
-	}
+  public VacuumWorldAgentThreadManager() {
+    this.activeThreads = new HashSet<>();
+    this.cleaningRunnables = new HashSet<>();
+    this.monitorRunnables = new HashSet<>();
+  }
 
-	public void start() {
-		this.simulationStarted = true;
-		Utils.log("START");
-		cycle();
-	}
+  public void start() {
+    this.simulationStarted = true;
+    //Utils.log("START");
+    cycle();
+  }
 
-	private void cycle() {
-		boolean doPerceive = false;
-		
-		while (this.simulationStarted) {
-			Utils.log("START CYCLE");
-			doCycleStep(this.monitorRunnables);
-			doCycleStep(this.cleaningRunnables, doPerceive);
-			
-			Utils.log("NEXT CYCLE!! \n \n \n \n");
-			doPerceive = true;
-			this.notifyObservers();
-			
-			Utils.doWait(1000);
-		}
-	}
-	
-	private void doCycleStep(Set<AgentRunnable> agentsRunnables, boolean... flags) {
-		boolean doPerceive = true;
-		
-		if(flags.length > 0) {
-			doPerceive = flags[0];
-		}
-		
-		doPerceive(agentsRunnables, doPerceive);
-		doDecide(agentsRunnables);
-		doExecute(agentsRunnables);
-	}
+  protected void cycle() {
+    boolean doPerceive = false;
+    while (this.simulationStarted) {
+      Utils.log("START CYCLE");
+      doCycleStep(this.monitorRunnables);
+      doCycleStep(this.cleaningRunnables, doPerceive);
 
-	@Override
-	public void notifyObservers() {
-		setChanged();
-		super.notifyObservers();
-	}
+      Utils.log("NEXT CYCLE!! \n \n \n \n");
+      doPerceive = true;
+      this.notifyObservers();
 
-	private void doDecide(Set<AgentRunnable> runnables) {
-		doPhase(this.threadStateDecide, runnables);
-	}
+      Utils.doWait(1000);
+    }
+  }
 
-	private void doExecute(Set<AgentRunnable> runnables) {
-		doPhase(this.threadStateExecute, runnables);
-	}
+  protected void doCycleStep(Set<AgentRunnable> agentsRunnables,
+      boolean... flags) {
+    boolean doPerceive = true;
 
-	private void doPerceive(Set<AgentRunnable> runnables, boolean doPerceive) {
-		if(doPerceive) {
-			doPhase(this.threadStatePerceive, runnables);
-		}
-	}
+    if (flags.length > 0) {
+      doPerceive = flags[0];
+    }
 
-	private void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
-		buildThreads(runnables);
-		setNextPhase(state, runnables);
-		startAllThreads();
-		waitForAllThreads();
-	}
+    doPerceive(agentsRunnables, doPerceive);
+    doDecide(agentsRunnables);
+    doExecute(agentsRunnables);
+  }
 
-	private void startAllThreads() {
-		for (Thread t : this.activeThreads) {
-			t.start();
-		}
-	}
+  @Override
+  public void notifyObservers() {
+    setChanged();
+    super.notifyObservers();
+  }
 
-	private void setNextPhase(ThreadState state, Set<AgentRunnable> runnables) {
-		for(AgentRunnable runnable : runnables) {
-			runnable.setState(state);
-		}
-	}
+  protected void doDecide(Set<AgentRunnable> runnables) {
+    doPhase(this.threadStateDecide, runnables);
+  }
 
-	private void buildThreads(Set<AgentRunnable> runnables) {
-		this.activeThreads.clear();
-		
-		for (AgentRunnable a : runnables) {
-			this.activeThreads.add(new Thread(a));
-		}
-	}
+  protected void doExecute(Set<AgentRunnable> runnables) {
+    doPhase(this.threadStateExecute, runnables);
+  }
 
-	private void waitForAllThreads() {
-		while (checkAlive()) {
-			continue;
-		}
-	}
+  protected void doPerceive(Set<AgentRunnable> runnables, boolean doPerceive) {
+    if (doPerceive) {
+      doPhase(this.threadStatePerceive, runnables);
+    }
+  }
 
-	private boolean checkAlive() {
-		for (Thread t : this.activeThreads) {
-			if (t.isAlive()) {
-				return true;
-			}
-		}
+  protected void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
+    buildThreads(runnables);
+    setNextPhase(state, runnables);
+    startAllThreads();
+    waitForAllThreads();
+  }
 
-		return false;
-	}
+  private void startAllThreads() {
+    for (Thread t : this.activeThreads) {
+      t.start();
+    }
+  }
 
-	public void addAgent(AgentRunnable runnable) {
-		if (this.simulationStarted) {
-			throw new IllegalThreadStateException("Cannot add a new agent at runtime.");
-		}
-		
-		if (runnable.getAgent() instanceof DatabaseAgentMind || runnable.getAgent() instanceof VacuumWorldMonitorMind) {
-			Utils.log("Adding monitoring runnable");
-			this.monitorRunnables.add(runnable);
-		}
-		else {
-			Utils.log("Adding cleaning runnable");
-			this.cleaningRunnables.add(runnable);
-		}
-	}
+  private void setNextPhase(ThreadState state, Set<AgentRunnable> runnables) {
+    for (AgentRunnable runnable : runnables) {
+      runnable.setState(state);
+    }
+  }
+
+  private void buildThreads(Set<AgentRunnable> runnables) {
+    this.activeThreads.clear();
+
+    for (AgentRunnable a : runnables) {
+      this.activeThreads.add(new Thread(a));
+    }
+  }
+
+  private void waitForAllThreads() {
+    while (checkAlive()) {
+      continue;
+    }
+  }
+
+  private boolean checkAlive() {
+    for (Thread t : this.activeThreads) {
+      if (t.isAlive()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public void addAgent(AgentRunnable runnable) {
+    if (this.simulationStarted) {
+      throw new IllegalThreadStateException(
+          "Cannot add a new agent at runtime.");
+    }
+
+    if (runnable.getAgent() instanceof DatabaseAgentMind
+        || runnable.getAgent() instanceof VacuumWorldMonitorMind) {
+      this.monitorRunnables.add(runnable);
+    } else {
+      this.cleaningRunnables.add(runnable);
+    }
+  }
 }

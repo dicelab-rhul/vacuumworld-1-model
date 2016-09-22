@@ -12,92 +12,105 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
 /**
  * The representation of a {@link Dirt} in a MongoDB. Converting an instance of
  * this class to and from JSON Strings using {@link ObjectMapper} is how the
- * MongoDB communicates {@link Dirt} data with {@link VWMongoBridge}. </br>
- * See also: {@link DirtRepresentation}. Implements (@link RefinedPerception} as
- * this class will be a part of the {@link Perception} of an
- * {@link EvaluatorAgent}.
+ * MongoDB communicates {@link Dirt} data with {@link VacuumWorldMongoBridge}.
+ * </br> See also: {@link DirtRepresentation}. Implements (@link
+ * RefinedPerception} as this class will be a part of the {@link Perception} of
+ * an {@link EvaluatorAgent}.
  * 
  * @author Ben Wilkins
  *
  */
 public class DirtDatabaseRepresentation implements RefinedPerception {
-	private String id;
-	private DirtType type;
-	private int x;
-	private int y;
-	private int startCycle;
-	private int endCycle;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param id
-	 *            the id of the dirt
-	 * @param type
-	 *            the {@link DirtType} of the dirt
-	 * @param x
-	 *            position
-	 * @param y
-	 *            position
-	 * @param startCycle
-	 *            the cycle that the dirt was created
-	 * @param endCycle
-	 *            the cycle that the dirt was cleaned
-	 */
-	public DirtDatabaseRepresentation(String id, DirtType type, int x, int y, int startCycle, int endCycle) {
-		this.id = id;
-		this.type = type;
-		this.x = x;
-		this.y = y;
-		this.startCycle = startCycle;
-		this.endCycle = endCycle;
-	}
+  // IMPORTANT TO KEEP variable names as are for JSON generation!
+  private String _id;
+  private DirtType type;
+  private int x;
+  private int y;
+  private int startCycle;
+  private int endCycle;
 
-	public DirtType getType() {
-		return this.type;
-	}
+  /**
+   * Constructor
+   * 
+   * @param id
+   *          the id of the dirt
+   * @param type
+   *          the {@link DirtType} of the dirt
+   * @param x
+   *          position
+   * @param y
+   *          position
+   * @param startCycle
+   *          the cycle that the dirt was created
+   * @param endCycle
+   *          the cycle that the dirt was cleaned
+   */
+  public DirtDatabaseRepresentation(String _id, DirtType type, int x, int y,
+      int startCycle, int endCycle) {
+    this._id = _id;
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.startCycle = startCycle;
+    this.endCycle = endCycle;
+  }
 
-	public void setType(DirtType type) {
-		this.type = type;
-	}
+  public DirtDatabaseRepresentation() {
+    super();
+  }
 
-	public int getX() {
-		return this.x;
-	}
+  public DirtType getType() {
+    return this.type;
+  }
 
-	public void setX(int x) {
-		this.x = x;
-	}
+  public void setType(DirtType type) {
+    this.type = type;
+  }
 
-	public int getY() {
-		return this.y;
-	}
+  public int getX() {
+    return this.x;
+  }
 
-	public void setY(int y) {
-		this.y = y;
-	}
+  public void setX(int x) {
+    this.x = x;
+  }
 
-	public int getStartCycle() {
-		return this.startCycle;
-	}
+  public int getY() {
+    return this.y;
+  }
 
-	public void setStartCycle(int startCycle) {
-		this.startCycle = startCycle;
-	}
+  public void setY(int y) {
+    this.y = y;
+  }
 
-	public int getEndCycle() {
-		return this.endCycle;
-	}
+  public int getStartCycle() {
+    return this.startCycle;
+  }
 
-	public void setEndCycle(int endCycle) {
-		this.endCycle = endCycle;
-	}
+  public void setStartCycle(int startCycle) {
+    this.startCycle = startCycle;
+  }
 
-	public String getId() {
-		return this.id;
-	}
+  public int getEndCycle() {
+    return this.endCycle;
+  }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+  public void setEndCycle(int endCycle) {
+    this.endCycle = endCycle;
+  }
+
+  public String get_id() {
+    return this._id;
+  }
+
+  public void set_id(String _id) {
+    this._id = _id;
+  }
+
+  @Override
+  public String toString() {
+    return this._id + " : " + type + " [Start:" + startCycle + ", End: "
+        + endCycle + "]";
+  }
 }

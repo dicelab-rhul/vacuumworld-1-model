@@ -1,7 +1,9 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
+import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.AgentDatabaseRepresentation;
 
 /**
@@ -27,6 +29,7 @@ public class AgentRepresentation implements Cloneable {
   private AgentFacingDirection direction;
   private int x;
   private int y;
+  private SpeechAction lastSpeechAction;
 
   /**
    * Constructor.
@@ -138,6 +141,15 @@ public class AgentRepresentation implements Cloneable {
         this.actuators, this.direction, this.x, this.y);
     rep.setClean(this.isClean());
     rep.setSuccessfulClean(this.isSuccessfulClean());
+    rep.setLastSpeechAction(this.lastSpeechAction);
     return rep;
+  }
+
+  public SpeechAction getLastSpeechAction() {
+    return lastSpeechAction;
+  }
+
+  public void setLastSpeechAction(SpeechAction lastSpeechAction) {
+    this.lastSpeechAction = lastSpeechAction;
   }
 }

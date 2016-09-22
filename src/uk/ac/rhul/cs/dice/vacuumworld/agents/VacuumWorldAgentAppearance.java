@@ -7,7 +7,6 @@ public class VacuumWorldAgentAppearance extends AbstractAgentAppearance {
 	
 	public VacuumWorldAgentAppearance(String name, Double[] dimensions, VacuumWorldAgentType type) {
 		super(name, dimensions);
-		
 		this.type = type;
 	}
 

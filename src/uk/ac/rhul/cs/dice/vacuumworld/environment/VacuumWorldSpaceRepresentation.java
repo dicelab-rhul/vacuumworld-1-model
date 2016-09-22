@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Set;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringUpdateEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
@@ -40,7 +42,9 @@ public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception,
   // When a dirt is cleaned it should be moved from dirts to this set (allows
   // ease of database updates)
   private Set<DirtRepresentation> removedDirts = new HashSet<DirtRepresentation>();
-
+  
+  private ArrayList<SpeechAction> speechActions = new ArrayList<SpeechAction>();
+  
   public int getWidth() {
     return width;
   }
@@ -121,10 +125,19 @@ public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception,
     while(rdirtsIter.hasNext()) {
       removedDirts.add(rdirtsIter.next().clone());
     }
+    rep.setSpeechActions(new ArrayList<SpeechAction>(speechActions));
     rep.setAgents(agents);
     rep.setDirts(dirts);
     rep.setRemovedDirts(removedDirts);
     return rep;
+  }
+
+  public ArrayList<SpeechAction> getSpeechActions() {
+    return speechActions;
+  }
+
+  public void setSpeechActions(ArrayList<SpeechAction> speechActions) {
+    this.speechActions = speechActions;
   }
 
 }
