@@ -16,7 +16,7 @@ public class Main {
 			VacuumWorldServer server = new VacuumWorldServer(13337);
 			server.startServer(true);
 		}
-		catch (IOException e) {
+		catch (IOException | ClassNotFoundException | HandshakeException e) {
 			Utils.log(e);
 		}
 	}

@@ -1,7 +1,8 @@
 package uk.ac.rhul.cs.dice.vacuumworld;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -72,7 +73,8 @@ public class VacuumWorldServer implements Observer {
 
 	private ServerSocket server;
 	private Socket clientSocket;
-	private InputStream input;
+	private ObjectInputStream input;
+	private ObjectOutputStream output;
 	private VacuumWorldUniverse universe;
 	private VacuumWorldAgentThreadManager threadManager;
 
@@ -92,7 +94,7 @@ public class VacuumWorldServer implements Observer {
 		this.monitoringWorldActions.add(TotalPerceptionAction.class);
 	}
 	
-	public void startServer(boolean debug) {
+	public void startServer(boolean debug) throws ClassNotFoundException, HandshakeException {
 		if (debug) {
 			startServerFromFile();
 		}
@@ -113,16 +115,27 @@ public class VacuumWorldServer implements Observer {
 		}
 	}
 
-	private void startServer() {
+	private void startServer() throws ClassNotFoundException, HandshakeException {
 		try {
-			this.clientSocket = this.server.accept();
-			this.input = this.clientSocket.getInputStream();
+			this.clientSocket = doHandshake();
+			this.output = new ObjectOutputStream(this.clientSocket.getOutputStream());
+			this.input = new ObjectInputStream(this.clientSocket.getInputStream());
+			
 			manageRequests();
 		}
 		catch (IOException e) {
 			Utils.log(e);
 			stopServer();
 		}
+	}
+
+	private Socket doHandshake() throws IOException, ClassNotFoundException, HandshakeException {
+		Socket candidate = this.server.accept();
+		ObjectInputStream i = new ObjectInputStream(candidate.getInputStream());
+		
+		Object codeFromController = i.readObject();
+		Handshake.attemptHanshakeWithController(candidate, codeFromController);
+		return candidate;
 	}
 
 	private void manageRequests() throws IOException {
@@ -163,9 +176,16 @@ public class VacuumWorldServer implements Observer {
 			setUpVacuumWorldCleaningAgent(agent);
 		}
 
+		startControllerUpdater();
+		
 		// START!
 		this.threadManager.addObserver(this);
 		this.threadManager.start();
+	}
+
+	private void startControllerUpdater() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
