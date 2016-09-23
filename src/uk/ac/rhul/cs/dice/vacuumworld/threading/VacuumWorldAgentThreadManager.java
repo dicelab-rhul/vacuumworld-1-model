@@ -5,13 +5,13 @@ import java.util.Observable;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
-import uk.ac.rhul.cs.dice.vacuumworld.ModelUpdate;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldParser;
-import uk.ac.rhul.cs.dice.vacuumworld.ViewRequestsEnum;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
 
 public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldClientListener listener;

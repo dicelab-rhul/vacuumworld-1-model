@@ -186,10 +186,7 @@ public class VacuumWorldServer implements Observer {
 
 	private void startServer() throws ClassNotFoundException, HandshakeException {
 		try {
-			this.clientSocket = doHandshake();
-			this.output = new ObjectOutputStream(this.clientSocket.getOutputStream());
-			this.input = new ObjectInputStream(this.clientSocket.getInputStream());
-
+			doHandshake();
 			manageRequests();
 		} catch (IOException e) {
 			Utils.log(e);
@@ -197,14 +194,19 @@ public class VacuumWorldServer implements Observer {
 		}
 	}
 
-	private Socket doHandshake() throws IOException, ClassNotFoundException, HandshakeException {
+	private void doHandshake() throws IOException, ClassNotFoundException, HandshakeException {
 		Socket candidate = this.server.accept();
+		ObjectOutputStream o = new ObjectOutputStream(candidate.getOutputStream());
 		ObjectInputStream i = new ObjectInputStream(candidate.getInputStream());
 
-		Object codeFromController = i.readObject();
-		Handshake.attemptHanshakeWithController(candidate, codeFromController);
+		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) i.readObject());
+		System.out.println("received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller");  //CHCM
 		
-		return candidate;
+		if(Handshake.attemptHanshakeWithController(o, i, codeFromController)) {
+			this.clientSocket = candidate;
+			this.output = o;
+			this.input = i;
+		}
 	}
 
 	private void manageRequests() throws IOException, ClassNotFoundException {

@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
+
 public class VacuumWorldClientListener implements Runnable {
 	private ObjectInputStream input;
 	private ObjectOutputStream output;

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -47,6 +46,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
 
 public class VacuumWorldParser {
 
