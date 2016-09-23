@@ -17,173 +17,163 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
-public class VacuumWorldCleaningAgent extends AbstractAgent implements
-    VacuumWorldAgentInterface {
-  private static final int PERCEPTION_RANGE = 2;
-  private static final boolean CAN_SEE_BEHIND = false;
-  
-  private static final int ACTION_ACTUATOR_INDEX = 0;
-  private static final int SERVER_MESSAGE_SENSOR_INDEX = 1;
-  private static final int ACTION_RESULT_SENSOR_INDEX = 0;
-  private static final int MIND_SIGNAL_ACTUATOR_INDEX = 1;
-  
-  private VacuumWorldCoordinates currentLocation;
-  private AgentFacingDirection facingDirection;
+public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWorldAgentInterface {
+	private static final int PERCEPTION_RANGE = 2;
+	private static final boolean CAN_SEE_BEHIND = false;
 
-  public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance,
-      List<Sensor> sensors, List<Actuator> actuators, AbstractAgentMind mind,
-      AbstractAgentBrain brain, AgentFacingDirection facingDirection) {
-    super(appearance, sensors, actuators, mind, brain);
+	private static final int ACTION_ACTUATOR_INDEX = 0;
+	private static final int SERVER_MESSAGE_SENSOR_INDEX = 1;
+	private static final int ACTION_RESULT_SENSOR_INDEX = 0;
+	private static final int MIND_SIGNAL_ACTUATOR_INDEX = 1;
 
-    this.facingDirection = facingDirection;
-    this.currentLocation = null;
-  }
+	private VacuumWorldCoordinates currentLocation;
+	private AgentFacingDirection facingDirection;
 
-  public final int getPerceptionRange() {
-    return PERCEPTION_RANGE;
-  }
+	public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, AbstractAgentMind mind, AbstractAgentBrain brain, AgentFacingDirection facingDirection) {
+		super(appearance, sensors, actuators, mind, brain);
 
-  public final boolean canSeeBehind() {
-    return CAN_SEE_BEHIND;
-  }
+		this.facingDirection = facingDirection;
+		this.currentLocation = null;
+	}
 
-  public final int getActionActuatorIndex() {
-    return ACTION_ACTUATOR_INDEX;
-  }
+	public final int getPerceptionRange() {
+		return PERCEPTION_RANGE;
+	}
 
-  public final int getMindSignalActuatorIndex() {
-    return MIND_SIGNAL_ACTUATOR_INDEX;
-  }
+	public final boolean canSeeBehind() {
+		return CAN_SEE_BEHIND;
+	}
 
-  public final int getActionResultSensorIndex() {
-    return ACTION_RESULT_SENSOR_INDEX;
-  }
+	public final int getActionActuatorIndex() {
+		return ACTION_ACTUATOR_INDEX;
+	}
 
-  public final int getServerMessageSensorIndex() {
-    return SERVER_MESSAGE_SENSOR_INDEX;
-  }
+	public final int getMindSignalActuatorIndex() {
+		return MIND_SIGNAL_ACTUATOR_INDEX;
+	}
 
-  @Override
-  public Object simulate() {
-    return null;
-  }
+	public final int getActionResultSensorIndex() {
+		return ACTION_RESULT_SENSOR_INDEX;
+	}
 
-  @Override
-  public void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldDefaultBrain) {
-      manageBrainRequest(arg);
-    } else if (o instanceof VacuumWorldDefaultSensor) {
-      manageSensorRequest(arg);
-    }
-  }
+	public final int getServerMessageSensorIndex() {
+		return SERVER_MESSAGE_SENSOR_INDEX;
+	}
 
-  private void manageSensorRequest(Object arg) {
-    if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-      notifyObservers(arg, VacuumWorldDefaultBrain.class);
-    }
-  }
+	@Override
+	public Object simulate() {
+		return null;
+	}
 
-  private void manageBrainRequest(Object arg) {
-    if (arg instanceof AbstractAction) {
-      manageBrainRequest((AbstractAction) arg);
-    }
-  }
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldDefaultBrain) {
+			manageBrainRequest(arg);
+		} else if (o instanceof VacuumWorldDefaultSensor) {
+			manageSensorRequest(arg);
+		}
+	}
 
-  private void manageBrainRequest(AbstractAction action) {
-    VacuumWorldEvent event = new VacuumWorldEvent(action,
-        System.currentTimeMillis(), this);
+	private void manageSensorRequest(Object arg) {
+		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+			notifyObservers(arg, VacuumWorldDefaultBrain.class);
+		}
+	}
 
-    String sensorToBeNotifiedBackId = selectSensorToBeNotifiedBackId(action);
-    event.setSensorToCallBackId(sensorToBeNotifiedBackId);
+	private void manageBrainRequest(Object arg) {
+		if (arg instanceof AbstractAction) {
+			manageBrainRequest((AbstractAction) arg);
+		}
+	}
 
-    String actuatorRecipientId = selectActuatorRecipientId(action);
-    event.setActuatorRecipient(actuatorRecipientId);
+	private void manageBrainRequest(AbstractAction action) {
+		VacuumWorldEvent event = new VacuumWorldEvent(action, System.currentTimeMillis(), this);
 
-    notifyAgentActuators(event, actuatorRecipientId);
-  }
+		String sensorToBeNotifiedBackId = selectSensorToBeNotifiedBackId(action);
+		event.setSensorToCallBackId(sensorToBeNotifiedBackId);
 
-  private void notifyAgentActuators(Object arg, String actuatorId) {
-    List<CustomObserver> recipients = this.getObservers();
+		String actuatorRecipientId = selectActuatorRecipientId(action);
+		event.setActuatorRecipient(actuatorRecipientId);
 
-    for (CustomObserver recipient : recipients) {
-      notifyIfNeeded(recipient, arg, actuatorId);
-    }
-  }
+		notifyAgentActuators(event, actuatorRecipientId);
+	}
 
-  private void notifyIfNeeded(CustomObserver recipient, Object arg,
-      String actuatorId) {
-    if (recipient instanceof VacuumWorldDefaultActuator) {
-      VacuumWorldDefaultActuator a = (VacuumWorldDefaultActuator) recipient;
+	private void notifyAgentActuators(Object arg, String actuatorId) {
+		List<CustomObserver> recipients = this.getObservers();
 
-      if (a.getActuatorId().equals(actuatorId)) {
-        a.update(this, arg);
-      }
-    }
-  }
+		for (CustomObserver recipient : recipients) {
+			notifyIfNeeded(recipient, arg, actuatorId);
+		}
+	}
 
-  private String selectActuatorRecipientId(Object arg) {
-    if (AbstractAction.class.isAssignableFrom(arg.getClass())) {
-      return ((VacuumWorldDefaultActuator) getActuators().get(
-          ACTION_ACTUATOR_INDEX)).getActuatorId();
-    }
+	private void notifyIfNeeded(CustomObserver recipient, Object arg, String actuatorId) {
+		if (recipient instanceof VacuumWorldDefaultActuator) {
+			VacuumWorldDefaultActuator a = (VacuumWorldDefaultActuator) recipient;
 
-    return null;
-  }
+			if (a.getActuatorId().equals(actuatorId)) {
+				a.update(this, arg);
+			}
+		}
+	}
 
-  private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
-    if (AbstractAction.class.isAssignableFrom(action.getClass())) {
-      return ((VacuumWorldDefaultSensor) getSensors().get(
-          ACTION_RESULT_SENSOR_INDEX)).getSensorId();
-    }
+	private String selectActuatorRecipientId(Object arg) {
+		if (AbstractAction.class.isAssignableFrom(arg.getClass())) {
+			return ((VacuumWorldDefaultActuator) getActuators().get(ACTION_ACTUATOR_INDEX)).getActuatorId();
+		}
 
-    return null;
-  }
+		return null;
+	}
 
-  public VacuumWorldCoordinates getCurrentLocation() {
-    return this.currentLocation;
-  }
+	private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
+		if (AbstractAction.class.isAssignableFrom(action.getClass())) {
+			return ((VacuumWorldDefaultSensor) getSensors().get(ACTION_RESULT_SENSOR_INDEX)).getSensorId();
+		}
 
-  public void setCurrentLocation(VacuumWorldCoordinates coordinates) {
-    this.currentLocation = coordinates;
-  }
+		return null;
+	}
 
-  public AgentFacingDirection getFacingDirection() {
-    return this.facingDirection;
-  }
+	public VacuumWorldCoordinates getCurrentLocation() {
+		return this.currentLocation;
+	}
 
-  public void turnLeft() {
-    this.facingDirection = this.facingDirection.getLeftDirection();
-  }
+	public void setCurrentLocation(VacuumWorldCoordinates coordinates) {
+		this.currentLocation = coordinates;
+	}
 
-  public void turnRight() {
-    this.facingDirection = this.facingDirection.getRightDirection();
-  }
+	public AgentFacingDirection getFacingDirection() {
+		return this.facingDirection;
+	}
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result
-        + ((currentLocation == null) ? 0 : currentLocation.hashCode());
-    result = prime * result
-        + ((facingDirection == null) ? 0 : facingDirection.hashCode());
-    return result;
-  }
+	public void turnLeft() {
+		this.facingDirection = this.facingDirection.getLeftDirection();
+	}
 
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof VacuumWorldCleaningAgent)) {
-      return false;
-    }
+	public void turnRight() {
+		this.facingDirection = this.facingDirection.getRightDirection();
+	}
 
-    return this.getId().equals(((VacuumWorldCleaningAgent) obj).getId());
-  }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((currentLocation == null) ? 0 : currentLocation.hashCode());
+		result = prime * result + ((facingDirection == null) ? 0 : facingDirection.hashCode());
+		return result;
+	}
 
-  @Override
-  public String toString() {
-    return "{" + this.getClass().getSimpleName() + "("
-        + this.currentLocation.getX() + "," + this.currentLocation.getY()
-        + "," + this.facingDirection + "),Sensors: " + this.getSensors().size() + ",Actuators: "
-        + this.getActuators().size() + "}";
-  }
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof VacuumWorldCleaningAgent)) {
+			return false;
+		}
+
+		return this.getId().equals(((VacuumWorldCleaningAgent) obj).getId());
+	}
+
+	@Override
+	public String toString() {
+		return "{" + this.getClass().getSimpleName() + "(" + this.currentLocation.getX() + ","
+				+ this.currentLocation.getY() + "," + this.facingDirection + "),Sensors: " + this.getSensors().size()
+				+ ",Actuators: " + this.getActuators().size() + "}";
+	}
 }

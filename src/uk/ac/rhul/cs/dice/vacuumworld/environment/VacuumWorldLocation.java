@@ -49,6 +49,10 @@ public class VacuumWorldLocation implements Location, Lockable {
 		return this.agent;
 	}
 
+	public boolean isFree() {
+		return !(isAnAgentPresent() || isAnObstaclePresent());
+	}
+	
 	public boolean isAnAgentPresent() {
 		return this.agent != null;
 	}

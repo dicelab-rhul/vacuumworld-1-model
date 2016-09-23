@@ -170,7 +170,8 @@ public class VacuumWorldServer implements Observer {
 		try {
 			VacuumWorldMonitoringContainer initialState = VacuumWorldParser.parseInitialState(fileName);
 			constructUniverseAndStart(initialState);
-		} catch (IOException e) {
+		} 
+		catch (Exception e) {
 			Utils.log(e);
 			stopServer();
 		}
@@ -206,7 +207,7 @@ public class VacuumWorldServer implements Observer {
 		return candidate;
 	}
 
-	private void manageRequests() throws IOException {
+	private void manageRequests() throws IOException, ClassNotFoundException {
 		VacuumWorldMonitoringContainer initialState = VacuumWorldParser.parseInitialState(this.input);
 		constructUniverseAndStart(initialState);
 	}
@@ -255,8 +256,9 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void startListeningService() {
-		// TODO Auto-generated method stub
-		
+		VacuumWorldClientListener listener = new VacuumWorldClientListener(this.input, this.output);
+		Thread listeningThread = new Thread(listener);
+		listeningThread.start();
 	}
 
 	/**
