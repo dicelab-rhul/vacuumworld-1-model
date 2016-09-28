@@ -1,9 +1,14 @@
 package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 public class Utils {
 	private static final Logger LOGGER = Logger.getGlobal();
@@ -64,5 +69,13 @@ public class Utils {
 		catch(Exception e) {
 			Utils.log(e);
 		}
+	}
+	
+	public static JsonObject parseJsonObjectFromString(String payload) {
+		JsonReader reader = Json.createReader(new StringReader(payload));
+		JsonObject toReturn = reader.readObject();
+		reader.close();
+		
+		return toReturn;
 	}
 }

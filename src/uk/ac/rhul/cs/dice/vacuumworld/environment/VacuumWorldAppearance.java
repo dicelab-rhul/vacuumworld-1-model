@@ -5,7 +5,7 @@ import java.util.Map;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.UniverseAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldParser;
+import uk.ac.rhul.cs.dice.vacuumworld.TextualInterfaceBuilder;
 
 public class VacuumWorldAppearance extends UniverseAppearance {
 	private List<String> stringRepresentation;
@@ -16,7 +16,7 @@ public class VacuumWorldAppearance extends UniverseAppearance {
 	}
 
 	public void updateRepresentation(VacuumWorldSpace state) {
-		this.stringRepresentation = VacuumWorldParser.getStringRepresentation(state);
+		this.stringRepresentation = TextualInterfaceBuilder.getStringRepresentation(state);
 	}
 	
 	@Override

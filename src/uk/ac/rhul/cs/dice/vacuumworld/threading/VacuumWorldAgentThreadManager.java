@@ -5,8 +5,8 @@ import java.util.Observable;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
+import uk.ac.rhul.cs.dice.vacuumworld.JsonForControllerBuilder;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldParser;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
@@ -64,6 +64,10 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	}
 
 	private void listenForClientCommand() {
+		if(this.listener == null) {
+			System.out.println("listener is null.");
+		}
+		
 		ViewRequestsEnum code = this.listener.getRequestCode();
 		
 		if(code != null) {
@@ -89,7 +93,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	}
 
 	private void sendModelUpdate() {
-		ModelUpdate update = VacuumWorldParser.createModelUpdate(this.state);
+		ModelUpdate update = JsonForControllerBuilder.createModelUpdate(this.state);
 		this.listener.setUpdateToSend(update);
 		this.listener.unlock();
 	}
