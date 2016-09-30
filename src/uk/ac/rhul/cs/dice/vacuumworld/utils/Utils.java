@@ -61,6 +61,10 @@ public class Utils {
 	public static void log(Level level, String message, Exception e) {
 		LOGGER.log(level, message, e);
 	}
+	
+	public static void println(String source, String message) {
+		System.out.println(source + ": " + message);
+	}
 
 	public static void doWait(int milliseconds) {
 		try {

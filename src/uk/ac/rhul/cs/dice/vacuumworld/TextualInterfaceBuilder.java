@@ -19,10 +19,10 @@ public class TextualInterfaceBuilder {
 		int width = state.getDimensions()[0];
 		int height = state.getDimensions()[1];
 
-		for (int j = 0; j < height; j++) {
+		for (int i = 0; i < height; i++) {
 			StringBuilder builder = new StringBuilder();
 
-			for (int i = 0; i < width; i++) {
+			for (int j = 0; j < width; j++) {
 				builder.append(representLocation(state.getLocation(new VacuumWorldCoordinates(i, j))));
 			}
 

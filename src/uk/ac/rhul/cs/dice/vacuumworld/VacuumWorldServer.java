@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
@@ -70,6 +71,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadExperimentManager;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
 
 public class VacuumWorldServer implements Observer {
 	/* Control */
@@ -97,6 +100,8 @@ public class VacuumWorldServer implements Observer {
 	private VacuumWorldAgentThreadManager threadManager;
 
 	private static final int TEST_CYCLES = 100;
+	
+	private Semaphore listeningThreadSemaphore;
 
 	public VacuumWorldServer(int port) throws IOException {
 		this.server = new ServerSocket(port);
@@ -194,7 +199,7 @@ public class VacuumWorldServer implements Observer {
 		ObjectInputStream i = new ObjectInputStream(candidate.getInputStream());
 
 		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) i.readObject());
-		System.out.println("received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller");  //CHCM
+		Utils.println(this.getClass().getSimpleName(), "received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller");  //CHCM
 		
 		if(Handshake.attemptHanshakeWithController(o, i, codeFromController)) {
 			this.clientSocket = candidate;
@@ -246,11 +251,13 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void startListeningService(VacuumWorldMonitoringContainer initialState) {
-		VacuumWorldClientListener listener = new VacuumWorldClientListener(this.input, this.output);
-		Thread listeningThread = new Thread(listener);
-		listeningThread.start();
+		this.listeningThreadSemaphore = new Semaphore(0);
 		
+		VacuumWorldClientListener listener = new VacuumWorldClientListener(this.input, this.output, this.listeningThreadSemaphore);
 		this.threadManager.setClientListener(listener, initialState.getSubContainerSpace());
+		
+		Thread listeningThread = new Thread(this.threadManager.getClientListener());
+		listeningThread.start();
 	}
 
 	/**
@@ -264,9 +271,64 @@ public class VacuumWorldServer implements Observer {
 		if (PRINTMAP) {
 			printState();
 		}
+		
+		Utils.println(this.getClass().getSimpleName(), "Before manageViewRequest()");
+		manageViewRequest();
+		Utils.println(this.getClass().getSimpleName(), "After manageViewRequest()");
+	}
+
+	private void manageViewRequest() {
+		this.listeningThreadSemaphore.release();
+		Utils.println(this.getClass().getSimpleName(), "Listening thread can continue");
+		
+		ViewRequestsEnum code;
+		
+		do {
+			code = this.threadManager.getClientListener().getRequestCode();
+		}
+		while(code == null);
+		
+		Utils.println(this.getClass().getSimpleName(), "Code is NOT null");
+		
+		manageViewRequest(code);
+		/*Utils.println(this.getClass().getSimpleName(), "Before resetting code");
+		this.threadManager.getClientListener().resetRequestCode();
+		Utils.println(this.getClass().getSimpleName(), "After resetting code");*/
 	}
 
 	// ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
+
+	private void manageViewRequest(ViewRequestsEnum code) {
+		switch(code) {
+		case GET_STATE:
+			sendUpdate();
+			break;
+		case STOP:
+			stopSystem();
+			break;
+		default:
+			break;	
+		}
+	}
+
+	private void sendUpdate() {
+		try {
+			Utils.println(this.getClass().getSimpleName(), "Before creating update");
+			ModelUpdate update = JsonForControllerBuilder.createModelUpdate(this.threadManager.getState());
+			Utils.println(this.getClass().getSimpleName(), "Before writing update");
+			this.threadManager.getClientListener().getOutputStream().writeObject(update);
+			this.threadManager.getClientListener().getOutputStream().flush();
+			Utils.println(this.getClass().getSimpleName(), "After writing update");
+		}
+		catch(IOException e) {
+			Utils.log(e);
+		}
+	}
+
+	private void stopSystem() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	private void setUpVacuumWorldCleaningAgent(VacuumWorldCleaningAgent agent) {
 		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe.getState();

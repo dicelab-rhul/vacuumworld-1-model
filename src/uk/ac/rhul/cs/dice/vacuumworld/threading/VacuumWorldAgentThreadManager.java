@@ -5,13 +5,10 @@ import java.util.Observable;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
-import uk.ac.rhul.cs.dice.vacuumworld.JsonForControllerBuilder;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
 
 public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldClientListener listener;
@@ -34,6 +31,14 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		this.monitorRunnables = new HashSet<>();
 	}
 
+	public VacuumWorldClientListener getClientListener() {
+		return this.listener;
+	}
+	
+	public VacuumWorldSpace getState() {
+		return this.state;
+	}
+	
 	public void setClientListener(VacuumWorldClientListener listener, VacuumWorldSpace state) {
 		this.listener = listener;
 		this.state = state;
@@ -41,7 +46,6 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	
 	public void start() {
 		this.simulationStarted = true;
-		// Utils.log("START");
 		cycle();
 	}
 
@@ -56,46 +60,9 @@ public class VacuumWorldAgentThreadManager extends Observable {
 			Utils.log("NEXT CYCLE!! \n \n \n \n");
 			doPerceive = true;
 			this.notifyObservers();
-
-			listenForClientCommand();
 			
 			Utils.doWait(1000);
 		}
-	}
-
-	private void listenForClientCommand() {
-		if(this.listener == null) {
-			System.out.println("listener is null.");
-		}
-		
-		ViewRequestsEnum code = this.listener.getRequestCode();
-		
-		if(code != null) {
-			listenForClientCommand(code);
-		}
-	}
-
-	private void listenForClientCommand(ViewRequestsEnum code) {
-		switch(code) {
-		case GET_STATE:
-			sendModelUpdate();
-			break;
-		case STOP:
-			stopServer();
-			break;
-		default:
-			return;
-		}
-	}
-
-	private void stopServer() {
-		System.exit(0);
-	}
-
-	private void sendModelUpdate() {
-		ModelUpdate update = JsonForControllerBuilder.createModelUpdate(this.state);
-		this.listener.setUpdateToSend(update);
-		this.listener.unlock();
 	}
 
 	protected void doCycleStep(Set<AgentRunnable> agentsRunnables, boolean... flags) {
