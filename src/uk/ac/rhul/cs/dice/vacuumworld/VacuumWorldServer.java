@@ -291,9 +291,6 @@ public class VacuumWorldServer implements Observer {
 		Utils.println(this.getClass().getSimpleName(), "Code is NOT null");
 		
 		manageViewRequest(code);
-		/*Utils.println(this.getClass().getSimpleName(), "Before resetting code");
-		this.threadManager.getClientListener().resetRequestCode();
-		Utils.println(this.getClass().getSimpleName(), "After resetting code");*/
 	}
 
 	// ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
@@ -326,8 +323,16 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void stopSystem() {
-		// TODO Auto-generated method stub
-		
+		try {
+			this.threadManager.getClientListener().getOutputStream().writeObject("STOP");
+			this.threadManager.getClientListener().getOutputStream().flush();
+		}
+		catch(IOException e) {
+			Utils.log(e);
+		}
+		finally {
+			System.exit(0);
+		}
 	}
 
 	private void setUpVacuumWorldCleaningAgent(VacuumWorldCleaningAgent agent) {
