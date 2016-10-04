@@ -71,11 +71,11 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadExperimentManager;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 public class VacuumWorldServer implements Observer {
-	/* Control */
 	private static final boolean LOAD_BASIC_MONITOR = true;
 	private static final boolean LOAD_OBSERVER = false;
 	private static final boolean LOAD_EVALUATOR = false;
@@ -188,7 +188,28 @@ public class VacuumWorldServer implements Observer {
 		} 
 		catch (Exception e) {
 			Utils.log(e);
+		}
+	}
+
+	private void manageExceptionInStartup(Exception e) {
+		if("The received initial state is not valid.".equals(e.getMessage())) {
+			sendErrorToView();
+		}
+		else {
+			Utils.log(e);
 			stopServer();
+		}
+	}
+
+	private void sendErrorToView() {
+		try {
+			ModelUpdate update = new ModelUpdate(ModelMessagesEnum.BAD_INITIAL_STATE, null);
+			this.output.writeObject(update);
+			this.output.flush();
+		}
+		catch(IOException e) {
+			Utils.log(e);
+			stopSystem(ModelMessagesEnum.STOP_FORWARD);
 		}
 	}
 
@@ -196,9 +217,9 @@ public class VacuumWorldServer implements Observer {
 		try {
 			doHandshake();
 			manageRequests();
-		} catch (IOException e) {
-			Utils.log(e);
-			stopServer();
+		}
+		catch (IOException e) {
+			manageExceptionInStartup(e);
 		}
 	}
 
@@ -250,7 +271,10 @@ public class VacuumWorldServer implements Observer {
 
 	private void startSimulation(VacuumWorldMonitoringContainer container) {
 		Set<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace().getAgents();
-		agents.forEach((VacuumWorldCleaningAgent agent) -> setUpVacuumWorldCleaningAgent(agent));
+		
+		for(VacuumWorldCleaningAgent agent : agents) {
+			setUpVacuumWorldCleaningAgent(agent);
+		}
 		
 		startListeningService(container);
 		
@@ -309,8 +333,8 @@ public class VacuumWorldServer implements Observer {
 		case GET_STATE:
 			sendUpdate();
 			break;
-		case STOP:
-			stopSystem();
+		case STOP_FORWARD:
+			stopSystem(ModelMessagesEnum.STOP_CONTROLLER);
 			break;
 		default:
 			break;	
@@ -319,24 +343,24 @@ public class VacuumWorldServer implements Observer {
 
 	private void sendUpdate() {
 		try {
-			Utils.println(this.getClass().getSimpleName(), "Before creating update");
 			ModelUpdate update = JsonForControllerBuilder.createModelUpdate(this.threadManager.getState());
-			Utils.println(this.getClass().getSimpleName(), "Before writing update");
 			this.threadManager.getClientListener().getOutputStream().writeObject(update);
 			this.threadManager.getClientListener().getOutputStream().flush();
-			Utils.println(this.getClass().getSimpleName(), "After writing update");
 		}
 		catch(IOException e) {
 			Utils.log(e);
 		}
 	}
 
-	private void stopSystem() {
+	private void stopSystem(ModelMessagesEnum code) {
 		try {
-			this.threadManager.getClientListener().getOutputStream().writeObject("STOP");
+			ModelUpdate update = new ModelUpdate(code, null);
+			this.threadManager.getClientListener().getOutputStream().writeObject(update);
 			this.threadManager.getClientListener().getOutputStream().flush();
+			this.server.close();
 		}
 		catch(IOException e) {
+			stopSystem(ModelMessagesEnum.STOP_FORWARD);
 			Utils.log(e);
 		}
 		finally {
@@ -469,8 +493,10 @@ public class VacuumWorldServer implements Observer {
 		try {
 			closeClientSocket();
 			closeServerSocket();
-		} catch (IOException e) {
+		}
+		catch (Exception e) {
 			Utils.log(e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -488,6 +514,6 @@ public class VacuumWorldServer implements Observer {
 
 	public void printState() {
 		((VacuumWorldAppearance) this.universe.getAppearance()).updateRepresentation((VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe.getState()).getSubContainerSpace());
-		System.out.println(this.universe.getAppearance().represent());
+		Utils.logState(this.universe.getAppearance().represent());
 	}
 }

@@ -46,6 +46,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	
 	public void start() {
 		this.simulationStarted = true;
+		
 		cycle();
 	}
 

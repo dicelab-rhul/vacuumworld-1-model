@@ -6,8 +6,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 public class VacuumWorldClientListener implements Runnable {
 	private ObjectInputStream input;
@@ -36,23 +36,25 @@ public class VacuumWorldClientListener implements Runnable {
 			runListener();
 		}
 		catch(InterruptedException e) {
-			e.printStackTrace();
+			Utils.log(e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
 	private void runListener() throws InterruptedException {
 		Utils.println(this.getClass().getSimpleName(), "LISTENING THREAD STARTED!!!");
+		boolean canContinue = true;
 		
-		while(true) {			
+		while(canContinue) {			
 			Utils.println(this.getClass().getSimpleName(), "Waiting for permission from thread manager");
 			this.canProceed.acquire();
 			Utils.println(this.getClass().getSimpleName(), "Got permission from thread manager");
 			Utils.println(this.getClass().getSimpleName(), "I can proceed: new loop");
-			loop();
+			canContinue = loop();
 		}
 	}
 
-	private void loop() {
+	private boolean loop() {
 		try {
 			Utils.println(this.getClass().getSimpleName(), "Waiting for view request.");
 			Object request = this.input.readObject();
@@ -61,16 +63,17 @@ public class VacuumWorldClientListener implements Runnable {
 			if(request instanceof ViewRequest) {
 				manageViewRequest((ViewRequest) request);
 			}
+			
+			return true;
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			return;
+			Utils.log(e);
+			return false;
 		}
 	}
 
 	private void manageViewRequest(ViewRequest request) {
 		this.code.set(request.getCode());
 		Utils.println(this.getClass().getSimpleName(), "after code assignment in listener: " + this.code);
-		//this.canProceed = false;
 	}
 }

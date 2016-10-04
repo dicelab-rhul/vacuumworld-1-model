@@ -42,7 +42,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 
 public class InitialStateParser {
 	private static final String MIND_TO_USE = "RANDOM_SOCIAL";
@@ -74,11 +74,23 @@ public class InitialStateParser {
 		return parseInitialState(json);
 	}
 
-	private static VacuumWorldMonitoringContainer parseInitialState(JsonObject json) {
+	private static VacuumWorldMonitoringContainer parseInitialState(JsonObject json) throws IOException {
 		VacuumWorldSpace space = createInitialState(json);
+		checkAgentsNumber(space);
+		
 		VacuumWorldMonitoringPhysics monitoringPhysics = new VacuumWorldMonitoringPhysics();
 
 		return new VacuumWorldMonitoringContainer(monitoringPhysics, space);
+	}
+
+	private static void checkAgentsNumber(VacuumWorldSpace space) throws IOException {
+		if(space.getAgents() == null) {
+			throw new IOException("The received initial state is not valid.");
+		}
+		
+		if(space.getAgents().isEmpty()) {
+			throw new IOException("The received initial state is not valid.");
+		}
 	}
 
 	private static VacuumWorldSpace createInitialState(JsonObject json) {

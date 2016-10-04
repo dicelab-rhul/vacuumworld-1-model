@@ -26,6 +26,7 @@ public class Utils {
 			fileHandler.setFormatter(new InfoLogFormatter());
 			logger.addHandler(fileHandler);
 			logger.setUseParentHandlers(false);
+			
 			return logger;
 		}
 		catch (SecurityException | IOException e) {
@@ -64,6 +65,10 @@ public class Utils {
 	
 	public static void println(String source, String message) {
 		log(source + ": " + message);
+	}
+	
+	public static void logState(String s) {
+		log("\n\n" + s + "\n\n");
 	}
 
 	public static void doWait(int milliseconds) {

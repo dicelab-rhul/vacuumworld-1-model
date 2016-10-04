@@ -15,7 +15,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
 
 public class JsonForControllerBuilder {
 	private JsonForControllerBuilder() {}
@@ -24,7 +25,7 @@ public class JsonForControllerBuilder {
 		Map<LocationKey, Location> map = space.getGrid();
 		
 		JsonObject stateRepresentation = buildStateRepresentation(space.getDimensions(), map);
-		return new ModelUpdate(stateRepresentation.toString());
+		return new ModelUpdate(ModelMessagesEnum.STATE_UPDATE, stateRepresentation.toString());
 	}
 
 	private static JsonObject buildStateRepresentation(int[] dimensions, Map<LocationKey, Location> map) {
