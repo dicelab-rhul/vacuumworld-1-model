@@ -258,6 +258,8 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		agentLocation.releaseExclusiveWriteLock();
 		targetLocation.releaseExclusiveWriteLock();
 
+		Utils.log("Agent: old position: " + originalCooridinates + ", new position: " + targetLocation.getCoordinates() + ", facing position: " + agentFacingDirection + ".");
+		
 		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}
 
