@@ -4,19 +4,19 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
 
 public class VacuumWorldSpeechPayload implements Payload<String> {
 
-  private String payload;
-  
-  public VacuumWorldSpeechPayload(String payload) {
-    this.payload = payload;
-  }
+	private String payload;
 
-  @Override
-  public void setPayload(String payload) {
-    this.payload = payload;
-  }
+	public VacuumWorldSpeechPayload(String payload) {
+		this.payload = payload;
+	}
 
-  @Override
-  public String getPayload() {
-    return this.payload;
-  }
+	@Override
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
+	@Override
+	public String getPayload() {
+		return this.payload;
+	}
 }

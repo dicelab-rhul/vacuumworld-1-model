@@ -18,8 +18,7 @@ public class VacuumWorldEvent extends AbstractEvent {
 
 	@Override
 	public String represent() {
-		return "at time " + getTimestamp() + " agent " + ((VacuumWorldCleaningAgent) getActor()).getExternalAppearance().getName() +
-				" attempted a " + getAction().getClass().getSimpleName();
+		return "at time " + getTimestamp() + " agent " + ((VacuumWorldCleaningAgent) getActor()).getExternalAppearance().getName() + " attempted a " + getAction().getClass().getSimpleName();
 	}
 
 	@Override

@@ -17,8 +17,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
 
 public class VWEvaluatorAgent extends EvaluatorAgent implements VacuumWorldAgentInterface {
 
-	public VWEvaluatorAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators,
-			VWEvaluatorMind mind, VWEvaluatorBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
+	public VWEvaluatorAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, VWEvaluatorMind mind, VWEvaluatorBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
 		super(appearance, sensors, actuators, mind, brain, classModel, database);
 	}
 	

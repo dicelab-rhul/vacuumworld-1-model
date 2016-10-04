@@ -3,6 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database;
 import static com.mongodb.client.model.Projections.slice;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bson.Document;
 
@@ -10,7 +11,6 @@ import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
 import uk.ac.rhul.cs.dice.monitor.mongo.MongoConnector;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
-import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 
@@ -29,19 +29,15 @@ import com.mongodb.client.MongoIterable;
  */
 public class VacuumWorldMongoConnector extends MongoConnector {
 
-  public ArrayList<String> efficentAgentRead(CollectionRepresentation collectionRepresentation,
-      int lastCycleRead) {
-    MongoCollection<Document> collection = database
-        .getCollection(collectionRepresentation.getCollectionName());
-    MongoIterable<Document> iter = collection.find().projection(
-        slice("cycleList", -((Utils.getCycleNumber() + 1) - lastCycleRead)));
-    ArrayList<String> jsons = new ArrayList<>();
-    iter.forEach(new Block<Document>() {
-      @Override
-      public void apply(Document d) {
-        jsons.add(d.toJson());
-      }
-    });
-    return jsons;
-  }
+	public List<String> efficentAgentRead(CollectionRepresentation collectionRepresentation, int lastCycleRead) {
+		MongoCollection<Document> collection = this.database.getCollection(collectionRepresentation.getCollectionName());
+		MongoIterable<Document> iter = collection.find().projection(slice("cycleList", -((Utils.getCycleNumber() + 1) - lastCycleRead)));
+		List<String> jsons = new ArrayList<>();
+		
+		for(Document document : iter) {
+			jsons.add(document.toJson());
+		}
+		
+		return jsons;
+	}
 }

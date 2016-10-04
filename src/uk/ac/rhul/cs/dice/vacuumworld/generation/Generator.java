@@ -5,237 +5,295 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+
 public class Generator {
 
-  private ObjectMapper mapper;
-  private int counter = 0;
-  private HashSet<Coordinate> allCoordinates;
-  private HashSet<LocationStructure> allLocations;
-  private HashSet<LocationStructure> dirtFreeLocations;
-  private HashSet<LocationStructure> agentFreeLocations;
+	private ObjectMapper mapper;
+	private int counter = 0;
+	private Set<VacuumWorldCoordinates> allCoordinates;
+	private Set<LocationStructure> allLocations;
+	private Set<LocationStructure> dirtFreeLocations;
+	private Set<LocationStructure> agentFreeLocations;
 
-  private int dirts = 0, agents = 0, totalDirts = 0, totalAgents = 0;
+	private int dirts = 0;
+	private int agents = 0;
+	private int totalDirts = 0;
+	private int totalAgents = 0;
 
-  private final Random RANDOM = new Random();
-  private final String AGENT = "agent";
-  private final String[] DIRECTIONS = new String[] { "north", "south", "east",
-      "west" };
-  private final String[] COLORS = new String[] { "orange", "green"};
+	private static final Random RANDOM = new Random();
+	private static final String AGENT = "agent";
+	private static final String[] DIRECTIONS = new String[] { "north", "south", "east", "west" };
+	private static final String[] COLORS = new String[] { "orange", "green" };
 
-  public Generator() {
-  }
+	public void generate(File file, int width, int height, int numAgents, int numDirts) {
+		if (validateInput(width, height, numAgents, numDirts)) {
+			init(width, height, numAgents, numDirts, file);
+		}
+		else {
+			Utils.log(Level.SEVERE, "FAILED TO GENERATE OUTPUT");
+		}
+	}
 
-  public void generate(File file, int width, int height, int numAgents,
-      int numDirts) {
-    if (validateInput(width, height, numAgents, numDirts)) {
-      try {
-        dirts = 0;
-        agents = 0;
-        totalDirts = numDirts;
-        totalAgents = numAgents;
-        mapper = new ObjectMapper();
-        allCoordinates = new HashSet<>();
-        allLocations = new HashSet<>();
-        dirtFreeLocations = new HashSet<>();
-        agentFreeLocations = new HashSet<>();
+	private void init(int width, int height, int numAgents, int numDirts, File file) {
+		try {
+			initAttributes(numAgents, numDirts);
+			tryAgentsOrDirts(width, height, numAgents, numDirts);
+			Structure struct = new Structure(width, height, new ArrayList<LocationStructure>(this.allLocations));
+			this.mapper.writeValue(file, struct);
+		}
+		catch (IOException e) {
+			Utils.log(e);
+		}
+	}
 
-        while (agents + dirts < numAgents + numDirts) {
-          if (RANDOM.nextInt(2) == 0) {
-            tryDirt(width, height);
-          } else {
-            tryAgent(width, height);
-          }
-        }
-        Structure struct = new Structure(width, height,
-            new ArrayList<LocationStructure>(allLocations));
-        mapper.writeValue(file, struct);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    } else {
-      Logger.getGlobal().log(Level.SEVERE, "FAILED TO GENERATE OUTPUT");
-    }
-  }
+	private void tryAgentsOrDirts(int width, int height, int numAgents, int numDirts) {
+		while (this.agents + this.dirts < numAgents + numDirts) {
+			if (RANDOM.nextInt(2) == 0) {
+				tryDirt(width, height);
+			}
+			else {
+				tryAgent(width, height);
+			}
+		}
+	}
 
-  private void tryDirt(int width, int height) {
-    LocationStructure struct = null;
-    //System.out.println("TRYING DIRT {");
-    if (dirts < totalDirts) {
-      if (width * height > allLocations.size()) {
-        if (RANDOM.nextInt(5) < 4) {
-          struct = generateLocationWithDirt(generateRandomCoordinate(width,
-              height));
-          dirts++;
-        } else {
-          if (!dirtFreeLocations.isEmpty()) {
-            addDirtToLocation(generateRandomColor());
-          } else {
-            struct = generateLocationWithDirt(generateRandomCoordinate(width,
-                height));
-          }
-          dirts++;
-        }
-      } else {
-        System.out.println("ALL LOCATIONS EXIST " + allLocations.size());
-        addDirtToLocation(generateRandomColor());
-        dirts++;
-      }
-      if (struct != null) {
-        allCoordinates.add(new Coordinate(struct.getX(), struct.getY()));
-        allLocations.add(struct);
-        agentFreeLocations.add(struct);
-      }
-    } else {
-      tryAgent(width, height);
-    }
-    //System.out.println("}");
-  }
+	private void initAttributes(int numAgents, int numDirts) {
+		this.dirts = 0;
+		this.agents = 0;
+		this.totalDirts = numDirts;
+		this.totalAgents = numAgents;
+		this.mapper = new ObjectMapper();
+		this.allCoordinates = new HashSet<>();
+		this.allLocations = new HashSet<>();
+		this.dirtFreeLocations = new HashSet<>();
+		this.agentFreeLocations = new HashSet<>();
+	}
 
-  private void addDirtToLocation(String dirt) {
-    if (!dirtFreeLocations.isEmpty()) {
-      LocationStructure struct = dirtFreeLocations.iterator().next();
+	private void tryDirt(int width, int height) {
+		if (this.dirts < this.totalDirts) {
+			LocationStructure struct = tryDirtHelper(width, height);
+			checkStruct(struct, true);
+		}
+		else {
+			tryAgent(width, height);
+		}
+	}
 
-      //System.out.println("adding dirt to location: " + struct.getX() + ","
-          //+ struct.getY());
+	private void checkStruct(LocationStructure struct, boolean agentOrDirt) {
+		if (struct != null) {
+			this.allCoordinates.add(new VacuumWorldCoordinates(struct.getX(), struct.getY()));
+			this.allLocations.add(struct);
+			
+			addStructToSet(struct, agentOrDirt);
+			
+		}
+	}
 
-      struct.setDirt(dirt);
-      dirtFreeLocations.remove(struct);
-    } else {
-      Logger.getGlobal().log(Level.SEVERE, "NO FREE LOCATIONS TO ADD DIRT");
-    }
-  }
+	private void addStructToSet(LocationStructure struct, boolean agentOrDirt) {
+		if(agentOrDirt) {
+			this.agentFreeLocations.add(struct);
+		}
+		else {
+			this.dirtFreeLocations.add(struct);
+		}
+	}
 
-  private LocationStructure generateLocationWithDirt(Coordinate coord) {
-    //System.out.println("creating dirt at location: " + coord);
-    return new LocationStructure(coord.getX(), coord.getY(), null,
-        COLORS[RANDOM.nextInt(COLORS.length)]);
-  }
+	private LocationStructure tryDirtHelper(int width, int height) {
+		if (width * height > this.allLocations.size()) {
+			return generateLocationWithDirt(width, height);
+		}
+		else {
+			Utils.log("ALL LOCATIONS EXIST " + this.allLocations.size());
+			addDirtToLocation(generateRandomColor());
+			this.dirts++;
+			
+			return null;
+		}
+	}
 
-  private void tryAgent(int width, int height) {
-    //System.out.println("TRYING AGENT {");
+	private LocationStructure generateLocationWithDirt(int width, int height) {
+		if (RANDOM.nextInt(5) < 4) {
+			LocationStructure struct = generateLocationWithDirt(generateRandomCoordinate(width, height));
+			this.dirts++;
+			
+			return struct;
+		}
+		else {
+			return generateLocationWithDirtHelper(width, height);
+		}
+	}
 
-    LocationStructure struct = null;
-    if (agents < totalAgents) {
-      if (width * height > allLocations.size()) {
-        if (RANDOM.nextInt(5) < 4) {
-          struct = generateLocationWithAgent(generateRandomCoordinate(width,
-              height));
-          agents++;
-        } else {
-          if (!agentFreeLocations.isEmpty()) {
-            addAgentToLocation(generateRandomAgent());
-          } else {
-            struct = generateLocationWithAgent(generateRandomCoordinate(width,
-                height));
-          }
-          agents++;
-        }
-      } else {
-        //System.out.println("ALL LOCATIONS EXIST " + allLocations.size());
-        addAgentToLocation(generateRandomAgent());
-        agents++;
-      }
-      if (struct != null) {
-        allCoordinates.add(new Coordinate(struct.getX(), struct.getY()));
-        allLocations.add(struct);
-        dirtFreeLocations.add(struct);
-      }
-    } else {
-      tryDirt(width, height);
-    }
-    //System.out.println("}");
-  }
+	private LocationStructure generateLocationWithDirtHelper(int width, int height) {
+		LocationStructure struct = null;
+		
+		if (!this.dirtFreeLocations.isEmpty()) {
+			addDirtToLocation(generateRandomColor());
+		}
+		else {
+			struct = generateLocationWithDirt(generateRandomCoordinate(width, height));
+		}
+		
+		this.dirts++;
+		
+		return struct;
+	}
 
-  private void addAgentToLocation(AgentStructure agent) {
-    if (!agentFreeLocations.isEmpty()) {
-      LocationStructure struct = agentFreeLocations.iterator().next();
+	private void addDirtToLocation(String dirt) {
+		if (!this.dirtFreeLocations.isEmpty()) {
+			LocationStructure struct = this.dirtFreeLocations.iterator().next();
+			struct.setDirt(dirt);
+			this.dirtFreeLocations.remove(struct);
+		}
+		else {
+			Utils.log(Level.SEVERE, "NO FREE LOCATIONS TO ADD DIRT");
+		}
+	}
 
-      //System.out.println("adding agent to location: " + struct.getX() + ","
-          //+ struct.getY());
+	private LocationStructure generateLocationWithDirt(VacuumWorldCoordinates coord) {
+		return new LocationStructure(coord.getX(), coord.getY(), null, COLORS[RANDOM.nextInt(COLORS.length)]);
+	}
 
-      struct.setAgent(agent);
-      agentFreeLocations.remove(struct);
-    } else {
-      Logger.getGlobal().log(Level.SEVERE, "NO FREE LOCATIONS TO ADD AGENT");
-    }
-  }
+	private void tryAgent(int width, int height) {		
+		if (this.agents < this.totalAgents) {
+			LocationStructure struct = tryAgentHelper(width, height);
+			checkStruct(struct, false);
+		}
+		else {
+			tryDirt(width, height);
+		}
+	}
 
-  private LocationStructure generateLocationWithAgent(Coordinate coord) {
-    //System.out.println("creating agent at location: " + coord);
-    return new LocationStructure(coord.getX(), coord.getY(),
-        generateRandomAgent(), null);
-  }
+	private LocationStructure tryAgentHelper(int width, int height) {
+		if (width * height > this.allLocations.size()) {
+			return generateLocatonWithAgent(width, height);
+		}
+		else {
+			addAgentToLocation(generateRandomAgent());
+			this.agents++;
+			
+			return null;
+		}
+	}
 
-  private Coordinate generateRandomCoordinate(int width, int height) {
-    Coordinate newCoord;
-    while (allCoordinates.contains((newCoord = new Coordinate(RANDOM
-        .nextInt(width), RANDOM.nextInt(height))))) {
-    }
-    allCoordinates.add(newCoord);
-    return newCoord;
-  }
+	private LocationStructure generateLocatonWithAgent(int width, int height) {
+		if (RANDOM.nextInt(5) < 4) {
+			LocationStructure struct = generateLocationWithAgent(generateRandomCoordinate(width, height));
+			this.agents++;
+			
+			return struct;
+		}
+		else {
+			return generateLocationWithAgentHelper(width, height);
+		}
+	}
 
-  private AgentStructure generateRandomAgent() {
-    return new AgentStructure(generateId(), generateName(),
-        generateRandomColor(), 1, 1, 1, 1, generateRandomDirection());
-  }
+	private LocationStructure generateLocationWithAgentHelper(int width, int height) {
+		LocationStructure struct = null;
+		
+		if (!this.agentFreeLocations.isEmpty()) {
+			addAgentToLocation(generateRandomAgent());
+		}
+		else {
+			struct = generateLocationWithAgent(generateRandomCoordinate(width, height));
+		}
+		
+		this.agents++;
+		
+		return struct;
+	}
 
-  private String generateId() {
-    return String.valueOf(RANDOM.nextLong());
-  }
+	private void addAgentToLocation(AgentStructure agent) {
+		if (!this.agentFreeLocations.isEmpty()) {
+			LocationStructure struct = this.dirtFreeLocations.iterator().next();
+			struct.setAgent(agent);
+			this.agentFreeLocations.remove(struct);
+		}
+		else {
+			Utils.log(Level.SEVERE, "NO FREE LOCATIONS TO ADD AGENT");
+		}
+	}
 
-  private String generateName() {
-    counter++;
-    return AGENT + counter;
-  }
+	private LocationStructure generateLocationWithAgent(VacuumWorldCoordinates coord) {
+		return new LocationStructure(coord.getX(), coord.getY(), generateRandomAgent(), null);
+	}
 
-  private String generateRandomColor() {
-    return COLORS[RANDOM.nextInt(COLORS.length)];
-  }
+	private VacuumWorldCoordinates generateRandomCoordinate(int width, int height) {
+		VacuumWorldCoordinates newCoord;
+		
+		while (this.allCoordinates.contains(newCoord = new VacuumWorldCoordinates(RANDOM.nextInt(width), RANDOM.nextInt(height)))) {
+			continue;
+		}
+		
+		this.allCoordinates.add(newCoord);
+		return newCoord;
+	}
 
-  private String generateRandomDirection() {
-    return DIRECTIONS[RANDOM.nextInt(DIRECTIONS.length)];
-  }
+	private AgentStructure generateRandomAgent() {
+		return new AgentStructure(generateId(), generateName(), generateRandomColor(), generateRandomDirection(), 1, 1, 1, 1);
+	}
 
-  private boolean validateInput(int width, int height, int numAgents,
-      int numDirts) {
-    int totalSpace = width * height;
-    float perAgent = (float) numAgents / totalSpace;
-    float perDirt = (float) numDirts / totalSpace;
+	private String generateId() {
+		return String.valueOf(RANDOM.nextLong());
+	}
 
-    if (perAgent > 0.8) {
-      densityWarning(perAgent, "AGENT");
-      if (perAgent > 1) {
-        densityFailure("AGENT", width, height, numAgents);
-        return false;
-      }
-    }
+	private String generateName() {
+		return AGENT + ++this.counter;
+	}
 
-    if (perDirt > 0.8) {
-      densityWarning(perDirt, "DIRT");
-      if (perDirt > 1) {
-        densityFailure("DIRT", width, height, numDirts);
-        return false;
-      }
-    }
-    return true;
-  }
+	private String generateRandomColor() {
+		return COLORS[RANDOM.nextInt(COLORS.length)];
+	}
 
-  private void densityWarning(float per, String type) {
-    Logger.getGlobal().warning(
-        "MAP " + type + " POPULATION DENSE AT: " + per * 100
-            + "% : CONSIDER ENLARGING MAP");
-  }
+	private String generateRandomDirection() {
+		return DIRECTIONS[RANDOM.nextInt(DIRECTIONS.length)];
+	}
 
-  private void densityFailure(String type, int width, int height, int num) {
-    Logger.getGlobal().severe(
-        "CANNOT ADD " + num + " " + type + " TO A GRID SIZE OF (" + width + ","
-            + height + ")");
-  }
+	private boolean validateInput(int width, int height, int numAgents, int numDirts) {
+		int totalSpace = width * height;
+		float perAgent = (float) numAgents / totalSpace;
+		float perDirt = (float) numDirts / totalSpace;
 
+		return validateAgents(perAgent, width, height, numAgents) && validateDirts(perDirt, width, height, numDirts);
+	}
+
+	private boolean validateDirts(float perDirt, int width, int height, int numDirts) {
+		if (perDirt > 0.8) {
+			densityWarning(perDirt, "DIRT");
+			
+			if (perDirt > 1) {
+				densityFailure("DIRT", width, height, numDirts);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	private boolean validateAgents(float perAgent, int width, int height, int numAgents) {
+		if (perAgent > 0.8) {
+			densityWarning(perAgent, "AGENT");
+			
+			if (perAgent > 1) {
+				densityFailure("AGENT", width, height, numAgents);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	private void densityWarning(float per, String type) {
+		Utils.log(Level.WARNING, "MAP " + type + " POPULATION DENSE AT: " + per * 100 + "% : CONSIDER ENLARGING MAP");
+	}
+
+	private void densityFailure(String type, int width, int height, int num) {
+		Utils.log(Level.SEVERE, "CANNOT ADD " + num + " " + type + " TO A GRID SIZE OF (" + width + "," + height + ")");
+	}
 }

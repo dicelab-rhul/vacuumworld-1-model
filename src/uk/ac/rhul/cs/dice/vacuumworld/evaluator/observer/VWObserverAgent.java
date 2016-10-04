@@ -54,8 +54,7 @@ public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentIn
 	 *            the class of the {@link Actuator Actuators} that will interact
 	 *            with this agent
 	 */
-	public VWObserverAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators,
-			VWObserverMind mind, VWObserverBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
+	public VWObserverAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, VWObserverMind mind, VWObserverBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
 		super(appearance, sensors, actuators, mind, brain, classModel, database);
 	}
 
@@ -79,6 +78,7 @@ public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentIn
 	 * 
 	 * @return the index
 	 */
+	@Override
 	public int getActionResultSensorIndex() {
 		return 0;
 	}
@@ -94,6 +94,7 @@ public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentIn
 		return 0;
 	}
 
+	@Override
 	public String toString() {
 		return this.getClass().getSimpleName();
 	}

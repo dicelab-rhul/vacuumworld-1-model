@@ -6,10 +6,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 
 public class VacuumWorldMonitorActuator extends AbstractActuator {
-  @Override
-  public void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldMonitorAgent && arg instanceof MonitoringEvent) {
-      notifyObservers(arg, VacuumWorldMonitoringContainer.class);
-    }
-  }
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldMonitorAgent && arg instanceof MonitoringEvent) {
+			notifyObservers(arg, VacuumWorldMonitoringContainer.class);
+		}
+	}
 }

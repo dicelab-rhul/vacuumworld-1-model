@@ -34,16 +34,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		
 		initEmptyMap();
 	}
-
-	private void initEmptyMap() {
-		for (int i = 0; i < this.dimensions[0]; i++) {
-			for (int j = 0; j < this.dimensions[1]; j++) {
-				VacuumWorldCoordinates coordinates = new VacuumWorldCoordinates(i, j);
-				this.addLocation(coordinates, new VacuumWorldLocation(coordinates, VacuumWorldLocationType.NORMAL, this.dimensions[0] - 1, this.dimensions[1] - 1));
-			}
-		}
-	}
-
+	
 	public VacuumWorldSpace(int[] dimensions, Map<LocationKey, Location> grid, boolean user, boolean monitoring) {
 		super(grid);
 		
@@ -54,6 +45,15 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		this.agents = new HashMap<>();
 		
 		fillAgentsMap();
+	}
+
+	private void initEmptyMap() {
+		for (int i = 0; i < this.dimensions[0]; i++) {
+			for (int j = 0; j < this.dimensions[1]; j++) {
+				VacuumWorldCoordinates coordinates = new VacuumWorldCoordinates(i, j);
+				this.addLocation(coordinates, new VacuumWorldLocation(coordinates, VacuumWorldLocationType.NORMAL, this.dimensions[0] - 1, this.dimensions[1] - 1));
+			}
+		}
 	}
 
 	private void fillAgentsMap() {
@@ -86,7 +86,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	public Set<VacuumWorldCleaningAgent> getAgents() {
-		return new HashSet<VacuumWorldCleaningAgent>(this.agents.values());
+		return new HashSet<>(this.agents.values());
 	}
 
 	public VacuumWorldLocation getNorthernLocation(int x, int y) {

@@ -29,117 +29,115 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
  *
  */
 public class VWObserverMind extends ObserverMind {
-  private EnvironmentalAction nextAction;
-  private MonitoringResult currentPerception;
-  private CollectionRepresentation dirtCollection;
+	private EnvironmentalAction nextAction;
+	private MonitoringResult currentPerception;
+	private CollectionRepresentation dirtCollection;
 
-  /**
-   * Constructor.
-   * 
-   * @param refiner
-   *          for refining {@link Perceptions}. Note that this should be
-   *          {@link DefaultPerceptionRefiner} as (unless for a good reason) the
-   *          perception should not be refined further. Only parse a value other
-   *          than {@link DefaultPerceptionRefiner} if you understand the
-   *          implications; having create a new {@link MongoBridge} etc.
-   * @param collection
-   *          that will be used by this database agent when attempting
-   *          {@link DatabaseAction DatabaseActions}
-   */
-  public VWObserverMind(PerceptionRefiner refiner,
-      CollectionRepresentation dirtCollection,
-      CollectionRepresentation agentCollection) {
-    super(refiner, agentCollection);
-    this.setDirtCollection(dirtCollection);
-  }
+	/**
+	 * Constructor.
+	 * 
+	 * @param refiner
+	 *            for refining {@link Perceptions}. Note that this should be
+	 *            {@link DefaultPerceptionRefiner} as (unless for a good reason)
+	 *            the perception should not be refined further. Only parse a
+	 *            value other than {@link DefaultPerceptionRefiner} if you
+	 *            understand the implications; having create a new
+	 *            {@link MongoBridge} etc.
+	 * @param collection
+	 *            that will be used by this database agent when attempting
+	 *            {@link DatabaseAction DatabaseActions}
+	 */
+	public VWObserverMind(PerceptionRefiner refiner, CollectionRepresentation dirtCollection, CollectionRepresentation agentCollection) {
+		super(refiner, agentCollection);
+		this.setDirtCollection(dirtCollection);
+	}
 
-  @Override
-  public EnvironmentalAction decide(Object... parameters) {
-    try {
-      this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      e.printStackTrace();
-    }
-    return this.nextAction;
-  }
+	@Override
+	public EnvironmentalAction decide(Object... parameters) {
+		try {
+			this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
+		}
+		catch (InstantiationException | IllegalAccessException e) {
+			Utils.log(e);
+		}
+		return this.nextAction;
+	}
 
-  @Override
-  public void updateCon(CustomObservable o, Object arg) {
-    if (o instanceof VWObserverBrain && arg instanceof MonitoringResult) {
-      this.currentPerception = (MonitoringResult) arg;
-    }
-  }
+	@Override
+	public void updateCon(CustomObservable o, Object arg) {
+		if (o instanceof VWObserverBrain && arg instanceof MonitoringResult) {
+			this.currentPerception = (MonitoringResult) arg;
+		}
+	}
 
-  /**
-   * Starts the perceive process, which for an {@link ObserverAgent} involves
-   * sending the perception to a database.
-   */
-  @Override
-  public void perceive(Object perceptionWrapper) {
-    notifyObservers(null, VWObserverBrain.class);
-    if (this.currentPerception != null) {
-      // check that it did not fail?
-      this.storePerception(new VacuumWorldWriteAction(this.getDirtCollection(),
-          this.getAgentCollection(), super.refine(currentPerception
-              .getPerception())));
-    }
-  }
+	/**
+	 * Starts the perceive process, which for an {@link ObserverAgent} involves
+	 * sending the perception to a database.
+	 */
+	@Override
+	public void perceive(Object perceptionWrapper) {
+		notifyObservers(null, VWObserverBrain.class);
+		if (this.currentPerception != null) {
+			this.storePerception(new VacuumWorldWriteAction(this.getDirtCollection(), this.getAgentCollection(), super.refine(this.currentPerception.getPerception())));
+		}
+	}
 
-  @Override
-  public void execute(EnvironmentalAction action) {
-    notifyObservers(this.nextAction, VWObserverBrain.class);
-  }
+	@Override
+	public void execute(EnvironmentalAction action) {
+		notifyObservers(this.nextAction, VWObserverBrain.class);
+	}
 
-  @Override
-  protected void manageWriteResult(WriteResult result) {
-    if (result.getActionResult().equals(ActionResult.ACTION_DONE)) {
-      return;
-    } else {
-      Utils.log(result.getFailureReason());
-    }
-  }
+	@Override
+	protected void manageWriteResult(WriteResult result) {
+		if (result.getActionResult().equals(ActionResult.ACTION_DONE)) {
+			return;
+		}
+		else {
+			Utils.log(result.getFailureReason());
+		}
+	}
 
-  public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
-    for (Class<? extends AbstractAction> action : actions) {
-      super.addAvailableActionForThisCycle(action);
-    }
-  }
+	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
+		for (Class<? extends AbstractAction> action : actions) {
+			super.addAvailableActionForThisCycle(action);
+		}
+	}
 
-  public CollectionRepresentation getDirtCollection() {
-    return dirtCollection;
-  }
+	public CollectionRepresentation getDirtCollection() {
+		return this.dirtCollection;
+	}
 
-  public void setDirtCollection(CollectionRepresentation dirtCollection) {
-    this.dirtCollection = dirtCollection;
-  }
+	public void setDirtCollection(CollectionRepresentation dirtCollection) {
+		this.dirtCollection = dirtCollection;
+	}
 
-  public CollectionRepresentation getAgentCollection() {
-    return super.getCollection();
-  }
+	public CollectionRepresentation getAgentCollection() {
+		return super.getCollection();
+	}
 
-  public void setAgentCollection(CollectionRepresentation agentCollection) {
-    super.setCollection(agentCollection);
-  }
+	public void setAgentCollection(CollectionRepresentation agentCollection) {
+		super.setCollection(agentCollection);
+	}
 
-  /**
-   * 
-   * @deprecated should use {@link #getDirtCollection()} or
-   *             {@link #getAgentCollection()} instead
-   */
-  @Override
-  @Deprecated
-  public CollectionRepresentation getCollection() {
-    throw new UnsupportedOperationException();
-  }
+	/**
+	 * 
+	 * @deprecated should use {@link #getDirtCollection()} or
+	 *             {@link #getAgentCollection()} instead
+	 */
+	@Override
+	@Deprecated
+	public CollectionRepresentation getCollection() {
+		throw new UnsupportedOperationException();
+	}
 
-  /**
-   * 
-   * @deprecated should use {@link #setDirtCollection()} or
-   *             {@link #setAgentCollection()} instead
-   */
-  @Override
-  @Deprecated
-  public void setCollection(CollectionRepresentation collection) {
-    throw new UnsupportedOperationException();
-  }
+	/**
+	 * 
+	 * @deprecated should use {@link #setDirtCollection()} or
+	 *             {@link #setAgentCollection()} instead
+	 */
+	@Override
+	@Deprecated
+	public void setCollection(CollectionRepresentation collection) {
+		throw new UnsupportedOperationException();
+	}
 }

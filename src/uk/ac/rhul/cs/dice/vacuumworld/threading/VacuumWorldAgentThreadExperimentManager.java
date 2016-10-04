@@ -1,92 +1,109 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
-public class VacuumWorldAgentThreadExperimentManager extends
-    VacuumWorldAgentThreadManager {
+public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThreadManager {
 
-  private ArrayList<long[]> pdeTimes = new ArrayList<>();
-  private int numberOfCycles;
-  private String testCase;
-  
-  public VacuumWorldAgentThreadExperimentManager(int numberOfCycles) {
-    this.numberOfCycles = numberOfCycles;
-  }
-  
-  public void clear() {
-    this.activeThreads.clear();
-    this.cleaningRunnables.clear();
-    this.monitorRunnables.clear();
-    pdeTimes.clear();
-    testCase = null;
-    this.simulationStarted = false;
-  }
+	private List<long[]> pdeTimes = new ArrayList<>();
+	private int numberOfCycles;
+	private String testCase;
 
-  @Override
-  protected void cycle() {
-    System.out.println("Start: " + testCase + " experiment...");
-    boolean doPerceive = false;
-    int i = 0;
-    while (i < numberOfCycles) {
-      doCycleStep(monitorRunnables);
-      super.doCycleStep(this.cleaningRunnables, doPerceive);
-      doPerceive = true;
-      i++;
-    }
-    
-    StringBuilder builder = new StringBuilder();
-    builder.append(testCase + " ");
-    for(int j = 0; j < pdeTimes.size(); j++) {
-      long[] v = pdeTimes.get(j);
-      builder.append((v[0] + v[1] + v[2]) + " ");
-    }
-    Logger log = Utils.fileLogger("logs/test/results.txt", true);
-    log.info(builder.toString());
-    //close file handlers
-    Handler h[] = log.getHandlers();
-    for(int k = 0; k < h.length; k++) {
-      h[k].close();
-    }
-    System.out.println("Complete");
-  }
+	public VacuumWorldAgentThreadExperimentManager(int numberOfCycles) {
+		this.numberOfCycles = numberOfCycles;
+	}
 
-  @Override
-  protected void doCycleStep(Set<AgentRunnable> agentsRunnables,
-      boolean... flags) {
-    long p = timePerceive(agentsRunnables);
-    long d = timeDecide(agentsRunnables);
-    long e = timeExecute(agentsRunnables);
-    pdeTimes.add(new long[] { p, d, e });
-  }
+	public void clear() {
+		this.activeThreads.clear();
+		this.cleaningRunnables.clear();
+		this.monitorRunnables.clear();
+		this.pdeTimes.clear();
+		this.testCase = null;
+		this.simulationStarted = false;
+	}
 
-  private long timeDecide(Set<AgentRunnable> agentsRunnables) {
-    Long l = System.nanoTime();
-    doDecide(agentsRunnables);
-    return System.nanoTime() - l;
-  }
+	@Override
+	protected void cycle() {
+		Utils.log("Start: " + this.testCase + " experiment...");
+		
+		cycleHelper();
+		log();
+	}
 
-  private long timePerceive(Set<AgentRunnable> agentsRunnables) {
-    Long l = System.nanoTime();
-    doPerceive(agentsRunnables, true);
-    return System.nanoTime() - l;
-  }
+	private void log() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(this.testCase + " ");
+		
+		for (int j = 0; j < this.pdeTimes.size(); j++) {
+			long[] v = this.pdeTimes.get(j);
+			builder.append((v[0] + v[1] + v[2]) + " ");
+		}
+		
+		Logger log = Utils.fileLogger("logs/test/results.txt", true);
+		log.info(builder.toString());
+		
+		closeHandlers(log);
+	}
 
-  private long timeExecute(Set<AgentRunnable> agentsRunnables) {
-    Long l = System.nanoTime();
-    doExecute(agentsRunnables);
-    return System.nanoTime() - l;
-  }
+	private void closeHandlers(Logger log) {
+		Handler[] h = log.getHandlers();
+		
+		for (int k = 0; k < h.length; k++) {
+			h[k].close();
+		}
+		Utils.log("Complete");
+	}
 
-  public String getTestCase() {
-    return testCase;
-  }
+	private void cycleHelper() {
+		boolean doPerceive = false;
+		
+		for(int i=0; i < this.numberOfCycles; i++) {
+			doCycleStep(this.monitorRunnables);
+			super.doCycleStep(this.cleaningRunnables, doPerceive);
+			doPerceive = true;
+		}
+	}
 
-  public void setTestCase(String testCase) {
-    this.testCase = testCase;
-  }
+	@Override
+	protected void doCycleStep(Set<AgentRunnable> agentsRunnables, boolean... flags) {
+		long p = timePerceive(agentsRunnables);
+		long d = timeDecide(agentsRunnables);
+		long e = timeExecute(agentsRunnables);
+		
+		this.pdeTimes.add(new long[] { p, d, e });
+	}
+
+	private long timeDecide(Set<AgentRunnable> agentsRunnables) {
+		Long l = System.nanoTime();
+		doDecide(agentsRunnables);
+		
+		return System.nanoTime() - l;
+	}
+
+	private long timePerceive(Set<AgentRunnable> agentsRunnables) {
+		Long l = System.nanoTime();
+		doPerceive(agentsRunnables, true);
+	
+		return System.nanoTime() - l;
+	}
+
+	private long timeExecute(Set<AgentRunnable> agentsRunnables) {
+		Long l = System.nanoTime();
+		doExecute(agentsRunnables);
+		
+		return System.nanoTime() - l;
+	}
+
+	public String getTestCase() {
+		return testCase;
+	}
+
+	public void setTestCase(String testCase) {
+		this.testCase = testCase;
+	}
 }

@@ -1,6 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer;
 
-import java.util.HashSet;
+import java.util.Set;
 
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.AgentDatabaseRepresentation;
@@ -8,30 +8,28 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.DirtDatabaseRe
 
 public class DatabasePerception implements RefinedPerception {
 
-  private HashSet<AgentDatabaseRepresentation> agents;
-  private HashSet<DirtDatabaseRepresentation> dirts;
-  private Integer lastCycleRead = null;
+	private Set<AgentDatabaseRepresentation> agents;
+	private Set<DirtDatabaseRepresentation> dirts;
+	private Integer lastCycleRead = null;
 
-  public DatabasePerception(HashSet<AgentDatabaseRepresentation> agents,
-      HashSet<DirtDatabaseRepresentation> dirts) {
-    this.agents = agents;
-    this.dirts = dirts;
-  }
+	public DatabasePerception(Set<AgentDatabaseRepresentation> agents, Set<DirtDatabaseRepresentation> dirts) {
+		this.agents = agents;
+		this.dirts = dirts;
+	}
 
-  public HashSet<AgentDatabaseRepresentation> getAgents() {
-    return agents;
-  }
+	public Set<AgentDatabaseRepresentation> getAgents() {
+		return this.agents;
+	}
 
-  public HashSet<DirtDatabaseRepresentation> getDirts() {
-    return dirts;
-  }
+	public Set<DirtDatabaseRepresentation> getDirts() {
+		return this.dirts;
+	}
 
-  public Integer getLastCycleRead() {
-    return lastCycleRead;
-  }
+	public Integer getLastCycleRead() {
+		return this.lastCycleRead;
+	}
 
-  public void setLastCycleRead(Integer lastCycleRead) {
-    this.lastCycleRead = lastCycleRead;
-  }
-
+	public void setLastCycleRead(Integer lastCycleRead) {
+		this.lastCycleRead = lastCycleRead;
+	}
 }

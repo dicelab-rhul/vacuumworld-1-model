@@ -47,4 +47,19 @@ public enum AgentFacingDirection {
 			throw new IllegalArgumentException("Bad facing position: " + this);
 		}
 	}
+	
+	public boolean isOpposite(AgentFacingDirection candidate) {
+		switch(this) {
+		case NORTH:
+			return candidate.equals(SOUTH);
+		case SOUTH:
+			return candidate.equals(NORTH);
+		case WEST:
+			return candidate.equals(EAST);
+		case EAST:
+			return candidate.equals(WEST);
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
 }

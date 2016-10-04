@@ -3,13 +3,13 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.BiConsumer;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class is specifically for formatting experiment output in its original format
@@ -21,59 +21,55 @@ import java.util.function.BiConsumer;
  * @author Ben Wilkins
  *
  */
-public class ExperimentOrderedOutputFormatter implements
-    ExperimentOutputFormatter {
+public class ExperimentOrderedOutputFormatter implements ExperimentOutputFormatter {
+	private Map<String, List<String>> groups = new HashMap<>();
+	private List<String> lines = new ArrayList<>();
 
-  BufferedReader reader;
-  BufferedWriter writer;
-  HashMap<String, ArrayList<String>> groups = new HashMap<>();
-  ArrayList<String> lines = new ArrayList<>();
+	@Override
+	public void format(File input, File output) {
+		try(BufferedReader reader = new BufferedReader(new FileReader(input)); BufferedWriter writer = new BufferedWriter(new FileWriter(output))) {
+			read(reader);
+			
+			for(List<String> value : this.groups.values()) {
+				write(writer, value);
+			}			
+		}
+		catch (IOException e) {
+			Utils.log(e);
+		}
+	}
 
-  @Override
-  public void format(File input, File output) {
-    try {
-      reader = new BufferedReader(new FileReader(input));
-      String line = null;
-      while ((line = reader.readLine()) != null) {
-        lines.add(line);
-        String[] nameSplit = line.split(" ", 2);
-        nameSplit[0] = nameSplit[0].replace("JSONTestCases\\", "");
-        nameSplit[0] = nameSplit[0].replace(".json", "");
-        nameSplit[0] = nameSplit[0].replace("\\", "-");
+	private void read(BufferedReader reader) throws IOException {
+		String line;
+		
+		while ((line = reader.readLine()) != null) {
+			this.lines.add(line);
+			String[] nameSplit = line.split(" ", 2);
+			nameSplit[0] = nameSplit[0].replace("JSONTestCases\\", "");
+			nameSplit[0] = nameSplit[0].replace(".json", "");
+			nameSplit[0] = nameSplit[0].replace("\\", "-");
 
-        String[] mapSplit = nameSplit[0].split("-");
-        groups.putIfAbsent(mapSplit[0], new ArrayList<String>());
-        groups.get(mapSplit[0]).add(nameSplit[0] + " " + nameSplit[1]);
-      }
-      writer = new BufferedWriter(new FileWriter(output));
-      groups.forEach(new BiConsumer<String, ArrayList<String>>() {
-        @Override
-        public void accept(String arg0, ArrayList<String> arg1) {
-          for (String s : arg1) {
-            try {
-              writer.write(s + "\n");
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          }
-        }
-      });
-      writer.flush();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        reader.close();
-        writer.close();
-      } catch (IOException e) {
-      }
-    }
-  }
+			String[] mapSplit = nameSplit[0].split("-");
+			this.groups.putIfAbsent(mapSplit[0], new ArrayList<String>());
+			this.groups.get(mapSplit[0]).add(nameSplit[0] + " " + nameSplit[1]);
+		}
+	}
 
-  @Override
-  public void format(String[] data, File output) {
-    System.out.println("FORMAT METHOD NOT SUPPORTED BY: " + this.getClass());
-  }
+	private void write(BufferedWriter writer, List<String> values) throws IOException {
+		for (String s : values) {
+			try {
+				writer.write(s + "\n");
+			}
+			catch (IOException e) {
+				Utils.log(e);
+			}
+		}
+		
+		writer.flush();
+	}
+
+	@Override
+	public void format(String[] data, File output) {
+		Utils.log("FORMAT METHOD NOT SUPPORTED BY: " + this.getClass());
+	}
 }

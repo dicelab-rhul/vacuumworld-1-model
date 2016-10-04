@@ -36,14 +36,17 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 		this.currentLocation = null;
 	}
 
+	@Override
 	public final int getPerceptionRange() {
 		return PERCEPTION_RANGE;
 	}
 
+	@Override
 	public final boolean canSeeBehind() {
 		return CAN_SEE_BEHIND;
 	}
 
+	@Override
 	public final int getActionActuatorIndex() {
 		return ACTION_ACTUATOR_INDEX;
 	}
@@ -52,6 +55,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 		return MIND_SIGNAL_ACTUATOR_INDEX;
 	}
 
+	@Override
 	public final int getActionResultSensorIndex() {
 		return ACTION_RESULT_SENSOR_INDEX;
 	}
@@ -69,7 +73,8 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 	public void update(CustomObservable o, Object arg) {
 		if (o instanceof VacuumWorldDefaultBrain) {
 			manageBrainRequest(arg);
-		} else if (o instanceof VacuumWorldDefaultSensor) {
+		}
+		else if (o instanceof VacuumWorldDefaultSensor) {
 			manageSensorRequest(arg);
 		}
 	}
@@ -144,11 +149,20 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 		return this.facingDirection;
 	}
 
-	public void turnLeft() {
+	public void turn(boolean right) {
+		if(right) {
+			turnRight();
+		}
+		else {
+			turnLeft();
+		}
+	}
+	
+	private void turnLeft() {
 		this.facingDirection = this.facingDirection.getLeftDirection();
 	}
 
-	public void turnRight() {
+	private void turnRight() {
 		this.facingDirection = this.facingDirection.getRightDirection();
 	}
 
@@ -172,8 +186,6 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 
 	@Override
 	public String toString() {
-		return "{" + this.getClass().getSimpleName() + "(" + this.currentLocation.getX() + ","
-				+ this.currentLocation.getY() + "," + this.facingDirection + "),Sensors: " + this.getSensors().size()
-				+ ",Actuators: " + this.getActuators().size() + "}";
+		return "{" + this.getClass().getSimpleName() + "(" + this.currentLocation.getX() + "," + this.currentLocation.getY() + "," + this.facingDirection + "),Sensors: " + this.getSensors().size() + ",Actuators: " + this.getActuators().size() + "}";
 	}
 }

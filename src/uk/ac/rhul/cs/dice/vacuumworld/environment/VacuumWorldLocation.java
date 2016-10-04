@@ -199,36 +199,36 @@ public class VacuumWorldLocation implements Location, Lockable {
 		if (getClass() != obj.getClass())
 			return false;
 		VacuumWorldLocation other = (VacuumWorldLocation) obj;
-		if (agent == null) {
+		if (this.agent == null) {
 			if (other.agent != null)
 				return false;
-		} else if (!agent.equals(other.agent))
+		} else if (!this.agent.equals(other.agent))
 			return false;
-		if (coordinates == null) {
+		if (this.coordinates == null) {
 			if (other.coordinates != null)
 				return false;
 		} else if (!coordinates.equals(other.coordinates))
 			return false;
-		if (easternLocationType != other.easternLocationType)
+		if (this.easternLocationType != other.easternLocationType)
 			return false;
-		if (northernLocationType != other.northernLocationType)
+		if (this.northernLocationType != other.northernLocationType)
 			return false;
-		if (obstacle == null) {
+		if (this.obstacle == null) {
 			if (other.obstacle != null)
 				return false;
 		} else if (!obstacle.equals(other.obstacle))
 			return false;
-		if (readers != other.readers)
+		if (this.readers != other.readers)
 			return false;
-		if (southernLocationType != other.southernLocationType)
+		if (this.southernLocationType != other.southernLocationType)
 			return false;
-		if (type != other.type)
+		if (this.type != other.type)
 			return false;
-		if (underExclusiveWriteLock != other.underExclusiveWriteLock)
+		if (this.underExclusiveWriteLock != other.underExclusiveWriteLock)
 			return false;
-		if (underSharedReadLock != other.underSharedReadLock)
+		if (this.underSharedReadLock != other.underSharedReadLock)
 			return false;
-		if (westernLocationType != other.westernLocationType)
+		if (this.westernLocationType != other.westernLocationType)
 			return false;
 		return true;
 	}

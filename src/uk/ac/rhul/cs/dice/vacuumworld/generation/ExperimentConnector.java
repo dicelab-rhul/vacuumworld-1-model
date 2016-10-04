@@ -1,146 +1,183 @@
 package uk.ac.rhul.cs.dice.vacuumworld.generation;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class ExperimentConnector {
 
-  private final String PATH = "path";
-  private final String SIZES = "sizes";
-  private final String AGENTS = "agents";
-  private final String CONFIGFILE = "TestConfig.txt";
+	private static final String PATH_KEY = "path";
+	private static final String SIZES_KEY = "sizes";
+	private static final String AGENTS_KEY = "agents";
+	private static final String CONFIG_FILE = "TestConfig.txt";
 
-  private String path;
-  private int[] sizes;
-  private int[] agents;
+	private String path;
+	private int[] sizes;
+	private int[] agents;
 
-  private GenerationSequence gen = null;
+	private GenerationSequence gen = null;
 
-  public ExperimentConnector() throws ConfigFileException {
-    File config = getConfigFile();
-    ArrayList<String> lines = new ArrayList<>();
-    try {
-      BufferedReader r = new BufferedReader(new FileReader(config));
-      String line = null;
-      while ((line = r.readLine()) != null) {
-        lines.add(line);
-      }
-      r.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    Iterator<String> iter = lines.iterator();
-    while (iter.hasNext()) {
-      handleLine(iter.next());
-    }
-  }
+	public ExperimentConnector() throws ConfigFileException {
+		File config = getConfigFile();
+		List<String> lines = new ArrayList<>();
+		
+		try (Stream<String> stream = Files.lines(Paths.get(config.getAbsolutePath()))) {
+			stream.forEach((String s) -> handle(lines, s));
+		}
+		catch (Exception e) {
+			Utils.log(e);
+		}
+	}
 
-  public void generateTestFiles() throws ConfigFileException {
-    File p = new File(path);
-    if (!p.exists()) {
-      if (!p.mkdir()) {
-        throw new ConfigFileException("Cannot create dir: " + path);
-      }
-    }
-    gen = new GenerationSequence(path + "/", sizes, agents);
-    gen.generateAllTestCases();
-  }
+	public void handle(List<String> lines, String line) {
+		try {
+			lines.add(line);
+			handleLine(line);
+		}
+		catch (Exception e) {
+			Utils.log(e);
+		}
+	}
+	
+	public void generateTestFiles() throws ConfigFileException {
+		File p = new File(this.path);
+		
+		if (!p.exists()) {
+			create(p);
+		}
+		
+		this.gen = new GenerationSequence(this.path + "/", sizes, agents);
+		this.gen.generateAllTestCases();
+	}
 
-  private void handleLine(String line) throws ConfigFileException {
-    String[] split = line.split(":");
-    if (split.length != 2) {
-      throw new ConfigFileException("invalid line structure: " + line);
-    }
-    String com = split[0].trim();
-    if (PATH.equals(com)) {
-      handlePath(split[1]);
-    } else if (SIZES.equals(com)) {
-      sizes = handleArray(split[1]);
-    } else if (AGENTS.equals(com)) {
-      agents = handleArray(split[1]);
-    } else {
-      throw new ConfigFileException("invalid property: " + com);
-    }
-  }
+	private void create(File p) throws ConfigFileException {
+		if (!p.mkdir()) {
+			throw new ConfigFileException("Cannot create dir: " + this.path);
+		}
+	}
 
-  private void handlePath(String line) {
-    path = line.replaceAll("\\s+", "");
-  }
+	private void handleLine(String line) throws ConfigFileException {
+		String[] split = line.split(":");
+		
+		if (split.length != 2) {
+			throw new ConfigFileException("invalid line structure: " + line);
+		}
+		
+		String com = split[0].trim();
+		handleLineHelper(split, com);
+	}
 
-  private int[] handleArray(String line) throws ConfigFileException {
-    line = line.replaceAll("\\s+", "");
-    String[] split = line.split(",");
-    if (split.length < 1) {
-      throw new ConfigFileException("invalid number of arguments");
-    }
-    int[] array = new int[split.length];
-    for (int i = 0; i < split.length; i++) {
-      array[i] = Integer.valueOf(split[i]);
-    }
-    return array;
-  }
+	private void handleLineHelper(String[] split, String com) throws ConfigFileException {
+		if (PATH_KEY.equals(com)) {
+			handlePath(split[1]);
+		}
+		else if (SIZES_KEY.equals(com)) {
+			this.sizes = handleArray(split[1]);
+		}
+		else if (AGENTS_KEY.equals(com)) {
+			this.agents = handleArray(split[1]);
+		}
+		else {
+			throw new ConfigFileException("invalid property: " + com);
+		}
+	}
 
-  private File getConfigFile() throws ConfigFileException {
-    File config = new File(CONFIGFILE);
-    if (!config.exists()) {
-      throw new ConfigFileException("config file does not exist");
-    }
-    return config;
-  }
+	private void handlePath(String line) {
+		path = line.replaceAll("\\s+", "");
+	}
 
-  public HashSet<File> getFilePaths() throws ConfigFileException {
-    if (gen == null) {
-      HashSet<File> files = new HashSet<>();
-      recurseFileStructure(new File(path + "/"), files);
-      files.forEach(new Consumer<File>() {
-        @Override
-        public void accept(File t) {
-          System.out.println(t.getPath());
-        }
-      });
-      return files;
+	private int[] handleArray(String line) throws ConfigFileException {
+		String tmp = line.replaceAll("\\s+", "");
+		String[] split = tmp.split(",");
+		
+		if (split.length < 1) {
+			throw new ConfigFileException("invalid number of arguments");
+		}
+		
+		return handleArrayHelper(split);
+	}
 
-    } else {
-      return gen.getCompleteFilePaths();
-    }
-  }
+	private int[] handleArrayHelper(String[] split) {
+		int[] array = new int[split.length];
+		
+		for (int i = 0; i < split.length; i++) {
+			array[i] = Integer.valueOf(split[i]);
+		}
+		return array;
+	}
 
-  public void recurseFileStructure(File folder, HashSet<File> files) {
-    HashSet<File> folders = new HashSet<>();
-    File[] listOfFiles = folder.listFiles();
-    for (int i = 0; i < listOfFiles.length; i++) {
-      files.add(listOfFiles[i]);
-    }
-    files.forEach(new Consumer<File>() {
-      @Override
-      public void accept(File f) {
-        if (f.isFile()) {
-          files.add(f);
-        } else if (f.isDirectory()) {
-          folders.add(f);
-        }
-      }
-    });
-    files.removeAll(folders);
-    folders.forEach(new Consumer<File>() {
-      @Override
-      public void accept(File f) {
-        recurseFileStructure(f, files);
-      }
-    });
-  }
+	private File getConfigFile() throws ConfigFileException {
+		File config = new File(CONFIG_FILE);
+		
+		if (!config.exists()) {
+			throw new ConfigFileException("config file does not exist");
+		}
+		
+		return config;
+	}
 
-  public class ConfigFileException extends Exception {
-    private static final long serialVersionUID = 1L;
+	public Set<File> getFilePaths() throws ConfigFileException {
+		if (this.gen == null) {
+			Set<File> files = new HashSet<>();
+			recurseFileStructure(new File(path + "/"), files);
+			logPaths(files);
+			
+			return files;
 
-    public ConfigFileException(String message) {
-      super(CONFIGFILE + " doesnt exist or is not in the correct format: "
-          + message);
-    }
-  }
+		}
+		else {
+			return this.gen.getCompleteFilePaths();
+		}
+	}
+
+	private void logPaths(Set<File> files) {
+		for(File file : files) {
+			Utils.log(file.getPath());
+		}
+	}
+
+	public void recurseFileStructure(File folder, Set<File> files) {
+		Set<File> folders = new HashSet<>();
+		File[] listOfFiles = folder.listFiles();
+		
+		for (int i = 0; i < listOfFiles.length; i++) {
+			files.add(listOfFiles[i]);
+		}
+		
+		separateFilesAndFolders(files, folders);
+		files.removeAll(folders);
+		doRecursion(folders, files);
+	}
+
+	private void doRecursion(Set<File> folders, Set<File> files) {
+		for(File folder : folders) {
+			recurseFileStructure(folder, files);
+		}
+	}
+
+	private void separateFilesAndFolders(Set<File> files, Set<File> folders) {
+		for(File file : files) {
+			if (file.isFile()) {
+				files.add(file);
+			}
+			else if (file.isDirectory()) {
+				folders.add(file);
+			}
+		}
+	}
+
+	public class ConfigFileException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public ConfigFileException(String message) {
+			super(CONFIG_FILE + " doesnt exist or is not in the correct format: " + message);
+		}
+	}
 }

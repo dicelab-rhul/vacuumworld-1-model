@@ -21,13 +21,13 @@ public class VacuumWorldAppearance extends UniverseAppearance {
 	
 	@Override
 	public String represent() {
-		String representation = "";
+		StringBuilder representation = new StringBuilder();
 		
 		for(String s : this.stringRepresentation) {
-			representation += s + "\n";
+			representation.append(s + "\n");
 		}
 		
-		return representation + "\n";
+		return representation.toString() + "\n";
 	}
 
 	@Override
@@ -47,10 +47,10 @@ public class VacuumWorldAppearance extends UniverseAppearance {
 		if (getClass() != obj.getClass())
 			return false;
 		VacuumWorldAppearance other = (VacuumWorldAppearance) obj;
-		if (stringRepresentation == null) {
+		if (this.stringRepresentation == null) {
 			if (other.stringRepresentation != null)
 				return false;
-		} else if (!stringRepresentation.equals(other.stringRepresentation))
+		} else if (!this.stringRepresentation.equals(other.stringRepresentation))
 			return false;
 		return true;
 	}

@@ -63,7 +63,7 @@ public class Utils {
 	}
 	
 	public static void println(String source, String message) {
-		System.out.println(source + ": " + message);
+		log(source + ": " + message);
 	}
 
 	public static void doWait(int milliseconds) {

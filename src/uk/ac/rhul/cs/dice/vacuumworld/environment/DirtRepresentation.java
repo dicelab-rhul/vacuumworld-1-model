@@ -9,47 +9,47 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.DirtDatabaseRe
  * {@link VacuumWorldMonitoringContainer} to build a useful representation of
  * what is happening inside its sub container - {@link VacuumWorldSpace}. </br>
  * See also: {@link DirtDatabaseRepresentation},
- * {@link VacuumWorldSpaceRepresentation}. </br> Note: The position of the dirt
- * is stored by {@link VacuumWorldSpaceRepresentation}.
+ * {@link VacuumWorldSpaceRepresentation}. </br>
+ * Note: The position of the dirt is stored by
+ * {@link VacuumWorldSpaceRepresentation}.
  * 
  * @author Ben Wilkins
  *
  */
-public class DirtRepresentation implements Cloneable {
-  private String _id;
-  private DirtType type;
+public class DirtRepresentation {
+	private String _id;
+	private DirtType type;
 
-  /**
-   * Constructor.
-   * 
-   * @param _id
-   *          the id of the dirt
-   * @param type
-   *          the {@link DirtType} of the dirt
-   */
-  public DirtRepresentation(String _id, DirtType type) {
-    super();
-    this._id = _id;
-    this.type = type;
-  }
-  
-  public DirtRepresentation clone() {
-    return new DirtRepresentation(this._id, this.type);
-  }
+	/**
+	 * Constructor.
+	 * 
+	 * @param id
+	 *            the id of the dirt
+	 * @param type
+	 *            the {@link DirtType} of the dirt
+	 */
+	public DirtRepresentation(String id, DirtType type) {
+		this._id = id;
+		this.type = type;
+	}
 
-  public String get_id() {
-    return _id;
-  }
+	public DirtRepresentation duplicate() {
+		return new DirtRepresentation(this._id, this.type);
+	}
 
-  public void set_id(String _id) {
-    this._id = _id;
-  }
+	public String getId() {
+		return this._id;
+	}
 
-  public DirtType getType() {
-    return type;
-  }
+	public void setId(String id) {
+		this._id = id;
+	}
 
-  public void setType(DirtType type) {
-    this.type = type;
-  }
+	public DirtType getType() {
+		return this.type;
+	}
+
+	public void setType(DirtType type) {
+		this.type = type;
+	}
 }

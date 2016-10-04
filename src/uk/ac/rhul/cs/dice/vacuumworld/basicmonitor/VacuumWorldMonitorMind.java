@@ -24,37 +24,42 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 
 	public VacuumWorldMonitorMind(VacuumWorldStepEvaluationStrategy strategy) {
 		this.strategy = strategy;
-		if(VacuumWorldServer.LOG) {
-		  this.logger = Utils.fileLogger("logs/eval/evaluation.log", false);
+		
+		if (VacuumWorldServer.LOG) {
+			this.logger = Utils.fileLogger("logs/eval/evaluation.log", false);
 		}
 	}
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		try {
-      this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
-    } catch (InstantiationException | IllegalAccessException e ) {
-      e.printStackTrace();
-    }
+			this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
+		}
+		catch (InstantiationException | IllegalAccessException e) {
+			Utils.log(e);
+		}
+		
 		return this.nextAction;
 	}
 
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, VacuumWorldMonitorBrain.class);
+		
 		if (this.perception != null) {
-			this.strategy.update(((VacuumWorldSpaceRepresentation) (this.perception).getPerception()).clone());
+			this.strategy.update(((VacuumWorldSpaceRepresentation) (this.perception).getPerception()).replicate());
 		}
 	}
 
 	@Override
 	public void execute(EnvironmentalAction action) {
 		notifyObservers(this.nextAction, VacuumWorldMonitorBrain.class);
-		
+
 		if (Utils.getCycleNumber() % 5 == 0 && Utils.getCycleNumber() != 0) {
 			Evaluation e = this.strategy.evaluate(null, 0, Utils.getCycleNumber());
-			if(VacuumWorldServer.LOG) {
-			  this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
+			
+			if (VacuumWorldServer.LOG) {
+				this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
 			}
 		}
 	}

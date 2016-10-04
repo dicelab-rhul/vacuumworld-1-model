@@ -118,7 +118,16 @@ public class VacuumWorldServer implements Observer {
 		this.monitoringWorldActions.add(TotalPerceptionAction.class);
 	}
 
-	public void startServer(String[] args) throws ClassNotFoundException, HandshakeException {
+	public void startServer(String[] args) throws HandshakeException {
+		try {
+			startServerHelper(args);
+		}
+		catch(ClassNotFoundException e) {
+			throw new HandshakeException(e);
+		}
+	}
+	
+	private void startServerHelper(String[] args) throws ClassNotFoundException, HandshakeException {
 		if (args[0].equals(Main.TEST)) {
 			test(args);
 		} 
@@ -157,7 +166,7 @@ public class VacuumWorldServer implements Observer {
 				tester.generateTestFiles();
 			}
 			
-			HashSet<File> files = tester.getFilePaths();
+			Set<File> files = tester.getFilePaths();
 			
 			for(File file : files) {
 				String name = file.getParent() + "/" + file.getName();

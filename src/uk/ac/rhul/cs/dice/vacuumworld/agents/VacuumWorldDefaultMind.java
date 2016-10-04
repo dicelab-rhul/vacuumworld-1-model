@@ -17,103 +17,104 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 
-  private int perceptionRange;
-  private boolean canSeeBehind;
+	private int perceptionRange;
+	private boolean canSeeBehind;
 
-  private Set<Class<? extends AbstractAction>> actions;
-  private List<Class<? extends EnvironmentalAction>> availableActions;
+	private Set<Class<? extends AbstractAction>> actions;
+	private List<Class<? extends EnvironmentalAction>> availableActions;
 
-  private List<DefaultActionResult> lastCyclePerceptions;
-  private EnvironmentalAction nextAction;
+	private List<DefaultActionResult> lastCyclePerceptions;
+	private EnvironmentalAction nextAction;
 
-  public VacuumWorldDefaultMind() {
-    this.setLastCyclePerceptions(new ArrayList<>());
-  }
-  
-  @Override
-  public final void update(CustomObservable o, Object arg) {
-    if (o instanceof VacuumWorldDefaultBrain && arg instanceof List<?>) {
-      for(Object result : (List<?>) arg) {
-        if(result instanceof DefaultActionResult) {
-          this.getLastCyclePerceptions().add((DefaultActionResult) result);
-        }
-      }
-    }
-  }
+	public VacuumWorldDefaultMind() {
+		this.setLastCyclePerceptions(new ArrayList<>());
+	}
 
-  protected final EnvironmentalAction buildPhysicalAction(
-      Class<? extends EnvironmentalAction> actionPrototype) {
-    try {
-      return actionPrototype.newInstance();
-    } catch (Exception e) {
-      Utils.log(e);
-      return null;
-    }
-  }
+	@Override
+	public final void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldDefaultBrain && arg instanceof List<?>) {
+			manageBrainRequest((List<?>) arg);
+		}
+	}
 
-  protected final SpeechAction buildSpeechAction(String senderId,
-      ArrayList<String> recipientIds, VacuumWorldSpeechPayload payload) {
-    try {
-      Constructor<SpeechAction> constructor = SpeechAction.class
-          .getConstructor(String.class, List.class, Payload.class);
-      return constructor.newInstance(senderId, recipientIds, payload);
-    } catch (Exception e) {
-      Utils.log(e);
-      return null;
-    }
-  }
+	private void manageBrainRequest(List<?> arg) {
+		for (Object result : arg) {
+			if (result instanceof DefaultActionResult) {
+				this.lastCyclePerceptions.add((DefaultActionResult) result);
+			}
+		}
+	}
 
-  public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
-    this.setActions(actions);
-  }
+	protected final EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+		try {
+			return actionPrototype.newInstance();
+		}
+		catch (Exception e) {
+			Utils.log(e);
+			return null;
+		}
+	}
 
-  public void setCanSeeBehind(boolean canSeeBehind) {
-    this.canSeeBehind = canSeeBehind;
-  }
+	protected final SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
+		try {
+			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
+			return constructor.newInstance(senderId, recipientIds, payload);
+		}
+		catch (Exception e) {
+			Utils.log(e);
+			return null;
+		}
+	}
 
-  public void setPerceptionRange(int preceptionRange) {
-    this.perceptionRange = preceptionRange;
-  }
+	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
+		this.setActions(actions);
+	}
 
-  public List<Class<? extends EnvironmentalAction>> getAvailableActions() {
-    return availableActions;
-  }
+	public void setCanSeeBehind(boolean canSeeBehind) {
+		this.canSeeBehind = canSeeBehind;
+	}
 
-  public void setAvailableActions(
-      List<Class<? extends EnvironmentalAction>> availableActions) {
-    this.availableActions = availableActions;
-  }
+	public void setPerceptionRange(int preceptionRange) {
+		this.perceptionRange = preceptionRange;
+	}
 
-  public int getPerceptionRange() {
-    return perceptionRange;
-  }
+	public List<Class<? extends EnvironmentalAction>> getAvailableActions() {
+		return this.availableActions;
+	}
 
-  public boolean isCanSeeBehind() {
-    return canSeeBehind;
-  }
+	public void setAvailableActions(List<Class<? extends EnvironmentalAction>> availableActions) {
+		this.availableActions = availableActions;
+	}
 
-  public EnvironmentalAction getNextAction() {
-    return nextAction;
-  }
+	public int getPerceptionRange() {
+		return this.perceptionRange;
+	}
 
-  public void setNextAction(EnvironmentalAction nextAction) {
-    this.nextAction = nextAction;
-  }
+	public boolean isCanSeeBehind() {
+		return this.canSeeBehind;
+	}
 
-  public List<DefaultActionResult> getLastCyclePerceptions() {
-    return lastCyclePerceptions;
-  }
+	public EnvironmentalAction getNextAction() {
+		return this.nextAction;
+	}
 
-  public void setLastCyclePerceptions(
-      List<DefaultActionResult> lastCyclePerceptions) {
-    this.lastCyclePerceptions = lastCyclePerceptions;
-  }
+	public void setNextAction(EnvironmentalAction nextAction) {
+		this.nextAction = nextAction;
+	}
 
-  public Set<Class<? extends AbstractAction>> getActions() {
-    return actions;
-  }
+	public List<DefaultActionResult> getLastCyclePerceptions() {
+		return this.lastCyclePerceptions;
+	}
 
-  public void setActions(Set<Class<? extends AbstractAction>> actions) {
-    this.actions = actions;
-  }
+	public void setLastCyclePerceptions(List<DefaultActionResult> lastCyclePerceptions) {
+		this.lastCyclePerceptions = lastCyclePerceptions;
+	}
+
+	public Set<Class<? extends AbstractAction>> getActions() {
+		return this.actions;
+	}
+
+	public void setActions(Set<Class<? extends AbstractAction>> actions) {
+		this.actions = actions;
+	}
 }

@@ -1,47 +1,43 @@
 package uk.ac.rhul.cs.dice.vacuumworld.generation;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Structure {
-  private int width;
-  private int height;
-  private ArrayList<LocationStructure> notable_locations;
+	private int width;
+	private int height;
+	private List<LocationStructure> notableLocations;
 
-  public Structure(int width, int height,
-      ArrayList<LocationStructure> notable_locations) {
-    super();
-    this.width = width;
-    this.height = height;
-    this.notable_locations = notable_locations;
-  }
+	public Structure(int width, int height, List<LocationStructure> notableLocations) {
+		this.width = width;
+		this.height = height;
+		this.notableLocations = notableLocations;
+	}
 
-  public Structure() {
-    super();
-  }
+	public Structure() {
+		super();
+	}
 
-  public int getWidth() {
-    return width;
-  }
+	public int getWidth() {
+		return this.width;
+	}
 
-  public void setWidth(int width) {
-    this.width = width;
-  }
+	public void setWidth(int width) {
+		this.width = width;
+	}
 
-  public int getHeight() {
-    return height;
-  }
+	public int getHeight() {
+		return this.height;
+	}
 
-  public void setHeight(int height) {
-    this.height = height;
-  }
+	public void setHeight(int height) {
+		this.height = height;
+	}
 
-  public ArrayList<LocationStructure> getNotable_locations() {
-    return notable_locations;
-  }
+	public List<LocationStructure> getNotableLocations() {
+		return this.notableLocations;
+	}
 
-  public void setNotable_locations(
-      ArrayList<LocationStructure> notable_locations) {
-    this.notable_locations = notable_locations;
-  }
-
+	public void setNotableLocations(List<LocationStructure> notableLocations) {
+		this.notableLocations = notableLocations;
+	}
 }

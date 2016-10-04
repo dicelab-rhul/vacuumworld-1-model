@@ -60,8 +60,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 
 	@Override
 	public synchronized Result perform(TotalPerceptionAction action, Space context) {
-		return new MonitoringResult(ActionResult.ACTION_DONE, null, null,
-				((VacuumWorldMonitoringContainer) context).getVacuumWorldSpaceRepresentation());
+		return new MonitoringResult(ActionResult.ACTION_DONE, null, null, ((VacuumWorldMonitoringContainer) context).getVacuumWorldSpaceRepresentation());
 	}
 
 	@Override
@@ -92,7 +91,9 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 		if (result.getRecipientsIds() == null) {
 			result.setRecipientsIds(this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
-		else if(result.getRecipientsIds().isEmpty()) {
+		
+		//separated from the case above to avoid NullPointerException.
+		if(result.getRecipientsIds().isEmpty()) {
 			result.setRecipientsIds(this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 

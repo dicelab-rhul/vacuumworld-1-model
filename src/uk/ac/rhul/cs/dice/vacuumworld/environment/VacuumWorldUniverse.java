@@ -22,6 +22,10 @@ public class VacuumWorldUniverse extends Universe {
 		VacuumWorldSpace space = container.getSubContainerSpace();
 		VacuumWorldPhysics vacuumWorldPhysics = (VacuumWorldPhysics) monitoringPhysics.getMonitoredContainerPhysics();
 		
+		makeObservers(container, monitoringPhysics, space, vacuumWorldPhysics);
+	}
+
+	private void makeObservers(VacuumWorldMonitoringContainer container, VacuumWorldMonitoringPhysics monitoringPhysics, VacuumWorldSpace space, VacuumWorldPhysics vacuumWorldPhysics) {
 		space.addObserver(vacuumWorldPhysics);
 		vacuumWorldPhysics.addObserver(space);
 		
