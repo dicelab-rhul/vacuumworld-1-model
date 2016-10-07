@@ -53,13 +53,13 @@ public class ExperimentConnector {
 			create(p);
 		}
 		
-		this.gen = new GenerationSequence(this.path + "/", sizes, agents);
+		this.gen = new GenerationSequence(this.path + "/", this.sizes, this.agents);
 		this.gen.generateAllTestCases();
 	}
 
 	private void create(File p) throws ConfigFileException {
 		if (!p.mkdir()) {
-			throw new ConfigFileException("Cannot create dir: " + this.path);
+			throw new ConfigFileException(ExperimentConnector.CONFIG_FILE, "Cannot create dir: " + this.path);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class ExperimentConnector {
 		String[] split = line.split(":");
 		
 		if (split.length != 2) {
-			throw new ConfigFileException("invalid line structure: " + line);
+			throw new ConfigFileException(ExperimentConnector.CONFIG_FILE, "Invalid line structure: " + line);
 		}
 		
 		String com = split[0].trim();
@@ -85,12 +85,12 @@ public class ExperimentConnector {
 			this.agents = handleArray(split[1]);
 		}
 		else {
-			throw new ConfigFileException("invalid property: " + com);
+			throw new ConfigFileException(ExperimentConnector.CONFIG_FILE, "Invalid property: " + com);
 		}
 	}
 
 	private void handlePath(String line) {
-		path = line.replaceAll("\\s+", "");
+		this.path = line.replaceAll("\\s+", "");
 	}
 
 	private int[] handleArray(String line) throws ConfigFileException {
@@ -98,7 +98,7 @@ public class ExperimentConnector {
 		String[] split = tmp.split(",");
 		
 		if (split.length < 1) {
-			throw new ConfigFileException("invalid number of arguments");
+			throw new ConfigFileException(ExperimentConnector.CONFIG_FILE, "Invalid number of arguments");
 		}
 		
 		return handleArrayHelper(split);
@@ -117,7 +117,7 @@ public class ExperimentConnector {
 		File config = new File(CONFIG_FILE);
 		
 		if (!config.exists()) {
-			throw new ConfigFileException("config file does not exist");
+			throw new ConfigFileException(ExperimentConnector.CONFIG_FILE, "Config file does not exist");
 		}
 		
 		return config;
@@ -126,7 +126,7 @@ public class ExperimentConnector {
 	public Set<File> getFilePaths() throws ConfigFileException {
 		if (this.gen == null) {
 			Set<File> files = new HashSet<>();
-			recurseFileStructure(new File(path + "/"), files);
+			recurseFileStructure(new File(this.path + "/"), files);
 			logPaths(files);
 			
 			return files;
@@ -139,7 +139,7 @@ public class ExperimentConnector {
 
 	private void logPaths(Set<File> files) {
 		for(File file : files) {
-			Utils.log(file.getPath());
+			Utils.logWithClass(this.getClass().getSimpleName(), "File: " + file.getPath() + "...");
 		}
 	}
 
@@ -170,14 +170,6 @@ public class ExperimentConnector {
 			else if (file.isDirectory()) {
 				folders.add(file);
 			}
-		}
-	}
-
-	public class ConfigFileException extends Exception {
-		private static final long serialVersionUID = 1L;
-
-		public ConfigFileException(String message) {
-			super(CONFIG_FILE + " doesnt exist or is not in the correct format: " + message);
 		}
 	}
 }

@@ -9,13 +9,12 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitorMind extends AbstractAgentMind {
-
 	private EvaluationStrategy<?> strategy;
 	private EnvironmentalAction nextAction = null;
 	private MonitoringResult perception;
@@ -25,7 +24,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 	public VacuumWorldMonitorMind(VacuumWorldStepEvaluationStrategy strategy) {
 		this.strategy = strategy;
 		
-		if (VacuumWorldServer.LOG) {
+		if (ConfigData.getLoggingFlag()) {
 			this.logger = Utils.fileLogger("logs/eval/evaluation.log", false);
 		}
 	}
@@ -58,7 +57,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 		if (Utils.getCycleNumber() % 5 == 0 && Utils.getCycleNumber() != 0) {
 			Evaluation e = this.strategy.evaluate(null, 0, Utils.getCycleNumber());
 			
-			if (VacuumWorldServer.LOG) {
+			if (ConfigData.getLoggingFlag()) {
 				this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());
 			}
 		}

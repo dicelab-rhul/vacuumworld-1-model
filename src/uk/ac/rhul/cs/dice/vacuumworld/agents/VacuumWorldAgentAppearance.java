@@ -18,9 +18,4 @@ public class VacuumWorldAgentAppearance extends AbstractAgentAppearance {
 	public String represent() {
 		return this.type.compactRepresentation();
 	}
-	
-	//DEBUG method which ignores the color
-	public String represent(AgentFacingDirection facingDirection) {
-		return facingDirection.compactRepresentation();
-	}
 }

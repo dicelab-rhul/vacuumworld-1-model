@@ -28,7 +28,7 @@ public class AgentAwarenessRepresentation {
 	}
 
 	public List<String> getMyactuatorids() {
-		return myactuatorids;
+		return this.myactuatorids;
 	}
 
 	public void setActuatorid(String myactuatorid) {
@@ -36,7 +36,7 @@ public class AgentAwarenessRepresentation {
 	}
 
 	public List<String> getMyEars() {
-		return myEars;
+		return this.myEars;
 	}
 
 	public void setMyEars(List<String> myEars) {
@@ -44,7 +44,7 @@ public class AgentAwarenessRepresentation {
 	}
 
 	public List<String> getMyEyes() {
-		return myEyes;
+		return this.myEyes;
 	}
 
 	public void setMyEyes(List<String> myEyes) {
@@ -52,7 +52,7 @@ public class AgentAwarenessRepresentation {
 	}
 
 	public VacuumWorldAgentType getType() {
-		return type;
+		return this.type;
 	}
 
 	public void setType(VacuumWorldAgentType type) {

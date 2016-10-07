@@ -67,7 +67,6 @@ public class VWEvaluatorMind extends EvaluatorMind {
 			read();
 		}
 		else if (shouldEvaluate()) {
-			Utils.log("EVAL");
 			outputEvaluation((VacuumWorldStepCollectiveEvaluation) evaluate());
 		}
 	}
@@ -88,7 +87,7 @@ public class VWEvaluatorMind extends EvaluatorMind {
 		this.currentCycle++;
 		
 		if (this.changes > 3) {
-			// for the step evaluation we dont need any dirt information
+			// for the step evaluation we don't need any dirt information
 			this.nextAction = new VacuumWorldReadAction(null, this.getAgentCollection(), this.lastCycleRead);
 			this.changes = 0;
 			this.evaluate++;

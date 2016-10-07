@@ -60,6 +60,7 @@ public class VWObserverMind extends ObserverMind {
 		catch (InstantiationException | IllegalAccessException e) {
 			Utils.log(e);
 		}
+		
 		return this.nextAction;
 	}
 
@@ -77,6 +78,7 @@ public class VWObserverMind extends ObserverMind {
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, VWObserverBrain.class);
+		
 		if (this.currentPerception != null) {
 			this.storePerception(new VacuumWorldWriteAction(this.getDirtCollection(), this.getAgentCollection(), super.refine(this.currentPerception.getPerception())));
 		}

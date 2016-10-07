@@ -7,7 +7,6 @@ public class LocationStructure {
 	private String dirt; // the color of the dirt
 
 	public LocationStructure(int x, int y, AgentStructure agent, String dirt) {
-		super();
 		this.x = x;
 		this.y = y;
 		this.agent = agent;

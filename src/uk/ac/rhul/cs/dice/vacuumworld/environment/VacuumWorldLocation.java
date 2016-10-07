@@ -44,7 +44,6 @@ public class VacuumWorldLocation implements Location, Lockable {
 		this.coordinates = coordinates;
 	}
 
-
 	public VacuumWorldCleaningAgent getAgent() {
 		return this.agent;
 	}
@@ -176,17 +175,17 @@ public class VacuumWorldLocation implements Location, Lockable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((agent == null) ? 0 : agent.hashCode());
-		result = prime * result + ((coordinates == null) ? 0 : coordinates.hashCode());
-		result = prime * result + ((easternLocationType == null) ? 0 : easternLocationType.hashCode());
-		result = prime * result + ((northernLocationType == null) ? 0 : northernLocationType.hashCode());
-		result = prime * result + ((obstacle == null) ? 0 : obstacle.hashCode());
-		result = prime * result + readers;
-		result = prime * result + ((southernLocationType == null) ? 0 : southernLocationType.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		result = prime * result + (underExclusiveWriteLock ? 1231 : 1237);
-		result = prime * result + (underSharedReadLock ? 1231 : 1237);
-		result = prime * result + ((westernLocationType == null) ? 0 : westernLocationType.hashCode());
+		result = prime * result + ((this.agent == null) ? 0 : this.agent.hashCode());
+		result = prime * result + ((this.coordinates == null) ? 0 : this.coordinates.hashCode());
+		result = prime * result + ((this.easternLocationType == null) ? 0 : this.easternLocationType.hashCode());
+		result = prime * result + ((this.northernLocationType == null) ? 0 : this.northernLocationType.hashCode());
+		result = prime * result + ((this.obstacle == null) ? 0 : this.obstacle.hashCode());
+		result = prime * result + this.readers;
+		result = prime * result + ((this.southernLocationType == null) ? 0 : this.southernLocationType.hashCode());
+		result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+		result = prime * result + (this.underExclusiveWriteLock ? 1231 : 1237);
+		result = prime * result + (this.underSharedReadLock ? 1231 : 1237);
+		result = prime * result + ((this.westernLocationType == null) ? 0 : this.westernLocationType.hashCode());
 		return result;
 	}
 

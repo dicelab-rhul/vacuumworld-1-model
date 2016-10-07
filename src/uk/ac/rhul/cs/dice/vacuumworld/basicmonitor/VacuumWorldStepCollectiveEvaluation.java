@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 
 public class VacuumWorldStepCollectiveEvaluation implements Evaluation {
-
 	private Map<String, VacuumWorldStepEvaluation> evaluations;
 
 	public VacuumWorldStepCollectiveEvaluation() {
@@ -26,7 +25,7 @@ public class VacuumWorldStepCollectiveEvaluation implements Evaluation {
 	}
 
 	public void addEvaluation(String id, VacuumWorldStepEvaluation eval) {
-		evaluations.put(id, eval);
+		this.evaluations.put(id, eval);
 	}
 
 	public Map<String, VacuumWorldStepEvaluation> getEvaluations() {

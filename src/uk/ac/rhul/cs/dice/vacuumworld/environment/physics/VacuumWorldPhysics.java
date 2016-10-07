@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
@@ -83,7 +81,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 			return new VacuumWorldActionResult((DefaultActionResult) result);
 		}
 		else {
-			Logger.getGlobal().log(Level.SEVERE, "An unknown Result has been encountered in VacuumWorldPhysics: " + result.getClass());
+			Utils.logWithClass(this.getClass().getSimpleName(), "An unknown \"Result\" has been encountered in VacuumWorldPhysics: " + result.getClass() + ".");
 			return null;
 		}
 	}
@@ -258,7 +256,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		agentLocation.releaseExclusiveWriteLock();
 		targetLocation.releaseExclusiveWriteLock();
 
-		Utils.log("Agent: old position: " + originalCooridinates + ", new position: " + targetLocation.getCoordinates() + ", facing position: " + agentFacingDirection + ".");
+		Utils.logWithClass(this.getClass().getSimpleName(), "Agent: old position: " + originalCooridinates + ", new position: " + targetLocation.getCoordinates() + ", facing position: " + agentFacingDirection + ".");
 		
 		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}

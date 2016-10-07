@@ -93,7 +93,7 @@ public class CycleDatabaseRepresentation {
 
 	@Override
 	public String toString() {
-		return "[" + x + "," + y + "," + dir + "]";
+		return "[" + this.x + "," + this.y + "," + this.dir + "]";
 	}
 
 	public SpeechDatabaseRepresentation getSpeech() {

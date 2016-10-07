@@ -70,6 +70,6 @@ public class ExperimentOrderedOutputFormatter implements ExperimentOutputFormatt
 
 	@Override
 	public void format(String[] data, File output) {
-		Utils.log("FORMAT METHOD NOT SUPPORTED BY: " + this.getClass());
+		Utils.logWithClass(this.getClass().getSimpleName(), "Format method not supported by: " + this.getClass().getSimpleName());
 	}
 }

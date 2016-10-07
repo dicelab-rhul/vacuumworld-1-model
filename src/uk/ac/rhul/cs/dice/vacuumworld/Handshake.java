@@ -8,13 +8,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+
 public class Handshake {
 	private static final String ERROR = "Bad handshake.";
 	private static final int TIME_TO_WAIT = 100000;
 	
 	private Handshake(){}
 	
-	public static Boolean attemptHanshakeWithController(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes code) throws HandshakeException, IOException {
+	public static Boolean attemptHanshakeWithController(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes code) throws HandshakeException {
 		if(code != null) {
 			return attemptHanshakeWithControllerHelper(toController, fromController, code); 
 		}
@@ -23,7 +25,7 @@ public class Handshake {
 		}
 	}
 	
-	public static Boolean attemptHanshakeWithControllerHelper(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes code) throws HandshakeException, IOException {
+	public static Boolean attemptHanshakeWithControllerHelper(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes code) throws HandshakeException {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		
 		Future<Boolean> future = executor.submit(() -> doHandshake(toController, fromController, code));
@@ -50,10 +52,10 @@ public class Handshake {
 	private static Boolean continueHandshake(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes oldCode, HandshakeCodes code) throws IOException, HandshakeException, ClassNotFoundException {
 		toController.writeObject(code.toString());
 		toController.flush();
-		System.out.println("sent " + code.toString() + " to controller"); //MHMC
+		Utils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller."); //MHMC
 		
 		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) fromController.readObject());
-		System.out.println("received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller");
+		Utils.logWithClass(Handshake.class.getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");
 		
 		if(codeFromController != null) {
 			return finalizeHandshake(toController, oldCode, codeFromController);
@@ -81,7 +83,7 @@ public class Handshake {
 	private static Boolean finalizeHandshake(ObjectOutputStream toController, HandshakeCodes code) throws IOException {
 		toController.writeObject(code.toString());
 		toController.flush();
-		System.out.println("sent " + code.toString() + " to controller");
+		Utils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller.");
 		
 		return true;
 	}

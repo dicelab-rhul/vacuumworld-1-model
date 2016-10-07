@@ -20,7 +20,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 
 public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements VacuumWorldMonitoringPhysicsInterface, CustomObserver {
-
 	private Physics monitoredContainerPhysics;
 	private ConcurrentMap<Long, AbstractAgent> activeAgents;
 	private ConcurrentMap<Long, List<String>> sensorsToNotify;
@@ -92,7 +91,6 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 			result.setRecipientsIds(this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 		
-		//separated from the case above to avoid NullPointerException.
 		if(result.getRecipientsIds().isEmpty()) {
 			result.setRecipientsIds(this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}

@@ -38,7 +38,6 @@ public class GenerationSequence {
 
 	private void generateTestCase(Generator gen, int i, int j) {
 		if (this.agents[j] < this.sizes[i] * this.sizes[i]) {
-			// /generate a test case for this!
 			generateTestCase(gen, this.filePath, this.agents[j], this.sizes[i]);
 		}
 	}
@@ -50,7 +49,7 @@ public class GenerationSequence {
 	}
 
 	private void generateDirectories(String path) {
-		Utils.log("Generating Dirs");
+		Utils.logWithClass(this.getClass().getSimpleName(), "generating directories...");
 		
 		generateDirectoriesHelper(path);
 		generateFilesNames();

@@ -229,11 +229,11 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	@Override
 	public synchronized void update(CustomObservable o, Object arg) {
 		if (o instanceof ObserverActuator || o instanceof EvaluatorActuator) {
-			manageActuator(o, arg);
+			manageActuator(arg);
 		}
 	}
 
-	private void manageActuator(CustomObservable o, Object arg) {
+	private void manageActuator(Object arg) {
 		if (arg instanceof DatabaseEvent) {
 			DatabaseEvent event = (DatabaseEvent) arg;
 			Result result = event.attempt(this, null);
@@ -289,7 +289,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	private void insertDirts(CollectionRepresentation collectionRepresentation, DirtRepresentation value, VacuumWorldCoordinates coord) {
 		try {
 			String json = this.mapper.writeValueAsString(new DirtDatabaseRepresentation(value.getId(), value.getType(), coord.getX(), coord.getY(), 0, 0));
-			Utils.log(json);
+			Utils.logWithClass(this.getClass().getSimpleName(), "\n" + json);
 			this.connector.insertDocument(collectionRepresentation.getCollectionName(), json);
 		}
 		catch (JsonProcessingException e) {
@@ -320,7 +320,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	private void insertAgents(CollectionRepresentation collectionRepresentation, AgentRepresentation agent) {
 		try {
 			String json = this.mapper.writeValueAsString(new AgentDatabaseRepresentation(agent.getId(), agent.getType(), agent.getSensors(), agent.getActuators(), 0, 0, new CycleDatabaseRepresentation[] {}));
-			Utils.log(json);
+			Utils.logWithClass(this.getClass().getSimpleName(), "\n" + json);
 			this.connector.insertDocument(collectionRepresentation.getCollectionName(), json);
 		}
 		catch (JsonProcessingException e) {

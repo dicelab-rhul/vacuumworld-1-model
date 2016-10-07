@@ -34,7 +34,7 @@ public class VacuumWorldAppearance extends UniverseAppearance {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((stringRepresentation == null) ? 0 : stringRepresentation.hashCode());
+		result = prime * result + ((this.stringRepresentation == null) ? 0 : this.stringRepresentation.hashCode());
 		return result;
 	}
 

@@ -40,7 +40,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		
 		this.user = user;
 		this.monitoring = monitoring;
-		
 		this.dimensions = dimensions;
 		this.agents = new HashMap<>();
 		

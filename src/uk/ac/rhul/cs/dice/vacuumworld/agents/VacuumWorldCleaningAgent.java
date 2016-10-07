@@ -170,8 +170,8 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((currentLocation == null) ? 0 : currentLocation.hashCode());
-		result = prime * result + ((facingDirection == null) ? 0 : facingDirection.hashCode());
+		result = prime * result + ((this.currentLocation == null) ? 0 : this.currentLocation.hashCode());
+		result = prime * result + ((this.facingDirection == null) ? 0 : this.facingDirection.hashCode());
 		return result;
 	}
 

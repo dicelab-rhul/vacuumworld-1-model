@@ -19,36 +19,32 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 
 public class VacuumWorldRandomMind extends VacuumWorldDefaultMind {
 	private Random rng;
+	private static final String NAME = "RANDOM";
 
 	public VacuumWorldRandomMind() {
 		this.rng = new Random();
 	}
-
-	@Override
-	public void perceive(Object perceptionWrapper) {
-		while (this.getLastCyclePerceptions().isEmpty()) {
-			notifyObservers(null, VacuumWorldDefaultBrain.class);
-		}
+	
+	public static final String getName() {
+		return NAME;
 	}
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		setAvailableActions(new ArrayList<>());
-		getAvailableActions().addAll(this.getActions());
+		super.decide(parameters);
+		
+		return decideHelper();
+	}
 
+	private EnvironmentalAction decideHelper() {
 		if (this.getLastCyclePerceptions().isEmpty()) {
 			setNextAction(new PerceiveAction(this.getPerceptionRange(), this.isCanSeeBehind()));
 		}
 		else {
 			setNextAction(decideFromPerceptions());
 		}
+		
 		return this.getNextAction();
-	}
-
-	@Override
-	public void execute(EnvironmentalAction action) {
-		this.getLastCyclePerceptions().clear();
-		notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
 	}
 
 	private EnvironmentalAction decideFromPerceptions() {
@@ -71,6 +67,7 @@ public class VacuumWorldRandomMind extends VacuumWorldDefaultMind {
 		if (perception != null) {
 			updateAvailableActions(perception);
 		}
+		
 		return decideAction();
 	}
 

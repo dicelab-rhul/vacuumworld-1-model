@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
@@ -26,27 +24,24 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
-
 	private Set<String> agentsIKnow = new HashSet<>();
 	private AgentAwarenessRepresentation me;
+	private static final String NAME = "RANDOM_SOCIAL";
 
 	public VacuumWorldSmartRandomSocialMind(AgentAwarenessRepresentation me) {
 		this.me = me;
 	}
 
-	@Override
-	public void perceive(Object perceptionWrapper) {
-		while (this.getLastCyclePerceptions().isEmpty()) {
-			notifyObservers(null, VacuumWorldDefaultBrain.class);
-		}
+	public static final String getName() {
+		return NAME;
 	}
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		this.setAvailableActions(new ArrayList<>());
-		this.getAvailableActions().addAll(this.getActions());
+		super.decide(parameters);
 		
 		if (this.getLastCyclePerceptions().isEmpty()) {
 			this.setNextAction(new PerceiveAction(this.getPerceptionRange(), this.isCanSeeBehind()));
@@ -55,12 +50,6 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 			this.setNextAction(decideFromPerceptions());
 		}
 		return this.getNextAction();
-	}
-
-	@Override
-	public void execute(EnvironmentalAction action) {
-		this.getLastCyclePerceptions().clear();
-		notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
 	}
 
 	private EnvironmentalAction decideFromPerceptions() {
@@ -77,7 +66,8 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 			return decideFromSpacePerception(result.getPerception());
 		}
 		else {
-			Logger.getGlobal().log(Level.SEVERE, "NO RESULT WAS GIVEN TO: " + this.me.getMyid());
+			Utils.logWithClass(this.getClass().getSimpleName(), "No result was given to " + this.me.getMyid() + ".");
+			
 			return new PerceiveAction(this.getPerceptionRange(), this.isCanSeeBehind());
 		}
 	}
@@ -174,16 +164,16 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	private List<String> updateAgentsMet(VacuumWorldPerception perception) {
 		List<String> newAgents = new ArrayList<>();
 		
-		for (Entry<VacuumWorldCoordinates, VacuumWorldLocation> entry : perception.getPerceivedMap().entrySet()) {
-			addAgentToList(entry.getKey(), entry.getValue(), newAgents);
+		for (VacuumWorldLocation location : perception.getPerceivedMap().values()) {
+			addAgentToList(location, newAgents);
 		}
 		
 		return newAgents;
 	}
 	
-	public void addAgentToList(VacuumWorldCoordinates t, VacuumWorldLocation u, List<String> newAgents) {
-		if (u.isAnAgentPresent()) {
-			String id = (String) u.getAgent().getId();
+	private void addAgentToList(VacuumWorldLocation location, List<String> newAgents) {
+		if (location.isAnAgentPresent()) {
+			String id = (String) location.getAgent().getId();
 			if (!this.me.getMyid().equals(id) && !this.agentsIKnow.contains(id)) {
 				newAgents.add(id);
 			}

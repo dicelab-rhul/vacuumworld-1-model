@@ -1,10 +1,14 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Coordinates;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 
-public class VacuumWorldCoordinates implements Coordinates, Cloneable {
+public class VacuumWorldCoordinates implements Coordinates {
 	private int x;
 	private int y;
 	
@@ -56,6 +60,14 @@ public class VacuumWorldCoordinates implements Coordinates, Cloneable {
 	
 	public VacuumWorldCoordinates getSouthEasternCoordinates() {
 		return getSouthernCoordinates().getEasternCoordinates();
+	}
+	
+	public List<VacuumWorldCoordinates> getAllNeighboursCoordinates() {
+		List<VacuumWorldCoordinates> toReturn = new ArrayList<>();
+		
+		toReturn.addAll(Arrays.asList(getNorthernCoordinates(), getSouthernCoordinates(), getWesternCoordinates(), getEasternCoordinates()));
+		
+		return toReturn;
 	}
 	
 	public VacuumWorldCoordinates getNewCoordinates(AgentFacingDirection agentDirection) {
@@ -120,17 +132,16 @@ public class VacuumWorldCoordinates implements Coordinates, Cloneable {
 		return x1 > x2 ? 1 : -1;
 	}
 	
-	@Override
-	public VacuumWorldCoordinates clone() {
-	  return new VacuumWorldCoordinates(this.x, this.y);
+	public VacuumWorldCoordinates duplicate() {
+		return new VacuumWorldCoordinates(this.x, this.y);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + x;
-		result = prime * result + y;
+		result = prime * result + this.x;
+		result = prime * result + this.y;
 		return result;
 	}
 

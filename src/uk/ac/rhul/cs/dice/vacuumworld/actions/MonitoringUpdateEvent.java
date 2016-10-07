@@ -22,7 +22,7 @@ public class MonitoringUpdateEvent extends AbstractEvent {
 
 	@Override
 	public String represent() {
-		return this.getActor() + " : " + this.getAction().getClass().getSimpleName() + " : " + result.toString() + " : " + this.getTimestamp();
+		return this.getActor() + " : " + this.getAction().getClass().getSimpleName() + " : " + this.result.toString() + " : " + this.getTimestamp();
 	}
 
 	@Override

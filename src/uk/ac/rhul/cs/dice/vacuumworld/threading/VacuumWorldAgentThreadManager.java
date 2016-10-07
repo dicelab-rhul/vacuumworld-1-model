@@ -13,15 +13,11 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldClientListener listener;
 	private VacuumWorldSpace state;
-	
 	protected final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
 	protected final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
 	protected final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
-
 	protected boolean simulationStarted = false;
-
 	protected Set<Thread> activeThreads;
-
 	protected Set<AgentRunnable> cleaningRunnables;
 	protected Set<AgentRunnable> monitorRunnables;
 
@@ -44,25 +40,25 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		this.state = state;
 	}
 	
-	public void start() {
+	public void start(double delayInSeconds) {
 		this.simulationStarted = true;
 		
-		cycle();
+		cycle(delayInSeconds);
 	}
 
-	protected void cycle() {
+	protected void cycle(double delayInSeconds) {
 		boolean doPerceive = false;
 		
 		while (this.simulationStarted) {
-			Utils.log("START CYCLE");
+			Utils.logWithClass(this.getClass().getSimpleName(), "\n\nSTART CYCLE");
 			doCycleStep(this.monitorRunnables);
 			doCycleStep(this.cleaningRunnables, doPerceive);
 
-			Utils.log("NEXT CYCLE!! \n \n \n \n");
+			Utils.logWithClass(this.getClass().getSimpleName(), "NEXT CYCLE!!\n\n");
 			doPerceive = true;
 			this.notifyObservers();
 			
-			Utils.doWait(1000);
+			Utils.doWait((int) Math.max(Math.floor(1000 * delayInSeconds), 200));
 		}
 	}
 

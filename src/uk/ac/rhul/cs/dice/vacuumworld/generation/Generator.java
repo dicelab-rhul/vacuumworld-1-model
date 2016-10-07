@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class Generator {
-
 	private ObjectMapper mapper;
 	private int counter = 0;
 	private Set<VacuumWorldCoordinates> allCoordinates;
@@ -29,15 +29,15 @@ public class Generator {
 
 	private static final Random RANDOM = new Random();
 	private static final String AGENT = "agent";
-	private static final String[] DIRECTIONS = new String[] { "north", "south", "east", "west" };
-	private static final String[] COLORS = new String[] { "orange", "green" };
+	private static final String[] DIRECTIONS = new String[] { AgentFacingDirection.NORTH.toString().toLowerCase(), AgentFacingDirection.SOUTH.toString().toLowerCase(), AgentFacingDirection.EAST.toString().toLowerCase(), AgentFacingDirection.WEST.toString().toLowerCase() };
+	private static final String[] COLORS = new String[] { VacuumWorldAgentType.ORANGE.toString().toLowerCase(), VacuumWorldAgentType.GREEN.toString().toLowerCase(), VacuumWorldAgentType.WHITE.toString().toLowerCase() };
 
 	public void generate(File file, int width, int height, int numAgents, int numDirts) {
 		if (validateInput(width, height, numAgents, numDirts)) {
 			init(width, height, numAgents, numDirts, file);
 		}
 		else {
-			Utils.log(Level.SEVERE, "FAILED TO GENERATE OUTPUT");
+			Utils.logWithClass(this.getClass().getSimpleName(), "Failed to generate output.");
 		}
 	}
 
@@ -110,7 +110,7 @@ public class Generator {
 			return generateLocationWithDirt(width, height);
 		}
 		else {
-			Utils.log("ALL LOCATIONS EXIST " + this.allLocations.size());
+			Utils.logWithClass(this.getClass().getSimpleName(), "All locations exist: " + this.allLocations.size());
 			addDirtToLocation(generateRandomColor());
 			this.dirts++;
 			
@@ -152,7 +152,7 @@ public class Generator {
 			this.dirtFreeLocations.remove(struct);
 		}
 		else {
-			Utils.log(Level.SEVERE, "NO FREE LOCATIONS TO ADD DIRT");
+			Utils.logWithClass(this.getClass().getSimpleName(), "No free locations to add dirt.");
 		}
 	}
 
@@ -216,7 +216,7 @@ public class Generator {
 			this.agentFreeLocations.remove(struct);
 		}
 		else {
-			Utils.log(Level.SEVERE, "NO FREE LOCATIONS TO ADD AGENT");
+			Utils.logWithClass(this.getClass().getSimpleName(), "No free locations to add an agent.");
 		}
 	}
 
@@ -290,10 +290,10 @@ public class Generator {
 	}
 
 	private void densityWarning(float per, String type) {
-		Utils.log(Level.WARNING, "MAP " + type + " POPULATION DENSE AT: " + per * 100 + "% : CONSIDER ENLARGING MAP");
+		Utils.logWithClass(this.getClass().getSimpleName(), "MAP " + type + " POPULATION DENSE AT: " + per * 100 + "% : CONSIDER ENLARGING MAP");
 	}
 
 	private void densityFailure(String type, int width, int height, int num) {
-		Utils.log(Level.SEVERE, "CANNOT ADD " + num + " " + type + " TO A GRID SIZE OF (" + width + "," + height + ")");
+		Utils.logWithClass(this.getClass().getSimpleName(), "CANNOT ADD " + num + " " + type + " TO A GRID SIZE OF (" + width + "," + height + ")");
 	}
 }

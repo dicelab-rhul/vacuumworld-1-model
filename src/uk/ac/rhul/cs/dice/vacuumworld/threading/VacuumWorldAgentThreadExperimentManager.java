@@ -28,8 +28,9 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 	}
 
 	@Override
-	protected void cycle() {
-		Utils.log("Start: " + this.testCase + " experiment...");
+	protected void cycle(double delayInSeconds) {
+		Utils.logWithClass(this.getClass().getSimpleName(), "Start: " + this.testCase + " experiment...");
+		Utils.doWait(Math.max((int) (delayInSeconds * 1000), 200));
 		
 		cycleHelper();
 		log();
@@ -56,7 +57,7 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 		for (int k = 0; k < h.length; k++) {
 			h[k].close();
 		}
-		Utils.log("Complete");
+		Utils.logWithClass(this.getClass().getSimpleName(), "Experiment done.");
 	}
 
 	private void cycleHelper() {

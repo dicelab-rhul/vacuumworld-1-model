@@ -1,7 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer;
 
-import java.util.Set;
-
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
@@ -9,7 +7,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldStepCollectiveEval
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldStepEvaluation;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.AgentDatabaseRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.CycleDatabaseRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.DirtDatabaseRepresentation;
 
 public class VacuumWorldDatatbaseStepEvaluationStrategy implements EvaluationStrategy<String> {
 
@@ -31,17 +28,21 @@ public class VacuumWorldDatatbaseStepEvaluationStrategy implements EvaluationStr
 		DatabasePerception p = (DatabasePerception) perception;
 		
 		for (AgentDatabaseRepresentation a : p.getAgents()) {
-			doAgent(a, p.getDirts(), p.getLastCycleRead());
+			doAgent(a, p.getLastCycleRead());
 		}
 	}
 
-	private void doAgent(AgentDatabaseRepresentation a, Set<DirtDatabaseRepresentation> dirts, int lastCycleRead) {
+	private void doAgent(AgentDatabaseRepresentation a, int lastCycleRead) {
 		this.lastCycleRead = lastCycleRead;
 		this.evaluations.getEvaluations().putIfAbsent(a.getId(), new VacuumWorldStepEvaluation());
-		// The first c in the list is the last one from the previous read!
+
+		processCycles(a);
+	}
+
+	private void processCycles(AgentDatabaseRepresentation a) {
 		CycleDatabaseRepresentation compare = a.getCycleList()[0];
 		VacuumWorldStepEvaluation eval = this.evaluations.getEvaluations().get(a.getId());
-
+		
 		for (int i = 1; i < a.getCycleList().length; i++) {
 			CycleDatabaseRepresentation c = a.getCycleList()[i];
 			
@@ -54,10 +55,14 @@ public class VacuumWorldDatatbaseStepEvaluationStrategy implements EvaluationStr
 			else if (c.getSpeech() != null) {
 				eval.incTotalSpeechActions(1);
 			}
+			
 			compare = c;
 		}
+		
+		update(a, eval);
+	}
 
-		// update dirts cleaned from field in AgentDatabaseRepresentation
+	private void update(AgentDatabaseRepresentation a, VacuumWorldStepEvaluation eval) {
 		int currentCleaned = eval.getDirtsCleaned();
 		int updatedCleaned = a.getSuccessfulCleans();
 		eval.incDirtsCleaned(updatedCleaned - currentCleaned);

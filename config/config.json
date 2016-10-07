@@ -1,0 +1,14 @@
+{
+   "monitor":true,
+   "observe":false,
+   "evalutate":false,
+   "log":false,
+   "print_grid":true,
+   "database":{
+      "name":"VacuumWorld",
+      "hostname":"127.0.0.1",
+      "port":"27017",
+      "agents_collection":"agents",
+      "dirts_collection":"dirts"
+   }
+}

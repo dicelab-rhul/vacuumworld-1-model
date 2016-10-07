@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
@@ -40,8 +39,7 @@ public class TextualInterfaceBuilder {
 			return getOverlappingSymbol(loc.getAgent(), loc.getDirt());
 		}
 		else if (loc.isAnAgentPresent()) {
-			//return loc.getAgent().getExternalAppearance().represent();
-			return ((VacuumWorldAgentAppearance) loc.getAgent().getExternalAppearance()).represent(loc.getAgent().getFacingDirection());
+			return loc.getAgent().getExternalAppearance().represent();
 		}
 		else if (loc.isDirtPresent()) {
 			return loc.getDirt().getExternalAppearance().represent();

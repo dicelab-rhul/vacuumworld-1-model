@@ -25,7 +25,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
  * {@link VacuumWorldCleaningAgent VacuumWorldCleaningAgents} or {@link Dirt
  * Dirts} or both, also the dimensions of the space. The purpose of the
  * representation is to give a {@link VWObserverAgent} an effective but
- * minimised view of what is happening in the real {@link VacuumWorldSpace}. The
+ * minimized view of what is happening in the real {@link VacuumWorldSpace}. The
  * representation is kept in sync by {@link VacuumWorldMonitoringContainer}
  * which will use {@link MonitoringUpdateEvent MonitoringUpdateEvents} sent from
  * {@link VacuumWorldPhysics}.
@@ -34,7 +34,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
  *
  */
 public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception, Cloneable {
-
 	private int width;
 	private int height;
 
@@ -125,7 +124,7 @@ public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception,
 		Map<VacuumWorldCoordinates, DirtRepresentation> dirtsCopy = new HashMap<>();
 		
 		for(Entry<VacuumWorldCoordinates, DirtRepresentation> entry : this.dirts.entrySet()) {
-			dirtsCopy.put(entry.getKey().clone(), entry.getValue().duplicate());
+			dirtsCopy.put(entry.getKey().duplicate(), entry.getValue().duplicate());
 		}
 		
 		return dirtsCopy;

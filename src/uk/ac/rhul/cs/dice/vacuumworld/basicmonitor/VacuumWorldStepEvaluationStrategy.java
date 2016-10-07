@@ -25,7 +25,7 @@ public class VacuumWorldStepEvaluationStrategy implements EvaluationStrategy<Str
 
 	@Override
 	public Evaluation evaluate(String actor, int startCycle, int endCycle) {
-		Utils.log("EVALUATING");
+		Utils.logWithClass(this.getClass().getSimpleName(), "Evaluation done, returning it...");
 		return this.evaluations;
 	}
 

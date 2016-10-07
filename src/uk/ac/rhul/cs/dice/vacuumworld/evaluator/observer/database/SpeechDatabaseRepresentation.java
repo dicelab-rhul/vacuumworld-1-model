@@ -15,7 +15,7 @@ public class SpeechDatabaseRepresentation {
 	}
 
 	public String getPayload() {
-		return payload;
+		return this.payload;
 	}
 
 	public void setPayload(String payload) {
@@ -23,7 +23,7 @@ public class SpeechDatabaseRepresentation {
 	}
 
 	public String[] getRecipients() {
-		return recipients;
+		return this.recipients;
 	}
 
 	public void setRecipients(String[] recipients) {

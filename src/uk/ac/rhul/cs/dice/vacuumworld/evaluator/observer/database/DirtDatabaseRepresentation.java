@@ -110,6 +110,6 @@ public class DirtDatabaseRepresentation implements RefinedPerception {
 
 	@Override
 	public String toString() {
-		return this._id + " : " + type + " [Start:" + startCycle + ", End: " + endCycle + "]";
+		return this._id + " : " + this.type + " [Start:" + this.startCycle + ", End: " + this.endCycle + "]";
 	}
 }

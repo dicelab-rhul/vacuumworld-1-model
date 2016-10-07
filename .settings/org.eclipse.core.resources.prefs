@@ -1,2 +1,3 @@
 eclipse.preferences.version=1
 encoding//src/uk/ac/rhul/cs/dice/vacuumworld/agents/VacuumWorldCleaningAgent.java=UTF-8
+encoding//src/uk/ac/rhul/cs/dice/vacuumworld/agents/manhattan/VacuumWorldManhattanMind.java=UTF-8

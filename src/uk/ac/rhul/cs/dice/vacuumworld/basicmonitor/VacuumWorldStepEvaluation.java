@@ -12,9 +12,9 @@ public class VacuumWorldStepEvaluation implements Evaluation {
 	private int idle = 0;
 
 	public String represent() {
-		return "Total physical actions: " + totalPhyicalActions + ",\nTotal dirt cleaned: " + dirtsCleaned
-				+ ",\nTotal moves: " + moves + ",\nTotal turns" + turns + ",\nTotal communication actions: "
-				+ totalSpeechActions + ",\nTotal time idle: " + idle
+		return "Total physical actions: " + this.totalPhyicalActions + ",\nTotal dirt cleaned: " + this.dirtsCleaned
+				+ ",\nTotal moves: " + this.moves + ",\nTotal turns" + this.turns + ",\nTotal communication actions: "
+				+ this.totalSpeechActions + ",\nTotal time idle: " + this.idle
 				+ ",\nTotal cost defined as (Total actions + Total communication actions): " + this.getCost() + "\n";
 	}
 

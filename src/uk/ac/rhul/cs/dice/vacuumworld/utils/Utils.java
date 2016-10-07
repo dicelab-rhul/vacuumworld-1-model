@@ -2,6 +2,8 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collection;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,11 +13,26 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 public class Utils {
-	private static final Logger LOGGER = Logger.getGlobal();
+	private static final Logger LOGGER = initLogger();
 	private static int cycleNumber = 1;
+	
+	public static final String INVALID_INITIAL_STATE = "The received initial state is not valid.";
 	
 	private Utils(){}
 	
+	private static Logger initLogger() {
+		Logger logger = Logger.getGlobal();
+		logger.setUseParentHandlers(false);
+		
+		VacuumWorldLogFormatter formatter = new VacuumWorldLogFormatter();
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setFormatter(formatter);
+		
+		logger.addHandler(handler);
+		
+		return logger;
+	}
+
 	public static final Logger fileLogger(String file, boolean append) {
 		FileHandler fileHandler = null;
 		Logger logger = null;
@@ -50,6 +67,10 @@ public class Utils {
 	public static void log(Exception e) {
 		log(e.getMessage(), e);
 	}
+	
+	public static void fakeLog(Exception e) {
+		//this exception does not need to be logged
+	}
 
 	public static void log(String message, Exception e) {
 		log(Level.SEVERE, message, e);
@@ -63,7 +84,7 @@ public class Utils {
 		LOGGER.log(level, message, e);
 	}
 	
-	public static void println(String source, String message) {
+	public static void logWithClass(String source, String message) {
 		log(source + ": " + message);
 	}
 	
@@ -86,5 +107,13 @@ public class Utils {
 		reader.close();
 		
 		return toReturn;
+	}
+	
+	public static boolean isCollectionNotNullAndNotEmpty(Collection<?> collection) {
+		if(collection == null) {
+			return false;
+		}
+		
+		return !collection.isEmpty();
 	}
 }

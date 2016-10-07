@@ -42,23 +42,20 @@ public class VacuumWorldClientListener implements Runnable {
 	}
 
 	private void runListener() throws InterruptedException {
-		Utils.println(this.getClass().getSimpleName(), "LISTENING THREAD STARTED!!!");
+		Utils.logWithClass(this.getClass().getSimpleName(), "View listening thread started.");
 		boolean canContinue = true;
 		
 		while(canContinue) {			
-			Utils.println(this.getClass().getSimpleName(), "Waiting for permission from thread manager");
 			this.canProceed.acquire();
-			Utils.println(this.getClass().getSimpleName(), "Got permission from thread manager");
-			Utils.println(this.getClass().getSimpleName(), "I can proceed: new loop");
 			canContinue = loop();
 		}
 	}
 
 	private boolean loop() {
 		try {
-			Utils.println(this.getClass().getSimpleName(), "Waiting for view request.");
+			Utils.logWithClass(this.getClass().getSimpleName(), "Waiting for view request.");
 			Object request = this.input.readObject();
-			Utils.println(this.getClass().getSimpleName(), "Got view request.");
+			Utils.logWithClass(this.getClass().getSimpleName(), "Got view request.");
 			
 			if(request instanceof ViewRequest) {
 				manageViewRequest((ViewRequest) request);
@@ -74,6 +71,5 @@ public class VacuumWorldClientListener implements Runnable {
 
 	private void manageViewRequest(ViewRequest request) {
 		this.code.set(request.getCode());
-		Utils.println(this.getClass().getSimpleName(), "after code assignment in listener: " + this.code);
 	}
 }

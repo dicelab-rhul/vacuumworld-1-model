@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
@@ -19,7 +18,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
-import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldServer;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringUpdateEvent;
@@ -39,6 +37,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWEvaluatorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWEvaluatorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
@@ -55,20 +54,29 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 		this.monitoringAgents = new ArrayList<>();
 		this.vacuumWorldSpaceRepresentation = new VacuumWorldSpaceRepresentation();
 		
-		if (VacuumWorldServer.LOG) {
+		initLogger();
+	}
+
+	private void initLogger() {
+		if (ConfigData.getLoggingFlag()) {
 			File lck = new File("logs/eval/container.log.lck");
 			File log = new File("logs/eval/container.log");
 			
-			try {
-				if (lck.exists()) {
-					Files.delete(lck.toPath());
-					Files.delete(log.toPath());
-				}
-			} 
-			catch (IOException e) {
-				Utils.log(e);
-			}
+			deleteFileIfNecessary(lck, log);
+			
 			this.logger = Utils.fileLogger(log.getPath(), true);
+		}
+	}
+
+	private void deleteFileIfNecessary(File lck, File log) {
+		try {
+			if (lck.exists()) {
+				Files.delete(lck.toPath());
+				Files.delete(log.toPath());
+			}
+		} 
+		catch (IOException e) {
+			Utils.log(e);
 		}
 	}
 
@@ -145,8 +153,8 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 	}
 
 	private void manageSubContainerMessage(MonitoringUpdateEvent event) {
-		if (VacuumWorldServer.LOG) {
-			Utils.log("MESSAGE FROM SUBCONTAINER! : " + event.represent());
+		if (ConfigData.getLoggingFlag()) {
+			Utils.logWithClass(this.getClass().getSimpleName(), "Message from subcontainer: " + event.represent());
 			this.logger.info(event.getAction().getClass().getSimpleName() + ":" + event.getResult() + ":" + event.getActor().toString());
 		}
 
@@ -282,11 +290,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
 	private void checkForDirt(Dirt dirt, VacuumWorldLocation location) {
 		if (dirt != null) {
-
 			this.vacuumWorldSpaceRepresentation.getDirts().put(new VacuumWorldCoordinates(location.getCoordinates().getX(), location.getCoordinates().getY()), new DirtRepresentation(generateDirtId(location.getCoordinates().getX(), location.getCoordinates().getY()), ((DirtAppearance) dirt.getExternalAppearance()).getDirtType()));
-		}
-		else {
-			Utils.log(Level.SEVERE, "CANNOT REPRESENT: " + location.getObstacle() + "IN " + VacuumWorldSpaceRepresentation.class.getSimpleName());
 		}
 	}
 
