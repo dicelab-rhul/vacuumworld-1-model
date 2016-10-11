@@ -15,7 +15,10 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
@@ -74,6 +77,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 public class VacuumWorldServer implements Observer {
@@ -86,10 +90,12 @@ public class VacuumWorldServer implements Observer {
 	private ObjectOutputStream output;
 	private VacuumWorldUniverse universe;
 	private VacuumWorldAgentThreadManager threadManager;
+	private ExecutorService executor;
 
 	private static final int TEST_CYCLES = 100;
 	
 	private Semaphore listeningThreadSemaphore;
+	private volatile StopSignal sharedStopSignal;
 
 	public VacuumWorldServer() throws IOException {		
 		this.server = new ServerSocket(ConfigData.getModelPort());
@@ -104,8 +110,14 @@ public class VacuumWorldServer implements Observer {
 
 		this.monitoringWorldActions = new HashSet<>();
 		this.monitoringWorldActions.add(TotalPerceptionAction.class);
+		
+		this.sharedStopSignal = new StopSignal();
 	}
 
+	public boolean isStopSignalOn() {
+		return this.sharedStopSignal.mustStop();
+	}
+	
 	public void startServer(String[] args, double delayInSeconds) throws HandshakeException {
 		Utils.logWithClass(this.getClass().getSimpleName(), "Starting server...");
 		
@@ -115,9 +127,12 @@ public class VacuumWorldServer implements Observer {
 		catch(ClassNotFoundException e) {
 			throw new HandshakeException(e);
 		}
+		catch(InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 	
-	private void startServerHelper(String[] args, double delayInSeconds) throws ClassNotFoundException, HandshakeException {
+	private void startServerHelper(String[] args, double delayInSeconds) throws ClassNotFoundException, HandshakeException, InterruptedException {
 		if (args[0].equals(Main.TEST)) {
 			test(args);
 		} 
@@ -126,8 +141,8 @@ public class VacuumWorldServer implements Observer {
 		}
 	}
 
-	private void startWithoutTest(String[] args, double delayInSeconds) throws ClassNotFoundException, HandshakeException {
-		this.threadManager = new VacuumWorldAgentThreadManager();
+	private void startWithoutTest(String[] args, double delayInSeconds) throws ClassNotFoundException, HandshakeException, InterruptedException {
+		this.threadManager = new VacuumWorldAgentThreadManager(this.sharedStopSignal);
 		
 		if (args[0].equals(Main.DEBUG)) {
 			startServerFromFile(args[1]);
@@ -148,7 +163,7 @@ public class VacuumWorldServer implements Observer {
 
 	public void test(String[] args) {
 		try {
-			this.threadManager = new VacuumWorldAgentThreadExperimentManager(TEST_CYCLES);
+			this.threadManager = new VacuumWorldAgentThreadExperimentManager(TEST_CYCLES, this.sharedStopSignal);
 			
 			ExperimentConnector tester = new ExperimentConnector();
 			
@@ -203,7 +218,7 @@ public class VacuumWorldServer implements Observer {
 		}
 	}
 
-	private void startServer(double delayInSeconds) throws ClassNotFoundException, HandshakeException {
+	private void startServer(double delayInSeconds) throws ClassNotFoundException, HandshakeException, InterruptedException {
 		try {
 			doHandshake();
 			manageRequests(delayInSeconds);
@@ -228,13 +243,13 @@ public class VacuumWorldServer implements Observer {
 		}
 	}
 
-	private void manageRequests(double delayInSeconds) throws IOException, ClassNotFoundException {
+	private void manageRequests(double delayInSeconds) throws IOException, ClassNotFoundException, InterruptedException {
 		VacuumWorldMonitoringContainer initialState = InitialStateParser.parseInitialState(this.input);
 		Utils.logWithClass(this.getClass().getSimpleName(), "Parser suceeded in parsing the initial state.\n");
 		constructUniverseAndStart(initialState, delayInSeconds);
 	}
 
-	private void constructUniverseAndStart(VacuumWorldMonitoringContainer initialState, double delayInSeconds) {
+	private void constructUniverseAndStart(VacuumWorldMonitoringContainer initialState, double delayInSeconds) throws InterruptedException {
 		Physics physics = new VacuumWorldPhysics();
 		initialState.getPhysics().setMonitoredContainerPhysics(physics);
 		int[] dimensions = initialState.getSubContainerSpace().getDimensions();
@@ -245,7 +260,7 @@ public class VacuumWorldServer implements Observer {
 		prepareAndStartSimulation(delayInSeconds);
 	}
 
-	private void prepareAndStartSimulation(double delayInSeconds) {
+	private void prepareAndStartSimulation(double delayInSeconds) throws InterruptedException {
 		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe.getState();
 		container.createVacuumWorldSpaceRepresentation();
 
@@ -261,7 +276,7 @@ public class VacuumWorldServer implements Observer {
 		startSimulation(container, delayInSeconds);
 	}
 
-	private void startSimulation(VacuumWorldMonitoringContainer container, double delayInSeconds) {
+	private void startSimulation(VacuumWorldMonitoringContainer container, double delayInSeconds) throws InterruptedException {
 		Set<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace().getAgents();
 		
 		for(VacuumWorldCleaningAgent agent : agents) {
@@ -278,11 +293,11 @@ public class VacuumWorldServer implements Observer {
 	private void startListeningService(VacuumWorldMonitoringContainer initialState) {
 		this.listeningThreadSemaphore = new Semaphore(0);
 		
-		VacuumWorldClientListener listener = new VacuumWorldClientListener(this.input, this.output, this.listeningThreadSemaphore);
+		VacuumWorldClientListener listener = new VacuumWorldClientListener(this.input, this.output, this.listeningThreadSemaphore, this.sharedStopSignal);
 		this.threadManager.setClientListener(listener, initialState.getSubContainerSpace());
 		
-		Thread listeningThread = new Thread(this.threadManager.getClientListener());
-		listeningThread.start();
+		this.executor = Executors.newSingleThreadExecutor();
+		this.executor.execute(this.threadManager.getClientListener());
 	}
 
 	/**
@@ -349,15 +364,26 @@ public class VacuumWorldServer implements Observer {
 			ModelUpdate update = new ModelUpdate(code, null);
 			this.threadManager.getClientListener().getOutputStream().writeObject(update);
 			this.threadManager.getClientListener().getOutputStream().flush();
+			
 			this.server.close();
 		}
 		catch(IOException e) {
-			stopSystem(ModelMessagesEnum.STOP_FORWARD);
 			Utils.log(e);
 		}
 		finally {
-			Utils.logWithClass(this.getClass().getSimpleName(), "Bye!!!");
-			System.exit(0);
+			this.sharedStopSignal.stop();
+			killThreads();
+		}
+	}
+
+	private void killThreads() {
+		try {
+			this.executor.shutdownNow();
+			this.executor.awaitTermination(2, TimeUnit.SECONDS);
+			Utils.logWithClass(this.getClass().getSimpleName(), "Requests listener termination complete.");
+		}
+		catch(InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 

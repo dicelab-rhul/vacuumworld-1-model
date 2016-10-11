@@ -7,6 +7,7 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 
 public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThreadManager {
 
@@ -14,12 +15,13 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 	private int numberOfCycles;
 	private String testCase;
 
-	public VacuumWorldAgentThreadExperimentManager(int numberOfCycles) {
+	public VacuumWorldAgentThreadExperimentManager(int numberOfCycles, StopSignal sharedStopSignal) {
+		super(sharedStopSignal);
 		this.numberOfCycles = numberOfCycles;
 	}
 
 	public void clear() {
-		this.activeThreads.clear();
+		//this.activeThreads.clear();
 		this.cleaningRunnables.clear();
 		this.monitorRunnables.clear();
 		this.pdeTimes.clear();

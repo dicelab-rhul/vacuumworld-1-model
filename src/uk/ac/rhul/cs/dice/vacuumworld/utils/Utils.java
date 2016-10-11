@@ -66,7 +66,9 @@ public class Utils {
 	}
 	
 	public static void log(Exception e) {
-		log(e.getMessage(), e);
+		if(e.getMessage() != null) {
+			log(e.getMessage(), e);
+		}
 	}
 	
 	public static void fakeLog(Exception e) {

@@ -23,6 +23,10 @@ public class Main {
 			String configFilePath = retrieveConfigFilePath(args);
 			ConfigData.initConfigData(configFilePath);
 			startModelServer(delay);
+			
+			Utils.logWithClass(Main.class.getSimpleName(), "Bye!!!");
+			
+			System.exit(0);
 		}
 	}
 

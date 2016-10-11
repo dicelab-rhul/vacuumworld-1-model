@@ -6,6 +6,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
@@ -15,11 +16,14 @@ public class VacuumWorldClientListener implements Runnable {
 	private Semaphore canProceed;
 	private AtomicReference<ViewRequestsEnum> code;
 	
-	public VacuumWorldClientListener(ObjectInputStream input, ObjectOutputStream output, Semaphore semaphore) {
+	private volatile StopSignal sharedStopSignal;
+	
+	public VacuumWorldClientListener(ObjectInputStream input, ObjectOutputStream output, Semaphore semaphore, StopSignal sharedStopSignal) {
 		this.input = input;
 		this.output = output;
 		this.canProceed = semaphore;
 		this.code = new AtomicReference<>(ViewRequestsEnum.GET_STATE);
+		this.sharedStopSignal = sharedStopSignal;
 	}
 	
 	public ViewRequestsEnum getRequestCode() {
@@ -52,6 +56,10 @@ public class VacuumWorldClientListener implements Runnable {
 	}
 
 	private boolean loop() {
+		if(this.sharedStopSignal.mustStop()) {
+			return false;
+		}
+		
 		try {
 			Object request = this.input.readObject();
 			
