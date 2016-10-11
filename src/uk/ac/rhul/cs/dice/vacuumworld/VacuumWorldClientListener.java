@@ -53,9 +53,7 @@ public class VacuumWorldClientListener implements Runnable {
 
 	private boolean loop() {
 		try {
-			Utils.logWithClass(this.getClass().getSimpleName(), "Waiting for view request.");
 			Object request = this.input.readObject();
-			Utils.logWithClass(this.getClass().getSimpleName(), "Got view request.");
 			
 			if(request instanceof ViewRequest) {
 				manageViewRequest((ViewRequest) request);

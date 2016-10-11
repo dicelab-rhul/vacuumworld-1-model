@@ -42,6 +42,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	
 	public void start(double delayInSeconds) {
 		this.simulationStarted = true;
+		Utils.logWithClass(this.getClass().getSimpleName(), "Thread manager correctly started.");
 		
 		cycle(delayInSeconds);
 	}
@@ -50,7 +51,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		boolean doPerceive = false;
 		
 		while (this.simulationStarted) {
-			Utils.logWithClass(this.getClass().getSimpleName(), "\n\nSTART CYCLE");
+			Utils.logWithClass(this.getClass().getSimpleName(), "START CYCLE");
 			doCycleStep(this.monitorRunnables);
 			doCycleStep(this.cleaningRunnables, doPerceive);
 

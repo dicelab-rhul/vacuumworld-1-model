@@ -19,15 +19,25 @@ public class Main {
 			Utils.logWithClass(Main.class.getSimpleName(), "Usage: java -jar model.jar --delay-in-seconds <delay-in-seconds> --config-file <config-json-file-path>");
 		}
 		else {
-			ConfigData.initConfigData(args[3]);
-			double delay = parseDelay(args[0]);
+			double delay = parseDelay(args);
+			String configFilePath = retrieveConfigFilePath(args);
+			ConfigData.initConfigData(configFilePath);
 			startModelServer(delay);
 		}
 	}
 
-	private static double parseDelay(String string) {
+	private static String retrieveConfigFilePath(String[] args) {
+		if("--config-file".equals(args[2])) {
+			return args[3];
+		}
+		else {
+			return null;
+		}
+	}
+
+	private static double parseDelay(String[] args) {
 		try {
-			return Double.valueOf(string);
+			return Double.valueOf(args[1]);
 		}
 		catch(Exception e) {
 			Utils.fakeLog(e);
@@ -37,7 +47,7 @@ public class Main {
 
 	private static void startModelServer(double delayInSeconds) {
 		try {
-			VacuumWorldServer server = new VacuumWorldServer(13337);
+			VacuumWorldServer server = new VacuumWorldServer();
 			server.startServer(new String[]{FOO, FOO}, delayInSeconds);
 		}
 		catch (IOException | HandshakeException e) {

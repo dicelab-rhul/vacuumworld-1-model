@@ -6,44 +6,42 @@ import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Coordinates;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
+import uk.ac.rhul.cs.dice.gawl.interfaces.utils.AbstractSingleTypedPair;
+import uk.ac.rhul.cs.dice.gawl.interfaces.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 
-public class VacuumWorldCoordinates implements Coordinates {
-	private int x;
-	private int y;
-	
+public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> implements Coordinates {
 	public VacuumWorldCoordinates(int x, int y) {
-		this.x = x;
-		this.y = y;
+		super(x, y);
 	}
 	
 	public int getX() {
-		return this.x;
+		return getFirst();
 	}
 	
 	public int getY() {
-		return this.y;
+		return getSecond();
 	}
 	
 	@Override
 	public String toString() {
-		return "(" + this.x + ", " + this.y + ")";
+		return "(" + getFirst() + ", " + getSecond() + ")";
 	}
 	
 	public VacuumWorldCoordinates getNorthernCoordinates() {
-		return new VacuumWorldCoordinates(this.x, this.y - 1);
+		return new VacuumWorldCoordinates(getFirst(), getSecond() - 1);
 	}
 	
 	public VacuumWorldCoordinates getSouthernCoordinates() {
-		return new VacuumWorldCoordinates(this.x, this.y + 1);
+		return new VacuumWorldCoordinates(getFirst(), getSecond() + 1);
 	}
 	
 	public VacuumWorldCoordinates getWesternCoordinates() {
-		return new VacuumWorldCoordinates(this.x - 1, this.y);
+		return new VacuumWorldCoordinates(getFirst() - 1, getSecond());
 	}
 	
 	public VacuumWorldCoordinates getEasternCoordinates() {
-		return new VacuumWorldCoordinates(this.x + 1, this.y);
+		return new VacuumWorldCoordinates(getFirst() + 1, getSecond());
 	}
 	
 	public VacuumWorldCoordinates getNorthWesternCoordinates() {
@@ -86,7 +84,7 @@ public class VacuumWorldCoordinates implements Coordinates {
 	}
 	
 	public boolean areInBounds(int maxX, int maxY) {
-		return this.x >= 0 && this.y >= 0 && this.x <= maxX && this.y <= maxY;
+		return getFirst() >= 0 && getSecond() >= 0 && getFirst() <= maxX && getSecond() <= maxY;
 	}
 	
 	@Override
@@ -102,17 +100,17 @@ public class VacuumWorldCoordinates implements Coordinates {
 	}
 
 	private int compareTo(VacuumWorldCoordinates other) {
-		if(this.x > other.getX() && this.y > other.getY()) {
+		if(getFirst() > other.getX() && getSecond() > other.getY()) {
 			return 1;
 		}
-		else if(this.x < other.getX() && this.y < other.getY()) {
+		else if(getFirst() < other.getX() && getSecond() < other.getY()) {
 			return -1;
 		}
 		else if(this.equals(other)) {
 			return 0;
 		}
 		else {
-			return squaresComparison(this.x, this.y, other.getX(), other.getY());
+			return squaresComparison(getFirst(), getSecond(), other.getX(), other.getY());
 		}
 	}
 
@@ -133,31 +131,36 @@ public class VacuumWorldCoordinates implements Coordinates {
 	}
 	
 	public VacuumWorldCoordinates duplicate() {
-		return new VacuumWorldCoordinates(this.x, this.y);
+		return new VacuumWorldCoordinates(getFirst(), getSecond());
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + this.x;
-		result = prime * result + this.y;
+		result = prime * result + getFirst().intValue();
+		result = prime * result + getSecond().intValue();
+		
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
+		if(!Utils.equalsHelper(this, obj)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
+		else {
+			return checkValues(obj);
+		}
+	}
+
+	private boolean checkValues(Object obj) {
 		VacuumWorldCoordinates other = (VacuumWorldCoordinates) obj;
-		if (this.x != other.x)
+		
+		if(other == null) {
 			return false;
-		if (this.y != other.y)
-			return false;
-		return true;
+		}
+		
+		return getFirst().intValue() == other.getFirst().intValue() && getSecond().intValue() == other.getSecond().intValue();
 	}
 }

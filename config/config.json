@@ -1,7 +1,8 @@
 {
+   "model_port":13337,
    "monitor":true,
    "observe":false,
-   "evalutate":false,
+   "evaluate":false,
    "log":false,
    "print_grid":true,
    "database":{

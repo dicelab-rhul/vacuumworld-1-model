@@ -40,6 +40,7 @@ public class MonitoringEvent extends AbstractEvent {
 		return this.getAction().succeeded(physics, context);
 	}
 
+	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + " : " + this.getAction();
 	}

@@ -37,7 +37,7 @@ public class VacuumWorldRandomMind extends VacuumWorldDefaultMind {
 	}
 
 	private EnvironmentalAction decideHelper() {
-		if (this.getLastCyclePerceptions().isEmpty()) {
+		if (this.getPerceptions().isEmpty()) {
 			setNextAction(new PerceiveAction(this.getPerceptionRange(), this.isCanSeeBehind()));
 		}
 		else {
@@ -50,7 +50,7 @@ public class VacuumWorldRandomMind extends VacuumWorldDefaultMind {
 	private EnvironmentalAction decideFromPerceptions() {
 		// this completely ignores the speeches
 
-		for (DefaultActionResult result : this.getLastCyclePerceptions()) {
+		for (DefaultActionResult result : this.getPerceptions()) {
 			if (result instanceof VacuumWorldActionResult) {
 				VacuumWorldPerception p = ((VacuumWorldActionResult) result).getPerception();
 

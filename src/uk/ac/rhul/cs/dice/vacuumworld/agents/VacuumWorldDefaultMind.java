@@ -32,7 +32,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private EnvironmentalAction nextAction;
 
 	public VacuumWorldDefaultMind() {
-		this.setLastCyclePerceptions(new ArrayList<>());
+		this.setPerceptions(new ArrayList<>());
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 
 	@Override
 	public void perceive(Object perceptionWrapper) {
-		while (this.getLastCyclePerceptions().isEmpty()) {
+		while (this.getPerceptions().isEmpty()) {
 			notifyObservers(null, VacuumWorldDefaultBrain.class);
 		}
 	}
@@ -52,15 +52,14 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		setAvailableActions(new ArrayList<>(this.getActions()));
-		this.nextAction = null; //this is why all the subclasses need to implement the decide logic.
 		
 		return null; //this is why all the subclasses need to implement the decide logic.
 	}
 	
 	@Override
 	public void execute(EnvironmentalAction action) {
-		this.getLastCyclePerceptions().clear();
-		Utils.logWithClass(this.getClass().getSimpleName(), "Executing " + this.getNextAction().getClass().getSimpleName() + "...");
+		this.getPerceptions().clear();
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 		notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
 	}
 	
@@ -108,6 +107,14 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		return ActionResult.ACTION_DONE.equals(this.lastActionResult.getActionResult());
 	}
 	
+	public boolean wasLastActionImpossible() {
+		return ActionResult.ACTION_IMPOSSIBLE.equals(this.lastActionResult.getActionResult());
+	}
+	
+	public boolean lastActionFailed() {
+		return ActionResult.ACTION_FAILED.equals(this.lastActionResult.getActionResult());
+	}
+	
 	public String getBodyId() {
 		return this.bodyId;
 	}
@@ -148,11 +155,11 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		this.nextAction = nextAction;
 	}
 
-	public List<DefaultActionResult> getLastCyclePerceptions() {
+	public List<DefaultActionResult> getPerceptions() {
 		return this.lastCyclePerceptions;
 	}
 
-	public void setLastCyclePerceptions(List<DefaultActionResult> lastCyclePerceptions) {
+	public void setPerceptions(List<DefaultActionResult> lastCyclePerceptions) {
 		this.lastCyclePerceptions = lastCyclePerceptions;
 	}
 

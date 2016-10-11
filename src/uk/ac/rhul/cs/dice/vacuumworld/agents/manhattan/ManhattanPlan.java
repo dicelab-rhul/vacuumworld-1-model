@@ -36,9 +36,9 @@ public class ManhattanPlan {
 		return this.actionsToPerform;
 	}
 	
-	public Class<? extends EnvironmentalAction> pullActionToPerform() {
+	public Class<? extends EnvironmentalAction> pullActionToPerform(String agentId) {
 		Class<? extends EnvironmentalAction> selected = this.actionsToPerform.poll();
-		Utils.logWithClass(this.getClass().getSimpleName(), "Selecting " + selected.getSimpleName() + " from plan...");
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + agentId + ": selecting " + selected.getSimpleName() + " from plan...");
 		
 		return selected;
 	}
@@ -51,8 +51,8 @@ public class ManhattanPlan {
 		this.actionsToPerform.clear();
 	}
 	
-	public void pushActionToPerform(Class<? extends EnvironmentalAction> actionToPerform) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Adding " + actionToPerform.getSimpleName() + " to plan...");
+	public void pushActionToPerform(Class<? extends EnvironmentalAction> actionToPerform, String agentId) {
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + agentId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
 		this.actionsToPerform.add(actionToPerform);
 	}
 

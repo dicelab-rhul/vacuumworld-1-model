@@ -12,6 +12,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPerceptionResultWrapper;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
@@ -19,6 +20,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class VacuumWorldSpace extends EnvironmentalSpace {
 	private int[] dimensions;
@@ -255,12 +257,36 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 
 		for (String ss : senderSensor) {
+			logResult(wrapper.getPerceptionResult());
 			notifyAgentSensor(wrapper.getPerceptionResult(), ss);
 		}
 	}
 
 	private void managePhysicsRequest(DefaultActionResult result) {
+		logResult(result);
 		notifyAgentsSensors(result);
+	}
+
+	private void logResult(DefaultActionResult result) {
+		if(result instanceof VacuumWorldActionResult) {
+			logResult((VacuumWorldActionResult) result); 
+		}
+	}
+	
+	private void logResult(VacuumWorldActionResult result) {
+		switch(result.getActionResult()) {
+		case ACTION_DONE:
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + result.getActorId() + ": the action was successful!");
+			break;
+		case ACTION_FAILED:
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + result.getActorId() + ": the action was recognized as possible, but it failed during the execution!");
+			break;
+		case ACTION_IMPOSSIBLE:
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + result.getActorId() + ": the action was recognized as impossible and it was not performed!");
+			break;
+		default:
+			throw new IllegalArgumentException(Utils.AGENT + result.getActorId() + ": unknown result: " + result.getActionResult());
+		}
 	}
 
 	private void notifyAgentsSensors(DefaultActionResult result) {

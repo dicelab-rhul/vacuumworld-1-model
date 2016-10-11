@@ -6,7 +6,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 
 public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
-
 	private VacuumWorldSpeechActionResult speechResult;
 	private VacuumWorldActionResult perceptionResult;
 
@@ -58,5 +57,10 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 
 	public void setPerceptionResult(VacuumWorldActionResult perceptionResult) {
 		this.perceptionResult = perceptionResult;
+	}
+
+	@Override
+	public String getActorId() {
+		return this.perceptionResult.getActorId();
 	}
 }

@@ -12,22 +12,23 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
+
 public class Utils {
 	private static final Logger LOGGER = initLogger();
 	private static int cycleNumber = 1;
+	public static final String AGENT = "Agent ";
 	
 	public static final String INVALID_INITIAL_STATE = "The received initial state is not valid.";
 	
 	private Utils(){}
 	
 	private static Logger initLogger() {
-		Logger logger = Logger.getGlobal();
+		Logger logger = Logger.getAnonymousLogger();
 		logger.setUseParentHandlers(false);
-		
 		VacuumWorldLogFormatter formatter = new VacuumWorldLogFormatter();
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setFormatter(formatter);
-		
 		logger.addHandler(handler);
 		
 		return logger;

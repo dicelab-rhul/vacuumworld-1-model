@@ -43,7 +43,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	public EnvironmentalAction decide(Object... parameters) {
 		super.decide(parameters);
 		
-		if (this.getLastCyclePerceptions().isEmpty()) {
+		if (this.getPerceptions().isEmpty()) {
 			this.setNextAction(new PerceiveAction(this.getPerceptionRange(), this.isCanSeeBehind()));
 		}
 		else {
@@ -54,7 +54,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 
 	private EnvironmentalAction decideFromPerceptions() {
 		VacuumWorldActionResult result = null;
-		for (DefaultActionResult r : this.getLastCyclePerceptions()) {
+		for (DefaultActionResult r : this.getPerceptions()) {
 			if (r instanceof VacuumWorldSpeechActionResult) {
 				//TODO
 			}

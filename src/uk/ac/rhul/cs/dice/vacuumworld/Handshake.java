@@ -25,7 +25,7 @@ public class Handshake {
 		}
 	}
 	
-	public static Boolean attemptHanshakeWithControllerHelper(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes code) throws HandshakeException {
+	private static Boolean attemptHanshakeWithControllerHelper(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes code) throws HandshakeException {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		
 		Future<Boolean> future = executor.submit(() -> doHandshake(toController, fromController, code));
@@ -83,7 +83,7 @@ public class Handshake {
 	private static Boolean finalizeHandshake(ObjectOutputStream toController, HandshakeCodes code) throws IOException {
 		toController.writeObject(code.toString());
 		toController.flush();
-		Utils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller.");
+		Utils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller.\n");
 		
 		return true;
 	}

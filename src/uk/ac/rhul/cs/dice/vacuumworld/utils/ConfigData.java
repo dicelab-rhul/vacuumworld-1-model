@@ -7,6 +7,8 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 public class ConfigData {	
+	private static int modelPort;
+	
 	private static boolean monitor;
 	private static boolean observe;
 	private static boolean evaluate;
@@ -21,6 +23,10 @@ public class ConfigData {
 	private static String dirtsCollection;
 	
 	private ConfigData(){}
+	
+	public static int getModelPort() {
+		return ConfigData.modelPort;
+	}
 	
 	public static boolean getMonitoringFlag() {
 		return ConfigData.monitor;
@@ -76,6 +82,7 @@ public class ConfigData {
 	private static boolean initData(JsonReader reader) {
 		JsonObject config = reader.readObject();
 		
+		ConfigData.modelPort = config.getInt("model_port");
 		ConfigData.monitor = config.getBoolean("monitor");
 		ConfigData.observe = config.getBoolean("observe");
 		ConfigData.evaluate = config.getBoolean("evaluate");

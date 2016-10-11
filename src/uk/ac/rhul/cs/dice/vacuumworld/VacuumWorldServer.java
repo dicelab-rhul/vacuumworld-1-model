@@ -91,8 +91,8 @@ public class VacuumWorldServer implements Observer {
 	
 	private Semaphore listeningThreadSemaphore;
 
-	public VacuumWorldServer(int port) throws IOException {		
-		this.server = new ServerSocket(port);
+	public VacuumWorldServer() throws IOException {		
+		this.server = new ServerSocket(ConfigData.getModelPort());
 
 		this.vacuumWorldActions = new HashSet<>();
 		this.vacuumWorldActions.add(TurnLeftAction.class);
@@ -107,6 +107,8 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	public void startServer(String[] args, double delayInSeconds) throws HandshakeException {
+		Utils.logWithClass(this.getClass().getSimpleName(), "Starting server...");
+		
 		try {
 			startServerHelper(args, delayInSeconds);
 		}
@@ -228,6 +230,7 @@ public class VacuumWorldServer implements Observer {
 
 	private void manageRequests(double delayInSeconds) throws IOException, ClassNotFoundException {
 		VacuumWorldMonitoringContainer initialState = InitialStateParser.parseInitialState(this.input);
+		Utils.logWithClass(this.getClass().getSimpleName(), "Parser suceeded in parsing the initial state.\n");
 		constructUniverseAndStart(initialState, delayInSeconds);
 	}
 
@@ -298,6 +301,7 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void manageViewRequest() {
+		Utils.logWithClass(this.getClass().getSimpleName(), "Waiting for view request.");
 		this.listeningThreadSemaphore.release();
 		
 		ViewRequestsEnum code;
@@ -339,6 +343,8 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void stopSystem(ModelMessagesEnum code) {
+		Utils.logWithClass(this.getClass().getSimpleName(), "Stopping the system and forwarding the stop request to the controller for him to shutdown...");
+		
 		try {
 			ModelUpdate update = new ModelUpdate(code, null);
 			this.threadManager.getClientListener().getOutputStream().writeObject(update);
@@ -350,6 +356,7 @@ public class VacuumWorldServer implements Observer {
 			Utils.log(e);
 		}
 		finally {
+			Utils.logWithClass(this.getClass().getSimpleName(), "Bye!!!");
 			System.exit(0);
 		}
 	}

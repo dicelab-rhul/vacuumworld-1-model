@@ -33,7 +33,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.VWObserverAgent;
  * @author Ben Wilkins
  *
  */
-public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception, Cloneable {
+public class VacuumWorldSpaceRepresentation implements Space, RefinedPerception {
 	private int width;
 	private int height;
 
