@@ -4,18 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
@@ -36,41 +30,26 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		super.decide(parameters);
-		
 		if(this.plan != null) {
-			this.setNextAction(followPlan(parameters));
+			return followPlan(parameters);
 		}
 		else {
-			this.setNextAction(buildNewPlan());
+			return buildNewPlan();
 		}
-		
-		return getNextAction();
 	}
 
 	private EnvironmentalAction buildNewPlan() {
 		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": new plan generation: seeking for a target...");
+		VacuumWorldPerception perception = getPerception();
 		
-		List<DefaultActionResult> lastCyclePerceptions = getPerceptions();
-		VacuumWorldActionResult lastPhysicalActionResult = getLastPhysicalActionResultIfExists(lastCyclePerceptions);
-		
-		if(lastPhysicalActionResult != null) {
-			return buildNewPlan(lastPhysicalActionResult.getPerception());
-		}
-		else {
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": perception is null: the only reasonable plan is to get a new one...");
-			
-			return getPerceptionAction();
-		}
-	}
-
-	private EnvironmentalAction buildNewPlan(VacuumWorldPerception perception) {
 		if(perception == null) {
 			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": perception is null: the only reasonable plan is to get a new one...");
 			
-			return getPerceptionAction();
+			return buildPerceiveAction();
 		}
 		else {
+			updateAvailableActions(perception);
+			
 			return buildNewPlanHelper(perception);
 		}
 	}
@@ -89,7 +68,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 			//here it's impossible to build a new plan.
 			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + " cannot spot any compatible dirt. The next action will be a random one.");
 			
-			return selectRandomAction();
+			return decideActionRandomly();
 		}
 	}
 
@@ -140,16 +119,6 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 			
 			return decide(parameters);
 		}
-	}
-
-	private VacuumWorldActionResult getLastPhysicalActionResultIfExists(List<DefaultActionResult> lastCyclePerceptions) {
-		for(DefaultActionResult result : lastCyclePerceptions) {
-			if(result instanceof VacuumWorldActionResult) {
-				return (VacuumWorldActionResult) result;
-			}
-		}
-		
-		return null;
 	}
 
 	private EnvironmentalAction getCloserToDirt(VacuumWorldPerception perception) {
@@ -271,30 +240,5 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 
 	private int getDistance(VacuumWorldCoordinates c1, VacuumWorldCoordinates c2) {
 		return Math.abs(c1.getX() - c2.getX()) + Math.abs(c1.getY() - c2.getY());
-	}
-
-	private EnvironmentalAction selectRandomAction() {
-		Random rng = new Random();
-		
-		int size = this.getAvailableActions().size();
-		int randomNumber = rng.nextInt(size);
-		Class<? extends EnvironmentalAction> actionPrototype = this.getAvailableActions().get(randomNumber);
-
-		if(SpeechAction.class.isAssignableFrom(actionPrototype)) {
-			return buildSpeechAction(getBodyId(), null, new VacuumWorldSpeechPayload("Hello!!!"));
-		}
-		else {
-			return buildPhysicalAction(actionPrototype);
-		}
-	}
-
-	private EnvironmentalAction getPerceptionAction() {
-		for(Class<? extends EnvironmentalAction> candidate : getAvailableActions()) {
-			if(PerceiveAction.class.isAssignableFrom(candidate)) {
-				return buildPhysicalAction(candidate);
-			}
-		}
-		
-		throw new IllegalArgumentException();
 	}
 }

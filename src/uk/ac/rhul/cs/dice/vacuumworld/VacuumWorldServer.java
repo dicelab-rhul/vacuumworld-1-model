@@ -73,6 +73,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.generation.ExperimentConnector;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadExperimentManager;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
+import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldCleaningAgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
@@ -396,9 +397,9 @@ public class VacuumWorldServer implements Observer {
 
 		((VacuumWorldDefaultMind) agent.getMind()).setCanSeeBehind(agent.canSeeBehind());
 		((VacuumWorldDefaultMind) agent.getMind()).setPerceptionRange(agent.getPerceptionRange());
-		((VacuumWorldDefaultMind) agent.getMind()).setAvailableActions(this.vacuumWorldActions);
+		((VacuumWorldDefaultMind) agent.getMind()).setVacuumWorldActions(this.vacuumWorldActions);
 
-		this.threadManager.addAgent(new AgentRunnable(agent.getMind()));
+		this.threadManager.addAgent(new VacuumWorldCleaningAgentRunnable((VacuumWorldDefaultMind) agent.getMind()));
 	}
 
 	// ******** LOAD BASIC MONITOR MODEL ******** //

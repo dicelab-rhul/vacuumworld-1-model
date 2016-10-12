@@ -18,9 +18,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldClientListener listener;
 	private VacuumWorldSpace state;
-	protected final ThreadStateDecide threadStateDecide = new ThreadStateDecide();
-	protected final ThreadStateExecute threadStateExecute = new ThreadStateExecute();
-	protected final ThreadStatePerceive threadStatePerceive = new ThreadStatePerceive();
+	protected final ThreadState threadStateDecide = new VacuumWorldThreadStateDecide();
+	protected final ThreadState threadStateExecute = new DefaultThreadStateExecute();
+	protected final ThreadState threadStatePerceive = new DefaultThreadStatePerceive();
 	protected boolean simulationStarted = false;
 	protected ExecutorService executor;
 	protected Set<AgentRunnable> cleaningRunnables;
@@ -147,7 +147,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 			throw new IllegalThreadStateException("Cannot add a new agent at runtime.");
 		}
 
-		if (runnable.getAgent() instanceof DatabaseAgentMind || runnable.getAgent() instanceof VacuumWorldMonitorMind) {
+		if (runnable.getAgentMind() instanceof DatabaseAgentMind || runnable.getAgentMind() instanceof VacuumWorldMonitorMind) {
 			this.monitorRunnables.add(runnable);
 		}
 		else {

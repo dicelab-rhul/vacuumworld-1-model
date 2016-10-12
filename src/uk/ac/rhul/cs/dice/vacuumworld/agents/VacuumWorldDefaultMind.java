@@ -1,38 +1,47 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
+	private Random rng;
+	
 	private String bodyId;
 	private int perceptionRange;
 	private boolean canSeeBehind;
-	private Result lastActionResult;
+	private VacuumWorldActionResult lastAttemptedActionResult;
+	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
 
 	private Set<Class<? extends AbstractAction>> actions;
 	private List<Class<? extends EnvironmentalAction>> availableActions;
-
-	private List<DefaultActionResult> lastCyclePerceptions;
 	private EnvironmentalAction nextAction;
 
 	public VacuumWorldDefaultMind() {
-		this.setPerceptions(new ArrayList<>());
+		this.rng = new Random();
+		this.lastCycleIncomingSpeeches = new ArrayList<>();
 	}
 
 	@Override
@@ -44,75 +53,159 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 
 	@Override
 	public void perceive(Object perceptionWrapper) {
-		while (this.getPerceptions().isEmpty()) {
-			notifyObservers(null, VacuumWorldDefaultBrain.class);
-		}
-	}
-	
-	@Override
-	public EnvironmentalAction decide(Object... parameters) {
-		setAvailableActions(new ArrayList<>(this.getActions()));
-		
-		return null; //this is why all the subclasses need to implement the decide logic.
+		notifyObservers(null, VacuumWorldDefaultBrain.class);
+		setAvailableActions(new ArrayList<>(this.getVacuumWorldActions()));
 	}
 	
 	@Override
 	public void execute(EnvironmentalAction action) {
-		this.getPerceptions().clear();
+		this.lastAttemptedActionResult = null;
+		this.lastCycleIncomingSpeeches = null;
+		
 		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 		notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
 	}
 	
 	private void manageBrainRequest(List<?> arg) {
 		for (Object result : arg) {
-			if (result instanceof DefaultActionResult) {
-				this.lastCyclePerceptions.add((DefaultActionResult) result);
-				manageNonReceivedSpeechResult(result);
+			if (result instanceof VacuumWorldActionResult) {
+				this.lastAttemptedActionResult = (VacuumWorldActionResult) result;
+			}
+			else if(result instanceof VacuumWorldSpeechActionResult) {
+				this.lastCycleIncomingSpeeches.add((VacuumWorldSpeechActionResult) result);
 			}
 		}
 	}
+	
+	protected EnvironmentalAction decideActionRandomly() {		
+		int size = this.getAvailableActions().size();
+		int randomNumber = this.rng.nextInt(size);
+		Class<? extends EnvironmentalAction> actionPrototype = this.getAvailableActions().get(randomNumber);
 
-	private void manageNonReceivedSpeechResult(Object result) {
-		if (!(result instanceof VacuumWorldSpeechActionResult)) {
-			this.lastActionResult = (VacuumWorldActionResult) result;
+		return buildNewAction(actionPrototype);
+	}
+
+	//subclasses should override this, especially the part where a speech action is build.
+	protected EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
+		if (actionPrototype.equals(SpeechAction.class)) {
+			return buildSpeechAction(this.bodyId, new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!"));
+		}
+		else if(actionPrototype.equals(PerceiveAction.class)) {
+			return buildPerceiveAction();
+		}
+		else {
+			return buildPhysicalAction(actionPrototype);
 		}
 	}
-	
+
+	protected EnvironmentalAction buildPerceiveAction() {
+		try {
+			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(this.perceptionRange, this.canSeeBehind);
+		}
+		catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+			Utils.fakeLog(e);
+			
+			return new PerceiveAction();
+		}
+	}
+
 	protected final EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
 		}
 		catch (Exception e) {
 			Utils.log(e);
+			
 			return null;
 		}
 	}
-
-	protected final SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
+	
+	protected SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
 		try {
 			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
 			return constructor.newInstance(senderId, recipientIds, payload);
 		}
 		catch (Exception e) {
 			Utils.log(e);
+			
 			return null;
 		}
 	}
+	
+	protected void updateAvailableActions(VacuumWorldPerception perception) {
+		updateMoveActionIfNecessary(perception);
+		updateCleaningActionIfNecessary(perception);
+	}
 
-	public void setAvailableActions(Set<Class<? extends AbstractAction>> actions) {
-		this.setActions(actions);
+	protected void updateCleaningActionIfNecessary(VacuumWorldPerception perception) {
+		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
+
+		if (agentLocation.isDirtPresent()) {
+			addActionIfNecessary(CleanAction.class);
+		}
+		else {
+			removeActionIfNecessary(CleanAction.class);
+		}
+	}
+
+	protected void addActionIfNecessary(Class<? extends EnvironmentalAction> name) {
+		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
+			if (a.getClass().isAssignableFrom(name)) {
+				return;
+			}
+		}
+		
+		this.getAvailableActions().add(name);
+	}
+	
+	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
+		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
+
+		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
+			if (a.getClass().isAssignableFrom(name)) {
+				toRemove.add(name);
+			}
+		}
+		
+		this.getAvailableActions().removeAll(toRemove);
+	}
+
+	protected void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
+		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
+		VacuumWorldCleaningAgent agent = agentLocation.getAgent();
+
+		if (agent != null) {
+			AgentFacingDirection facingDirection = agent.getFacingDirection();
+
+			if (agentLocation.getNeighborLocation(facingDirection) == VacuumWorldLocationType.WALL) {
+				removeActionIfNecessary(MoveAction.class);
+			}
+			else {
+				addActionIfNecessary(MoveAction.class);
+			}
+		}
+	}
+
+	public void setVacuumWorldActions(Set<Class<? extends AbstractAction>> actions) {
+		this.actions = actions;
+	}
+	
+	public Set<Class<? extends AbstractAction>> getVacuumWorldActions() {
+		return this.actions;
 	}
 
 	public boolean lastActionSucceded() {
-		return ActionResult.ACTION_DONE.equals(this.lastActionResult.getActionResult());
+		return ActionResult.ACTION_DONE.equals(this.lastAttemptedActionResult.getActionResult());
 	}
 	
 	public boolean wasLastActionImpossible() {
-		return ActionResult.ACTION_IMPOSSIBLE.equals(this.lastActionResult.getActionResult());
+		return ActionResult.ACTION_IMPOSSIBLE.equals(this.lastAttemptedActionResult.getActionResult());
 	}
 	
 	public boolean lastActionFailed() {
-		return ActionResult.ACTION_FAILED.equals(this.lastActionResult.getActionResult());
+		return ActionResult.ACTION_FAILED.equals(this.lastAttemptedActionResult.getActionResult());
 	}
 	
 	public String getBodyId() {
@@ -151,23 +244,24 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		return this.nextAction;
 	}
 
-	public void setNextAction(EnvironmentalAction nextAction) {
+	public void setNextActionForExecution(EnvironmentalAction nextAction) {
 		this.nextAction = nextAction;
 	}
 
-	public List<DefaultActionResult> getPerceptions() {
-		return this.lastCyclePerceptions;
+	public VacuumWorldActionResult getLastActionResult() {
+		return this.lastAttemptedActionResult;
 	}
-
-	public void setPerceptions(List<DefaultActionResult> lastCyclePerceptions) {
-		this.lastCyclePerceptions = lastCyclePerceptions;
+	
+	public VacuumWorldPerception getPerception() {
+		if(this.lastAttemptedActionResult == null) {
+			return null;
+		}
+		else {
+			return this.lastAttemptedActionResult.getPerception();
+		}
 	}
-
-	public Set<Class<? extends AbstractAction>> getActions() {
-		return this.actions;
-	}
-
-	public void setActions(Set<Class<? extends AbstractAction>> actions) {
-		this.actions = actions;
+	
+	public List<VacuumWorldSpeechActionResult> getReceivedSpeeches() {
+		return this.lastCycleIncomingSpeeches;
 	}
 }

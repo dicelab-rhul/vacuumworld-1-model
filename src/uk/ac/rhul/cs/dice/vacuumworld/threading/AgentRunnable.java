@@ -24,11 +24,11 @@ public class AgentRunnable implements Runnable {
 		this.state = state;
 	}
 
-	public void setAgent(Mind agent) {
+	public void setAgentMind(Mind agent) {
 		this.agent = agent;
 	}
 
-	public Mind getAgent() {
+	public Mind getAgentMind() {
 		return this.agent;
 	}
 }

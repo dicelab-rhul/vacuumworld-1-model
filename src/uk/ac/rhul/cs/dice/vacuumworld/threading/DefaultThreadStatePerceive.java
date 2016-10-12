@@ -1,10 +1,10 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
-public class ThreadStateDecide implements ThreadState {
+public class DefaultThreadStatePerceive implements ThreadState {
 
 	@Override
 	public void run(AgentRunnable runnable) {
-		runnable.getAgent().decide();
+		runnable.getAgentMind().perceive(null);
 	}
 
 	@Override
