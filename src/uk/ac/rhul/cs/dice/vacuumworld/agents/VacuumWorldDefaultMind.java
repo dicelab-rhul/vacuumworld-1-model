@@ -54,7 +54,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, VacuumWorldDefaultBrain.class);
-		setAvailableActions(new ArrayList<>(this.getVacuumWorldActions()));
+		setAvailableActions(new ArrayList<>(getVacuumWorldActions()));
 	}
 	
 	@Override
@@ -141,29 +141,17 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
 		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
 
-		if (agentLocation.isDirtPresent()) {
-			addActionIfNecessary(CleanAction.class);
-		}
-		else {
+		if (!agentLocation.isDirtPresent()) {
 			removeActionIfNecessary(CleanAction.class);
 		}
-	}
-
-	protected void addActionIfNecessary(Class<? extends EnvironmentalAction> name) {
-		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
-			if (a.getClass().isAssignableFrom(name)) {
-				return;
-			}
-		}
-		
-		this.getAvailableActions().add(name);
 	}
 	
 	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
 		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
 
 		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
-			if (a.getClass().isAssignableFrom(name)) {
+			if (a.isAssignableFrom(name)) {
+				Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
 				toRemove.add(name);
 			}
 		}
@@ -181,9 +169,6 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 
 			if (agentLocation.getNeighborLocation(facingDirection) == VacuumWorldLocationType.WALL) {
 				removeActionIfNecessary(MoveAction.class);
-			}
-			else {
-				addActionIfNecessary(MoveAction.class);
 			}
 		}
 	}
