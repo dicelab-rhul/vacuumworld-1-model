@@ -159,7 +159,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 		}
 
 		if (event.getResult().equals(ActionResult.ACTION_DONE)) {
-			AgentRepresentation agent = this.vacuumWorldSpaceRepresentation.getAgent((String) ((AbstractAgent) event.getActor()).getId());
+			AgentRepresentation agent = this.vacuumWorldSpaceRepresentation.getAgent((String) ((AbstractAgent<?,?>) event.getActor()).getId());
 			EnvironmentalAction a = event.getAction();
 			agent.setClean(false);
 			agent.setSuccessfulClean(false);
@@ -240,12 +240,12 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
 	private void notifyIfNeeded(CustomObserver recipient, Object arg, List<String> sensorsIds) {
 		if (recipient instanceof AbstractSensor) {
-			AbstractSensor s = (AbstractSensor) recipient;
+			AbstractSensor<?> s = (AbstractSensor<?>) recipient;
 			notifySensorsIfNeeded(s, arg, sensorsIds);
 		}
 	}
 
-	private void notifySensorsIfNeeded(AbstractSensor s, Object arg, List<String> sensorsIds) {
+	private void notifySensorsIfNeeded(AbstractSensor<?> s, Object arg, List<String> sensorsIds) {
 		for (String sensorId : sensorsIds) {
 			if (s.getSensorId().equals(sensorId)) {
 				s.update(this, arg);

@@ -1,6 +1,6 @@
 {
    "model_port":13337,
-   "monitor":true,
+   "monitor":false,
    "observe":false,
    "evaluate":false,
    "log":false,

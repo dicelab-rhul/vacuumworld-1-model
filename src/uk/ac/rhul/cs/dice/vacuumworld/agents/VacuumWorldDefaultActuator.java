@@ -6,8 +6,12 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
-public class VacuumWorldDefaultActuator extends AbstractActuator {
-
+public class VacuumWorldDefaultActuator extends AbstractActuator<VacuumWorldActuatorRole> {
+	
+	public VacuumWorldDefaultActuator(String bodyId, VacuumWorldActuatorRole role) {
+		super(bodyId, role);
+	}
+	
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if(o instanceof VacuumWorldCleaningAgent) {

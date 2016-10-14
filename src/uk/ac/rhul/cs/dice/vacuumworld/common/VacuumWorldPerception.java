@@ -9,6 +9,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 
@@ -108,5 +109,23 @@ public class VacuumWorldPerception implements Perception {
 		}
 		
 		return locationsWithCompatibleDirt;
+	}
+	
+	public List<VacuumWorldCleaningAgent> getAgentsInPerception(String agentId) {
+		List<VacuumWorldCleaningAgent> agents = new ArrayList<>();
+		
+		this.perception.values().forEach((VacuumWorldLocation location) -> addAgentToAgentsListIfNecessary(agents, location, agentId));
+		
+		return agents;
+	}
+
+	private void addAgentToAgentsListIfNecessary(List<VacuumWorldCleaningAgent> agents, VacuumWorldLocation location, String agentId) {
+		if(!location.isAnAgentPresent()) {
+			return;
+		}
+		
+		if(!agentId.equals(location.getAgent().getId())) {
+			agents.add(location.getAgent());
+		}
 	}
 }

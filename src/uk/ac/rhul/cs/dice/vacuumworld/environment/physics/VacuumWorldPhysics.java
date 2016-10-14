@@ -80,7 +80,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	private String getActorId(Event event) {
-		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 		
 		if(actorId == null) {
 			actorId = getActorIdFromEvent(event);
@@ -94,7 +94,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 			Actor actor = ((AbstractEvent) event).getActor();
 			
 			if(actor instanceof AbstractAgent) {
-				return ((AbstractAgent) actor).getId().toString();
+				return ((AbstractAgent<?, ?>) actor).getId().toString();
 			}
 		}
 		
@@ -202,7 +202,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		agentLocation.getAgent().turn(rightOrLeft);
 		agentLocation.releaseExclusiveWriteLock();
 
-		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + actorId + " old facing direction: " + action.getAgentOldFacingDirection() + ", new facing direction: " + agentLocation.getAgent().getFacingDirection() + ".");
 		
 		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
@@ -286,7 +286,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		agentLocation.releaseExclusiveWriteLock();
 		targetLocation.releaseExclusiveWriteLock();
 
-		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + actorId + " old position: " + originalCooridinates + ", new position: " + targetLocation.getCoordinates() + ", facing direction: " + agentFacingDirection + ".");
 		
 		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
@@ -302,7 +302,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	
 	private synchronized Result manageFailedAction(boolean readUnlock, boolean writeUnlock, List<VacuumWorldLocation> readLockedLocations, List<VacuumWorldLocation> writeLockedLocations, Exception e) {
 		Utils.log(e);
-		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 		this.activeAgents.remove(Thread.currentThread().getId());
 		releaseLocksIfNecessary(readUnlock, writeUnlock, readLockedLocations, writeLockedLocations);
 		
@@ -383,7 +383,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		agentLocation.removeDirt();
 		agentLocation.releaseExclusiveWriteLock();
 		
-		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 
 		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}
@@ -407,7 +407,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	@Override
 	public synchronized Result perform(PerceiveAction action, Space context) {
 		try {
-			String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+			String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 			
 			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
@@ -491,7 +491,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 
 	private Result doSpeech(SpeechAction action, VacuumWorldSpace context) {
 		VacuumWorldSpeechActionResult result = createSpeechActionResult(action, context);
-		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId().toString();
+		String actorId = this.activeAgents.get(Thread.currentThread().getId()).getId();
 		VacuumWorldActionResult actionResult = new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		String message = result.getPayload().getPayload();
 		String logMessage = buildSpeechActionLogMessage(actorId, message, result.getRecipientsIds());
@@ -521,33 +521,34 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		for(String recipientId : recipientsIds) {
 			builder.append("  " + Utils.AGENT + recipientId + "\n");
 		}
+		
+		builder.append("...");
 	}
 
 	private VacuumWorldSpeechActionResult createSpeechActionResult(SpeechAction action, VacuumWorldSpace context) {
 		VacuumWorldSpeechActionResult result = new VacuumWorldSpeechActionResult(ActionResult.ACTION_DONE, action);
-		List<String> sensorids = new ArrayList<>();
 		
-		if (result.getRecipientsIds() == null || result.getRecipientsIds().isEmpty()) {
-			context.getAgents().forEach((VacuumWorldCleaningAgent agent) -> addSensorToList(agent, sensorids, result)); 
-			result.setRecipientsIds(sensorids);
-		}
-		else {
-			action.getRecipientsIds().forEach((String id) -> addSensorsToList(context.getAgentById(id), sensorids));
-			result.setRecipientsIds(sensorids);
+		if (!Utils.isCollectionNotNullAndNotEmpty(result.getRecipientsIds())) {
+			List<String> recipientsIds = new ArrayList<>();
+			context.getAgents().forEach((VacuumWorldCleaningAgent agent) -> addAgentIdToRecipientsList(agent, recipientsIds, result)); 
+			result.setRecipientsIds(recipientsIds);
 		}
 		
 		return result;
 	}
 
-	private synchronized void addSensorsToList(VacuumWorldCleaningAgent agent, List<String> sensorids) {
-		String sensorId = ((VacuumWorldDefaultSensor) agent.getSensors().get(agent.getActionResultSensorIndex())).getSensorId();
-		sensorids.add(sensorId);
+	private void addAgentIdToRecipientsList(VacuumWorldCleaningAgent agent, List<String> recipientIds, VacuumWorldSpeechActionResult result) {
+		String candidateId = agent.getId();
+		
+		if(!candidateId.equals(result.getSenderId())) {
+			recipientIds.add(candidateId);
+		}
 	}
 
 	public synchronized void addSensorToList(VacuumWorldCleaningAgent agent, List<String> sensorids, VacuumWorldSpeechActionResult result) {
 		String sensorId = ((VacuumWorldDefaultSensor) agent.getSensors().get(agent.getActionResultSensorIndex())).getSensorId();
 		
-		if (!agent.getId().equals(result.getSender())) {
+		if (!agent.getId().equals(result.getSenderId())) {
 			sensorids.add(sensorId);
 		}
 	}

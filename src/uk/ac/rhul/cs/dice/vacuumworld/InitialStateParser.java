@@ -22,6 +22,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
@@ -30,6 +31,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldRandomMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSmartRandomSocialMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.manhattan.VacuumWorldManhattanMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.AgentAwarenessRepresentation;
@@ -56,7 +58,7 @@ public class InitialStateParser {
 		
 		colorsToMindMap.put("green", VacuumWorldManhattanMind.getName());
 		colorsToMindMap.put("orange", VacuumWorldManhattanMind.getName());
-		colorsToMindMap.put("white", VacuumWorldManhattanMind.getName());
+		colorsToMindMap.put("white", VacuumWorldSmartRandomSocialMind.getName());
 		
 		return colorsToMindMap;
 	}
@@ -259,8 +261,8 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldCleaningAgent createAgent(String id, String name, String color, int sensorsNumber, int actuatorsNumber, Double[] dimensions, AgentFacingDirection agentFacingDirection) {
-		List<Sensor> sensors = createSensors(sensorsNumber);
-		List<Actuator> actuators = createActuators(actuatorsNumber);
+		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(sensorsNumber, id);
+		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(actuatorsNumber, id);
 
 		VacuumWorldAgentType type = VacuumWorldAgentType.fromString(color);
 		AbstractAgentAppearance appearance = new VacuumWorldAgentAppearance(name, dimensions, type);
@@ -268,7 +270,7 @@ public class InitialStateParser {
 		return createAgent(id, appearance, sensors, actuators, agentFacingDirection);
 	}
 
-	private static VacuumWorldCleaningAgent createAgent(String id, AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, AgentFacingDirection agentFacingDirection) {
+	private static VacuumWorldCleaningAgent createAgent(String id, AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, AgentFacingDirection agentFacingDirection) {
 		try {
 			String color = ((VacuumWorldAgentAppearance) appearance).getType().toString().toLowerCase();
 			VacuumWorldDefaultMind mind = InitialStateParser.admissibleMindTypes.get(InitialStateParser.colorToMindMap.get(color)).getConstructor().newInstance();
@@ -285,7 +287,7 @@ public class InitialStateParser {
 		}
 	}
 	
-	protected static Object createAwareness(List<Actuator> actuators, List<Sensor> sensors, String id, VacuumWorldAgentType type) {
+	protected static Object createAwareness(List<Actuator<VacuumWorldActuatorRole>> actuators, List<Sensor<VacuumWorldSensorRole>> sensors, String id, VacuumWorldAgentType type) {
 		List<String> aids = createAids(actuators);
 		List<String> earids = createEarids(sensors);
 		List<String> eyeids = createEyeids(sensors);
@@ -293,51 +295,81 @@ public class InitialStateParser {
 		return new AgentAwarenessRepresentation(id, aids, earids, eyeids, type);
 	}
 
-	private static List<String> createEyeids(List<Sensor> sensors) {
+	private static List<String> createEyeids(List<Sensor<VacuumWorldSensorRole>> sensors) {
 		return createSids(sensors);
 	}
 
-	private static List<String> createEarids(List<Sensor> sensors) {
+	private static List<String> createEarids(List<Sensor<VacuumWorldSensorRole>> sensors) {
 		return createSids(sensors);
 	}
 
-	private static List<String> createSids(List<Sensor> sensors) {
+	private static List<String> createSids(List<Sensor<VacuumWorldSensorRole>> sensors) {
 		List<String> sids = new ArrayList<>();
-		sensors.forEach((Sensor sensor) -> sids.add(((VacuumWorldDefaultSensor) sensor).getSensorId()));
+		sensors.forEach((Sensor<VacuumWorldSensorRole> sensor) -> sids.add(((VacuumWorldDefaultSensor) sensor).getSensorId()));
 		
 		return sids;
 	}
 
-	private static List<String> createAids(List<Actuator> actuators) {
+	private static List<String> createAids(List<Actuator<VacuumWorldActuatorRole>> actuators) {
 		List<String> aids = new ArrayList<>();
-		actuators.forEach((Actuator actuator) -> aids.add(((VacuumWorldDefaultActuator) actuator).getActuatorId()));
+		actuators.forEach((Actuator<VacuumWorldActuatorRole> actuator) -> aids.add(((VacuumWorldDefaultActuator) actuator).getActuatorId()));
 		
 		return aids;
 	}
 
-	private static List<Actuator> createActuators(int actuatorsNumber) {
-		List<Actuator> actuators = new ArrayList<>();
+	private static List<Actuator<VacuumWorldActuatorRole>> createActuators(int actuatorsNumber, String bodyId) {
+		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
 
 		if (actuatorsNumber <= 0) {
 			return actuators;
 		}
-
-		for (int i = 0; i < actuatorsNumber; i++) {
-			actuators.add(new VacuumWorldDefaultActuator());
+		
+		if(actuatorsNumber >= 1) {
+			actuators.add(new VacuumWorldDefaultActuator(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
+		}
+		
+		if(actuatorsNumber >= 2) {
+			actuators.add(new VacuumWorldDefaultActuator(bodyId, VacuumWorldActuatorRole.SPEAKING_ACTUATOR));
+		}
+		
+		if(actuatorsNumber >= 3) {
+			addOtherActuators(actuatorsNumber, bodyId, actuators);
 		}
 
 		return actuators;
 	}
 
-	private static List<Sensor> createSensors(int sensorsNumber) {
-		List<Sensor> sensors = new ArrayList<>();
+	private static void addOtherActuators(int actuatorsNumber, String bodyId, List<Actuator<VacuumWorldActuatorRole>> actuators) {
+		for (int i = 0; i < actuatorsNumber - 2; i++) {
+			actuators.add(new VacuumWorldDefaultActuator(bodyId, VacuumWorldActuatorRole.UNDEFINED));
+		}
+	}
+
+	private static List<Sensor<VacuumWorldSensorRole>> createSensors(int sensorsNumber, String bodyId) {
+		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
 
 		if (sensorsNumber <= 0) {
 			return sensors;
 		}
+		
+		if(sensorsNumber >= 1) {
+			sensors.add(new VacuumWorldDefaultSensor(bodyId, VacuumWorldSensorRole.SEEING_SENSOR));
+		}
+		
+		if(sensorsNumber >= 2) {
+			sensors.add(new VacuumWorldDefaultSensor(bodyId, VacuumWorldSensorRole.LISTENING_SENSOR));
+		}
+		
+		if(sensorsNumber >= 3) {
+			addOtherSensors(sensorsNumber, bodyId, sensors);
+		}
+		
+		return sensors;
+	}
 
-		for (int i = 0; i < sensorsNumber; i++) {
-			sensors.add(new VacuumWorldDefaultSensor());
+	private static List<Sensor<VacuumWorldSensorRole>> addOtherSensors(int sensorsNumber, String bodyId, List<Sensor<VacuumWorldSensorRole>> sensors) {
+		for (int i = 0; i < sensorsNumber - 2; i++) {
+			sensors.add(new VacuumWorldDefaultSensor(bodyId, VacuumWorldSensorRole.UNDEFINED));
 		}
 
 		return sensors;

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -39,9 +40,12 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorBrain;
@@ -390,7 +394,15 @@ public class VacuumWorldServer implements Observer {
 
 	private void setUpVacuumWorldCleaningAgent(VacuumWorldCleaningAgent agent) {
 		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe.getState();
-		container.getSubContainerSpace().addObserver(agent.getSensors().get(agent.getActionResultSensorIndex()));
+		VacuumWorldSpace space = container.getSubContainerSpace();
+		
+		for(VacuumWorldDefaultSensor sensor : agent.getSeeingSensors()) {
+			space.addObserver(sensor);
+		}
+		
+		for(VacuumWorldDefaultSensor sensor : agent.getListeningSensors()) {
+			space.addObserver(sensor);
+		}
 
 		VacuumWorldDefaultActuator actuator = (VacuumWorldDefaultActuator) agent.getActuators().get(agent.getActionActuatorIndex());
 		actuator.addObserver(container.getSubContainerSpace());
@@ -420,13 +432,16 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void createBasicMonitor(VacuumWorldMonitoringContainer container) {
-		List<Sensor> sensors = new ArrayList<>();
-		List<Actuator> actuators = new ArrayList<>();
-		sensors.add(new VacuumWorldMonitorSensor());
-		actuators.add(new VacuumWorldMonitorActuator());
+		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
+		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
+		String id = UUID.randomUUID().toString();
+		
+		sensors.add(new VacuumWorldMonitorSensor(id, VacuumWorldSensorRole.UNDEFINED));
+		actuators.add(new VacuumWorldMonitorActuator(id, VacuumWorldActuatorRole.UNDEFINED));
 
 		VacuumWorldMonitorAgent a = new VacuumWorldMonitorAgent(new DefaultAgentAppearance(null, null), sensors, actuators, new VacuumWorldMonitorMind(new VacuumWorldStepEvaluationStrategy()), new VacuumWorldMonitorBrain());
-
+		a.setId(id);
+		
 		container.addMonitorAgent(a);
 	}
 
@@ -479,27 +494,33 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void createEvaluator(VacuumWorldMonitoringContainer container, MongoBridge bridge, CollectionRepresentation dirtCollection, CollectionRepresentation agentCollection) {
-		List<Sensor> sensors = new ArrayList<>();
-		List<Actuator> actuators = new ArrayList<>();
-		sensors.add(new VWEvaluatorSensor());
-		actuators.add(new VWEvaluatorActuator());
+		String id = UUID.randomUUID().toString();
+		
+		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
+		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
+		sensors.add(new VWEvaluatorSensor(id, VacuumWorldSensorRole.UNDEFINED));
+		actuators.add(new VWEvaluatorActuator(id, VacuumWorldActuatorRole.UNDEFINED));
 		AgentClassModel evaluatorClassModel = new AgentClassModel(VWEvaluatorBrain.class, VWEvaluatorAgent.class, VWEvaluatorMind.class, VWEvaluatorSensor.class, VWEvaluatorActuator.class);
 
 		VWEvaluatorAgent e = new VWEvaluatorAgent(new DefaultAgentAppearance(null, null), sensors, actuators, new VWEvaluatorMind(new VacuumWorldDatatbaseStepEvaluationStrategy(), dirtCollection, agentCollection), new VWEvaluatorBrain(), evaluatorClassModel, (AbstractMongoBridge) bridge);
-
+		e.setId(id);
+		
 		container.addEvaluatorAgent(e);
 	}
 
 	private void createObserver(VacuumWorldMonitoringContainer container, MongoBridge bridge, CollectionRepresentation dirtCollection, CollectionRepresentation agentCollection) {
-		List<Sensor> sensors = new ArrayList<>();
-		List<Actuator> actuators = new ArrayList<>();
-		sensors.add(new VWObserverSensor());
-		actuators.add(new VWObserverActuator());
+		String id = UUID.randomUUID().toString();
+		
+		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
+		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
+		sensors.add(new VWObserverSensor(id, VacuumWorldSensorRole.UNDEFINED));
+		actuators.add(new VWObserverActuator(id, VacuumWorldActuatorRole.UNDEFINED));
 
 		AgentClassModel observerClassModel = new AgentClassModel(VWObserverBrain.class, VWObserverAgent.class, VWObserverMind.class, VWObserverSensor.class, VWObserverActuator.class);
 
 		VWObserverAgent a = new VWObserverAgent(new DefaultAgentAppearance(null, null), sensors, actuators, new VWObserverMind(new DefaultPerceptionRefiner(), dirtCollection, agentCollection), new VWObserverBrain(), observerClassModel, (AbstractMongoBridge) bridge);
-
+		a.setId(id);
+		
 		container.addObserverAgent(a);
 	}
 

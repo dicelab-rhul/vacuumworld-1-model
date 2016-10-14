@@ -238,7 +238,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 			DatabaseEvent event = (DatabaseEvent) arg;
 			Result result = event.attempt(this, null);
 			List<String> recipients = new ArrayList<>();
-			recipients.add((String) ((DatabaseAgent) event.getActor()).getId());
+			recipients.add((String) ((DatabaseAgent<?,?>) event.getActor()).getId());
 			result.setRecipientsIds(recipients);
 			notifyObservers(result);
 		}

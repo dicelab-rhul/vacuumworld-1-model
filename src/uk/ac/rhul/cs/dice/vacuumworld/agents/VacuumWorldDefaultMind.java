@@ -60,7 +60,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	@Override
 	public void execute(EnvironmentalAction action) {
 		this.lastAttemptedActionResult = null;
-		this.lastCycleIncomingSpeeches = null;
+		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		
 		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 		notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
@@ -88,7 +88,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	//subclasses should override this, especially the part where a speech action is build.
 	protected EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		if (actionPrototype.equals(SpeechAction.class)) {
-			return buildSpeechAction(this.bodyId, new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!"));
+			return buildSpeechAction(this.bodyId, new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
 		}
 		else if(actionPrototype.equals(PerceiveAction.class)) {
 			return buildPerceiveAction();
@@ -123,7 +123,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	protected SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
 		try {
 			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
-			return constructor.newInstance(senderId, recipientIds, payload);
+			return constructor.newInstance(senderId, new ArrayList<>(recipientIds), payload);
 		}
 		catch (Exception e) {
 			Utils.log(e);
@@ -246,7 +246,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		}
 	}
 	
-	public List<VacuumWorldSpeechActionResult> getReceivedSpeeches() {
+	public List<VacuumWorldSpeechActionResult> getReceivedCommunications() {
 		return this.lastCycleIncomingSpeeches;
 	}
 }

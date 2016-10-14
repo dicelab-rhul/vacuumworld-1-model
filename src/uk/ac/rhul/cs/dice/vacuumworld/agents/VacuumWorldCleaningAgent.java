@@ -1,6 +1,8 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
@@ -17,7 +19,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
-public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWorldAgentInterface {
+public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> implements VacuumWorldAgentInterface {
 	private static final int PERCEPTION_RANGE = 2;
 	private static final boolean CAN_SEE_BEHIND = false;
 
@@ -29,13 +31,68 @@ public class VacuumWorldCleaningAgent extends AbstractAgent implements VacuumWor
 	private VacuumWorldCoordinates currentLocation;
 	private AgentFacingDirection facingDirection;
 
-	public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, AbstractAgentMind mind, AbstractAgentBrain brain, AgentFacingDirection facingDirection) {
+	public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, AbstractAgentMind mind, AbstractAgentBrain brain, AgentFacingDirection facingDirection) {
 		super(appearance, sensors, actuators, mind, brain);
 
 		this.facingDirection = facingDirection;
 		this.currentLocation = null;
 	}
 
+	@Override
+	public String getId() {
+		return super.getId().toString();
+	}
+	
+	public List<VacuumWorldDefaultSensor> getSeeingSensors() {
+		return getSpecificSensors(VacuumWorldSensorRole.SEEING_SENSOR);
+	}
+	
+	public List<VacuumWorldDefaultSensor> getListeningSensors() {
+		return getSpecificSensors(VacuumWorldSensorRole.LISTENING_SENSOR);
+	}
+	
+	public List<VacuumWorldDefaultSensor> getUndefinedSensors() {
+		return getSpecificSensors(VacuumWorldSensorRole.UNDEFINED);
+	}
+	
+	private List<VacuumWorldDefaultSensor> getSpecificSensors(VacuumWorldSensorRole role) {
+		List<Sensor<VacuumWorldSensorRole>> candidates = getSensors().stream().filter((Sensor<VacuumWorldSensorRole> sensor) -> role.equals(sensor.getRole())).collect(Collectors.toList());
+		List<VacuumWorldDefaultSensor> toReturn = new ArrayList<>();
+		
+		for(Sensor<VacuumWorldSensorRole> sensor : candidates) {
+			if(sensor instanceof VacuumWorldDefaultSensor) {
+				toReturn.add((VacuumWorldDefaultSensor) sensor);
+			}
+		}
+		
+		return toReturn;
+	}
+	
+	public List<VacuumWorldDefaultActuator> getPhysicalActuators() {
+		return getSpecificActuators(VacuumWorldActuatorRole.PHYSICAL_ACTUATOR);
+	}
+	
+	public List<VacuumWorldDefaultActuator> getSpeakingActuators() {
+		return getSpecificActuators(VacuumWorldActuatorRole.SPEAKING_ACTUATOR);
+	}
+	
+	public List<VacuumWorldDefaultActuator> getundefinedActuators() {
+		return getSpecificActuators(VacuumWorldActuatorRole.UNDEFINED);
+	}
+	
+	private List<VacuumWorldDefaultActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
+		List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
+		List<VacuumWorldDefaultActuator> toReturn = new ArrayList<>();
+		
+		for(Actuator<VacuumWorldActuatorRole> actuator : candidates) {
+			if(actuator instanceof VacuumWorldDefaultActuator) {
+				toReturn.add((VacuumWorldDefaultActuator) actuator);
+			}
+		}
+		
+		return toReturn;
+	}
+	
 	@Override
 	public final int getPerceptionRange() {
 		return PERCEPTION_RANGE;

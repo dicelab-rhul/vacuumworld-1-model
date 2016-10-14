@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
@@ -14,6 +15,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPerceptionResultWrapper;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
@@ -61,7 +63,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		for (Location location : getLocations()) {
 			if (((VacuumWorldLocation) location).isAnAgentPresent()) {
 				VacuumWorldCleaningAgent a = ((VacuumWorldLocation) location).getAgent();
-				this.agents.put((String) a.getId(), a);
+				this.agents.put(a.getId(), a);
 			}
 		}
 	}
@@ -249,22 +251,47 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	private void manageSpeechActionResult(VacuumWorldSpeechPerceptionResultWrapper wrapper) {
-		List<String> recipientSensors = wrapper.getSpeechResult().getRecipientsIds();
-		List<String> senderSensor = wrapper.getRecipientsIds();
+		List<String> recipientAgentsIds = wrapper.getSpeechResult().getRecipientsIds();
+		List<String> senderSensorIds = wrapper.getRecipientsIds();
 
-		for (String rs : recipientSensors) {
-			notifyAgentSensor(wrapper.getSpeechResult(), rs);
+		notifyActor(senderSensorIds, wrapper.getPerceptionResult());
+		notifyTargets(recipientAgentsIds, wrapper.getSpeechResult());
+	}
+
+	private void notifyActor(List<String> senderSensorIds, DefaultActionResult result) {
+		notifyObserversIfNeeded(senderSensorIds, result);
+	}
+	
+	private void notifyTargets(List<String> recipientAgentsIds, VacuumWorldSpeechActionResult result) {
+		List<VacuumWorldCleaningAgent> recipientAgents = this.agents.values().stream().filter((VacuumWorldCleaningAgent agent) -> recipientAgentsIds.contains(agent.getId())).collect(Collectors.toList());
+		recipientAgents.forEach((VacuumWorldCleaningAgent agent) -> notifyListeningSensors(agent, result));
+	}
+
+	private void notifyListeningSensors(VacuumWorldCleaningAgent agent, VacuumWorldSpeechActionResult result) {
+		agent.getListeningSensors().forEach((VacuumWorldDefaultSensor sensor) -> sensor.update(this, result));
+	}
+
+	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, DefaultActionResult result) {
+		List<CustomObserver> recipients = this.getObservers();
+		
+		for(CustomObserver recipient : recipients) {
+			if(recipient instanceof VacuumWorldDefaultSensor) {
+				notifySensorIfNeeded((VacuumWorldDefaultSensor) recipient, sensorsToNotifyIds, result);
+			}
 		}
+	}
 
-		for (String ss : senderSensor) {
-			logResult(wrapper.getPerceptionResult());
-			notifyAgentSensor(wrapper.getPerceptionResult(), ss);
+	private void notifySensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> senderSensorIds, DefaultActionResult result) {
+		if(senderSensorIds.contains(recipient.getSensorId())) {
+			recipient.update(this, result);
 		}
 	}
 
 	private void managePhysicsRequest(DefaultActionResult result) {
 		logResult(result);
-		notifyAgentsSensors(result);
+		
+		List<String> senderSensorIds = result.getRecipientsIds();
+		notifyActor(senderSensorIds, result);
 	}
 
 	private void logResult(DefaultActionResult result) {
@@ -289,33 +316,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	private void notifyAgentsSensors(DefaultActionResult result) {
-		List<String> sensors = result.getRecipientsIds();
-
-		for (String sensor : sensors) {
-			notifyAgentSensor(result, sensor);
-		}
-	}
-
 	private void manageActuatorRequest(VacuumWorldEvent event) {
 		notifyObservers(new Object[] { event, this }, VacuumWorldPhysics.class);
-	}
-
-	private void notifyAgentSensor(Object arg, String sensorId) {
-		List<CustomObserver> recipients = this.getObservers();
-
-		for (CustomObserver recipient : recipients) {
-			notifyIfNeeded(recipient, arg, sensorId);
-		}
-	}
-
-	private void notifyIfNeeded(CustomObserver recipient, Object arg, String sensorId) {
-		if (recipient instanceof VacuumWorldDefaultSensor) {
-			VacuumWorldDefaultSensor s = (VacuumWorldDefaultSensor) recipient;
-
-			if (s.getSensorId().equals(sensorId)) {
-				s.update(this, arg);
-			}
-		}
 	}
 }

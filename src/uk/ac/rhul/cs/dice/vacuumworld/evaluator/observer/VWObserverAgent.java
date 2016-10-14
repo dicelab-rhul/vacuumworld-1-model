@@ -16,6 +16,8 @@ import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TotalPerceptionAction;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
@@ -29,7 +31,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
  * @author Ben Wilkins
  *
  */
-public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentInterface {
+public class VWObserverAgent extends ObserverAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> implements VacuumWorldAgentInterface {
 
 	/**
 	 * Constructor.
@@ -54,7 +56,7 @@ public class VWObserverAgent extends ObserverAgent implements VacuumWorldAgentIn
 	 *            the class of the {@link Actuator Actuators} that will interact
 	 *            with this agent
 	 */
-	public VWObserverAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, VWObserverMind mind, VWObserverBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
+	public VWObserverAgent(AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, VWObserverMind mind, VWObserverBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
 		super(appearance, sensors, actuators, mind, brain, classModel, database);
 	}
 

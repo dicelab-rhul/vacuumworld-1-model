@@ -21,7 +21,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer
 
 public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements VacuumWorldMonitoringPhysicsInterface, CustomObserver {
 	private Physics monitoredContainerPhysics;
-	private ConcurrentMap<Long, AbstractAgent> activeAgents;
+	private ConcurrentMap<Long, AbstractAgent<?, ?>> activeAgents;
 	private ConcurrentMap<Long, List<String>> sensorsToNotify;
 
 	public VacuumWorldMonitoringPhysics() {
@@ -40,7 +40,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 
 	@Override
 	public synchronized Result attempt(Event event, Space context) {
-		this.activeAgents.put(Thread.currentThread().getId(), (AbstractAgent) event.getActor());
+		this.activeAgents.put(Thread.currentThread().getId(), (AbstractAgent<?, ?>) event.getActor());
 		this.sensorsToNotify.putIfAbsent(Thread.currentThread().getId(), new ArrayList<>());
 		this.sensorsToNotify.get(Thread.currentThread().getId()).add(((MonitoringEvent) event).getSensorToCallBackId());
 

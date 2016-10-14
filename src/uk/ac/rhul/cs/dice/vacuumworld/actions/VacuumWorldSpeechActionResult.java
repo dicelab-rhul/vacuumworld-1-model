@@ -9,11 +9,12 @@ public class VacuumWorldSpeechActionResult extends DefaultActionResult {
 
 	public VacuumWorldSpeechActionResult(ActionResult result, SpeechAction action) {
 		super(result, action.getRecipientsIds());
+		
 		this.sender = action.getSenderId();
 		this.payload = (VacuumWorldSpeechPayload) action.getPayload();
 	}
 
-	public String getSender() {
+	public String getSenderId() {
 		return this.sender;
 	}
 

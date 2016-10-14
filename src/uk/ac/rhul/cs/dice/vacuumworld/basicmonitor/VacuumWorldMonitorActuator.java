@@ -3,9 +3,15 @@ package uk.ac.rhul.cs.dice.vacuumworld.basicmonitor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractActuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 
-public class VacuumWorldMonitorActuator extends AbstractActuator {
+public class VacuumWorldMonitorActuator extends AbstractActuator<VacuumWorldActuatorRole> {
+	
+	public VacuumWorldMonitorActuator(String bodyId, VacuumWorldActuatorRole role) {
+		super(bodyId, role);
+	}
+
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if (o instanceof VacuumWorldMonitorAgent && arg instanceof MonitoringEvent) {

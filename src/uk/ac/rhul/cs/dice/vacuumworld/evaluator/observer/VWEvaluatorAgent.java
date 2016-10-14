@@ -12,12 +12,14 @@ import uk.ac.rhul.cs.dice.monitor.agents.AgentClassModel;
 import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorAgent;
 import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MonitoringResult;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 
-public class VWEvaluatorAgent extends EvaluatorAgent implements VacuumWorldAgentInterface {
+public class VWEvaluatorAgent extends EvaluatorAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> implements VacuumWorldAgentInterface {
 
-	public VWEvaluatorAgent(AbstractAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, VWEvaluatorMind mind, VWEvaluatorBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
+	public VWEvaluatorAgent(AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, VWEvaluatorMind mind, VWEvaluatorBrain brain, AgentClassModel classModel, AbstractMongoBridge database) {
 		super(appearance, sensors, actuators, mind, brain, classModel, database);
 	}
 	
