@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Pair;
 
 public class PlanCodes {
 	private static PlanCodes instance;
-	private Map<Pair<Integer>, Map<AgentFacingDirection, String>> planCodesMap;
+	private Map<Pair<Integer>, Map<ActorFacingDirection, String>> planCodesMap;
 	
 	private PlanCodes() {
 		this.planCodesMap = initMap();
@@ -25,26 +25,26 @@ public class PlanCodes {
 		return PlanCodes.instance;
 	}
 	
-	public Map<Pair<Integer>, Map<AgentFacingDirection, String>> getPlanCodes() {
+	public Map<Pair<Integer>, Map<ActorFacingDirection, String>> getPlanCodes() {
 		return this.planCodesMap;
 	}
 	
-	private Map<Pair<Integer>, Map<AgentFacingDirection, String>> initMap() {
-		Map<AgentFacingDirection, String> pp = fillPositivePositiveMap();
-		Map<AgentFacingDirection, String> pe = fillPositiveZeroMap();
-		Map<AgentFacingDirection, String> pn = fillPositiveNegativeMap();
-		Map<AgentFacingDirection, String> ep = fillZeroPositiveMap();
-		Map<AgentFacingDirection, String> ee = fillZeroZeroMap();
-		Map<AgentFacingDirection, String> en = fillZeroNegativeMap();
-		Map<AgentFacingDirection, String> np = fillNegativePositiveMap();
-		Map<AgentFacingDirection, String> ne = fillNegativeZeroMap();
-		Map<AgentFacingDirection, String> nn = fillNegativeNegativeMap();
+	private Map<Pair<Integer>, Map<ActorFacingDirection, String>> initMap() {
+		Map<ActorFacingDirection, String> pp = fillPositivePositiveMap();
+		Map<ActorFacingDirection, String> pe = fillPositiveZeroMap();
+		Map<ActorFacingDirection, String> pn = fillPositiveNegativeMap();
+		Map<ActorFacingDirection, String> ep = fillZeroPositiveMap();
+		Map<ActorFacingDirection, String> ee = fillZeroZeroMap();
+		Map<ActorFacingDirection, String> en = fillZeroNegativeMap();
+		Map<ActorFacingDirection, String> np = fillNegativePositiveMap();
+		Map<ActorFacingDirection, String> ne = fillNegativeZeroMap();
+		Map<ActorFacingDirection, String> nn = fillNegativeNegativeMap();
 		
 		return fillMap(Arrays.asList(pp, pe, pn, ep, ee, en, np, ne, nn));
 	}
 
-	private static Map<Pair<Integer>, Map<AgentFacingDirection, String>> fillMap(List<Map<AgentFacingDirection, String>> maps) {
-		Map<Pair<Integer>, Map<AgentFacingDirection, String>> toReturn = new HashMap<>();
+	private static Map<Pair<Integer>, Map<ActorFacingDirection, String>> fillMap(List<Map<ActorFacingDirection, String>> maps) {
+		Map<Pair<Integer>, Map<ActorFacingDirection, String>> toReturn = new HashMap<>();
 		
 		toReturn.put(new Pair<Integer>(1, 1),  maps.get(0));
 		toReturn.put(new Pair<Integer>(1, 0),  maps.get(1));
@@ -59,101 +59,101 @@ public class PlanCodes {
 		return toReturn;
 	}
 
-	private static Map<AgentFacingDirection, String> fillPositivePositiveMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
+	private static Map<ActorFacingDirection, String> fillPositivePositiveMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
 		
-		toReturn.put(AgentFacingDirection.NORTH, "RMRM");
-		toReturn.put(AgentFacingDirection.SOUTH, "MLM");
-		toReturn.put(AgentFacingDirection.WEST, "LMLM");
-		toReturn.put(AgentFacingDirection.EAST, "MRM");
-		
-		return toReturn;
-	}
-
-	private static Map<AgentFacingDirection, String> fillPositiveZeroMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
-		
-		toReturn.put(AgentFacingDirection.NORTH, "RM");
-		toReturn.put(AgentFacingDirection.SOUTH, "LM");
-		toReturn.put(AgentFacingDirection.WEST, "RRM");
-		toReturn.put(AgentFacingDirection.EAST, "M");
+		toReturn.put(ActorFacingDirection.NORTH, "RMRM");
+		toReturn.put(ActorFacingDirection.SOUTH, "MLM");
+		toReturn.put(ActorFacingDirection.WEST, "LMLM");
+		toReturn.put(ActorFacingDirection.EAST, "MRM");
 		
 		return toReturn;
 	}
 
-	private static Map<AgentFacingDirection, String> fillPositiveNegativeMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
+	private static Map<ActorFacingDirection, String> fillPositiveZeroMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
 		
-		toReturn.put(AgentFacingDirection.NORTH, "MRM");
-		toReturn.put(AgentFacingDirection.SOUTH, "LMLM");
-		toReturn.put(AgentFacingDirection.WEST, "RMRM");
-		toReturn.put(AgentFacingDirection.EAST, "MLM");
-		
-		return toReturn;
-	}
-
-	private static Map<AgentFacingDirection, String> fillZeroPositiveMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
-		
-		toReturn.put(AgentFacingDirection.NORTH, "RRM");
-		toReturn.put(AgentFacingDirection.SOUTH, "M");
-		toReturn.put(AgentFacingDirection.WEST, "LM");
-		toReturn.put(AgentFacingDirection.EAST, "RM");
+		toReturn.put(ActorFacingDirection.NORTH, "RM");
+		toReturn.put(ActorFacingDirection.SOUTH, "LM");
+		toReturn.put(ActorFacingDirection.WEST, "RRM");
+		toReturn.put(ActorFacingDirection.EAST, "M");
 		
 		return toReturn;
 	}
 
-	private static Map<AgentFacingDirection, String> fillZeroZeroMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
+	private static Map<ActorFacingDirection, String> fillPositiveNegativeMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
 		
-		toReturn.put(AgentFacingDirection.NORTH, "");
-		toReturn.put(AgentFacingDirection.SOUTH, "");
-		toReturn.put(AgentFacingDirection.WEST, "");
-		toReturn.put(AgentFacingDirection.EAST, "");
-		
-		return toReturn;
-	}
-
-	private static Map<AgentFacingDirection, String> fillZeroNegativeMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
-		
-		toReturn.put(AgentFacingDirection.NORTH, "M");
-		toReturn.put(AgentFacingDirection.SOUTH, "RRM");
-		toReturn.put(AgentFacingDirection.WEST, "RM");
-		toReturn.put(AgentFacingDirection.EAST, "LM");
+		toReturn.put(ActorFacingDirection.NORTH, "MRM");
+		toReturn.put(ActorFacingDirection.SOUTH, "LMLM");
+		toReturn.put(ActorFacingDirection.WEST, "RMRM");
+		toReturn.put(ActorFacingDirection.EAST, "MLM");
 		
 		return toReturn;
 	}
 
-	private static Map<AgentFacingDirection, String> fillNegativePositiveMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
+	private static Map<ActorFacingDirection, String> fillZeroPositiveMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
 		
-		toReturn.put(AgentFacingDirection.NORTH, "LMLM");
-		toReturn.put(AgentFacingDirection.SOUTH, "MRM");
-		toReturn.put(AgentFacingDirection.WEST, "MLM");
-		toReturn.put(AgentFacingDirection.EAST, "RMRM");
-		
-		return toReturn;
-	}
-
-	private static Map<AgentFacingDirection, String> fillNegativeZeroMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
-		
-		toReturn.put(AgentFacingDirection.NORTH, "LM");
-		toReturn.put(AgentFacingDirection.SOUTH, "RM");
-		toReturn.put(AgentFacingDirection.WEST, "M");
-		toReturn.put(AgentFacingDirection.EAST, "RRM");
+		toReturn.put(ActorFacingDirection.NORTH, "RRM");
+		toReturn.put(ActorFacingDirection.SOUTH, "M");
+		toReturn.put(ActorFacingDirection.WEST, "LM");
+		toReturn.put(ActorFacingDirection.EAST, "RM");
 		
 		return toReturn;
 	}
 
-	private static Map<AgentFacingDirection, String> fillNegativeNegativeMap() {
-		Map<AgentFacingDirection, String> toReturn = new EnumMap<>(AgentFacingDirection.class);
+	private static Map<ActorFacingDirection, String> fillZeroZeroMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
 		
-		toReturn.put(AgentFacingDirection.NORTH, "MLM");
-		toReturn.put(AgentFacingDirection.SOUTH, "RMRM");
-		toReturn.put(AgentFacingDirection.WEST, "MRM");
-		toReturn.put(AgentFacingDirection.EAST, "LMLM");
+		toReturn.put(ActorFacingDirection.NORTH, "");
+		toReturn.put(ActorFacingDirection.SOUTH, "");
+		toReturn.put(ActorFacingDirection.WEST, "");
+		toReturn.put(ActorFacingDirection.EAST, "");
+		
+		return toReturn;
+	}
+
+	private static Map<ActorFacingDirection, String> fillZeroNegativeMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
+		
+		toReturn.put(ActorFacingDirection.NORTH, "M");
+		toReturn.put(ActorFacingDirection.SOUTH, "RRM");
+		toReturn.put(ActorFacingDirection.WEST, "RM");
+		toReturn.put(ActorFacingDirection.EAST, "LM");
+		
+		return toReturn;
+	}
+
+	private static Map<ActorFacingDirection, String> fillNegativePositiveMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
+		
+		toReturn.put(ActorFacingDirection.NORTH, "LMLM");
+		toReturn.put(ActorFacingDirection.SOUTH, "MRM");
+		toReturn.put(ActorFacingDirection.WEST, "MLM");
+		toReturn.put(ActorFacingDirection.EAST, "RMRM");
+		
+		return toReturn;
+	}
+
+	private static Map<ActorFacingDirection, String> fillNegativeZeroMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
+		
+		toReturn.put(ActorFacingDirection.NORTH, "LM");
+		toReturn.put(ActorFacingDirection.SOUTH, "RM");
+		toReturn.put(ActorFacingDirection.WEST, "M");
+		toReturn.put(ActorFacingDirection.EAST, "RRM");
+		
+		return toReturn;
+	}
+
+	private static Map<ActorFacingDirection, String> fillNegativeNegativeMap() {
+		Map<ActorFacingDirection, String> toReturn = new EnumMap<>(ActorFacingDirection.class);
+		
+		toReturn.put(ActorFacingDirection.NORTH, "MLM");
+		toReturn.put(ActorFacingDirection.SOUTH, "RMRM");
+		toReturn.put(ActorFacingDirection.WEST, "MRM");
+		toReturn.put(ActorFacingDirection.EAST, "LMLM");
 		
 		return toReturn;
 	}

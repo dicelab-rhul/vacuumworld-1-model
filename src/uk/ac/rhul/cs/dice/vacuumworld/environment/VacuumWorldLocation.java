@@ -1,14 +1,16 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Obstacle;
 
 public class VacuumWorldLocation implements Location, Lockable {
 	private VacuumWorldCoordinates coordinates;
 	private VacuumWorldCleaningAgent agent;
+	private User user;
 	private Obstacle obstacle;
 	private VacuumWorldLocationType type;
 	private VacuumWorldLocationType northernLocationType;
@@ -47,11 +49,19 @@ public class VacuumWorldLocation implements Location, Lockable {
 	public VacuumWorldCleaningAgent getAgent() {
 		return this.agent;
 	}
+	
+	public User getUser() {
+		return this.user;
+	}
 
 	public boolean isFree() {
-		return !(isAnAgentPresent() || isAnObstaclePresent());
+		return !(isAnAgentPresent() || isAnObstaclePresent() || isAUserPresent());
 	}
 	
+	private boolean isAUserPresent() {
+		return this.user != null;
+	}
+
 	public boolean isAnAgentPresent() {
 		return this.agent != null;
 	}
@@ -63,6 +73,15 @@ public class VacuumWorldLocation implements Location, Lockable {
 	public void removeAgent() {
 		this.agent = null;
 	}
+	
+	public void addUser(User user) {
+		this.user = user;
+	}
+	
+	public void removeUser() {
+		this.user = null;
+	}
+	
 	
 	public boolean isAnObstaclePresent() {
 		if(this.obstacle == null) {
@@ -156,7 +175,7 @@ public class VacuumWorldLocation implements Location, Lockable {
 		this.easternLocationType = easternLocationType;
 	}
 	
-	public VacuumWorldLocationType getNeighborLocation(AgentFacingDirection direction) {
+	public VacuumWorldLocationType getNeighborLocationType(ActorFacingDirection direction) {
 		switch(direction) {
 		case NORTH:
 			return getNorthernLocationType();
@@ -176,6 +195,7 @@ public class VacuumWorldLocation implements Location, Lockable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((this.agent == null) ? 0 : this.agent.hashCode());
+		result = prime * result + ((this.user == null) ? 0 : this.user.hashCode());
 		result = prime * result + ((this.coordinates == null) ? 0 : this.coordinates.hashCode());
 		result = prime * result + ((this.easternLocationType == null) ? 0 : this.easternLocationType.hashCode());
 		result = prime * result + ((this.northernLocationType == null) ? 0 : this.northernLocationType.hashCode());
@@ -202,6 +222,11 @@ public class VacuumWorldLocation implements Location, Lockable {
 			if (other.agent != null)
 				return false;
 		} else if (!this.agent.equals(other.agent))
+			return false;
+		if (this.user == null) {
+			if (other.user != null)
+				return false;
+		} else if (!this.user.equals(other.user))
 			return false;
 		if (this.coordinates == null) {
 			if (other.coordinates != null)

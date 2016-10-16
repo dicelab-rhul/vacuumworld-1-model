@@ -1,16 +1,29 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
 
 public class VacuumWorldThreadStateDecide extends DefaultThreadStateDecide {
 	@Override
-	public void run(AgentRunnable runnable) {
-		if(runnable instanceof VacuumWorldCleaningAgentRunnable) {
+	public void run(ActorRunnable runnable) {
+		if(runnable instanceof VacuumWorldActorRunnable) {
 			EnvironmentalAction nextAction = runnable.getAgentMind().decide();
-			((VacuumWorldCleaningAgentRunnable) runnable).getAgentMind().setNextActionForExecution(nextAction);
+			Mind mind = ((VacuumWorldActorRunnable) runnable).getAgentMind();
+			setNextAction(nextAction, mind);
 		}
 		else {
 			super.run(runnable);
+		}
+	}
+
+	private void setNextAction(EnvironmentalAction nextAction, Mind mind) {
+		if(mind instanceof VacuumWorldDefaultMind) {
+			((VacuumWorldDefaultMind) mind).setNextActionForExecution(nextAction);
+		}
+		else if(mind instanceof UserMind) {
+			((UserMind) mind).setNextActionForExecution(nextAction);
 		}
 	}
 }

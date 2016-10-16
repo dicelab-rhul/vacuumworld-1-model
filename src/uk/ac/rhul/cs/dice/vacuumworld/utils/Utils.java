@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collection;
@@ -11,13 +12,14 @@ import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonWriter;
 
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
 public class Utils {
 	private static final Logger LOGGER = initLogger();
 	private static int cycleNumber = 1;
-	public static final String AGENT = "Agent ";
+	public static final String ACTOR = "Actor ";
 	
 	public static final String INVALID_INITIAL_STATE = "The received initial state is not valid.";
 	
@@ -76,7 +78,7 @@ public class Utils {
 	}
 
 	public static void log(String message, Exception e) {
-		log(Level.SEVERE, message, e);
+		log(Level.SEVERE, e.getClass().getCanonicalName() + ": " + message, e);
 	}
 
 	public static void log(Level level, String message) {
@@ -118,5 +120,18 @@ public class Utils {
 		}
 		
 		return !collection.isEmpty();
+	}
+
+	public static void dumpJson(JsonObject json, String filePath) {
+		try(FileOutputStream output = new FileOutputStream(filePath); JsonWriter writer = Json.createWriter(output)) {
+			writer.write(json);
+		}
+		catch(Exception e) {
+			Utils.log(e);
+		}
+	}
+	
+	public static void dumpInitialState(JsonObject initialState) {
+		dumpJson(initialState, ConfigData.getLogPath("initial.json"));
 	}
 }

@@ -23,8 +23,8 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	protected final ThreadState threadStatePerceive = new DefaultThreadStatePerceive();
 	protected boolean simulationStarted = false;
 	protected ExecutorService executor;
-	protected Set<AgentRunnable> cleaningRunnables;
-	protected Set<AgentRunnable> monitorRunnables;
+	protected Set<ActorRunnable> cleaningRunnables;
+	protected Set<ActorRunnable> monitorRunnables;
 	
 	private volatile StopSignal sharedStopSignal;
 
@@ -76,7 +76,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		Utils.logWithClass(this.getClass().getSimpleName(), "Agents threads termination complete.");
 	}
 
-	protected void doCycleStep(Set<AgentRunnable> agentsRunnables, boolean... flags) {
+	protected void doCycleStep(Set<ActorRunnable> agentsRunnables, boolean... flags) {
 		boolean doPerceive = true;
 
 		if (flags.length > 0) {
@@ -94,21 +94,21 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		super.notifyObservers();
 	}
 
-	protected void doDecide(Set<AgentRunnable> runnables) {
+	protected void doDecide(Set<ActorRunnable> runnables) {
 		doPhase(this.threadStateDecide, runnables);
 	}
 
-	protected void doExecute(Set<AgentRunnable> runnables) {
+	protected void doExecute(Set<ActorRunnable> runnables) {
 		doPhase(this.threadStateExecute, runnables);
 	}
 
-	protected void doPerceive(Set<AgentRunnable> runnables, boolean doPerceive) {
+	protected void doPerceive(Set<ActorRunnable> runnables, boolean doPerceive) {
 		if (doPerceive) {
 			doPhase(this.threadStatePerceive, runnables);
 		}
 	}
 
-	protected void doPhase(ThreadState state, Set<AgentRunnable> runnables) {
+	protected void doPhase(ThreadState state, Set<ActorRunnable> runnables) {
 		try {
 			this.executor = Executors.newFixedThreadPool(this.cleaningRunnables.size());
 			
@@ -130,19 +130,19 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		}
 	}
 
-	private void startThreads(Set<AgentRunnable> runnables) {
-		for(AgentRunnable runnable : runnables) {
+	private void startThreads(Set<ActorRunnable> runnables) {
+		for(ActorRunnable runnable : runnables) {
 			this.executor.execute(runnable);
 		}
 	}
 
-	private void setNextPhase(ThreadState state, Set<AgentRunnable> runnables) {
-		for (AgentRunnable runnable : runnables) {
+	private void setNextPhase(ThreadState state, Set<ActorRunnable> runnables) {
+		for (ActorRunnable runnable : runnables) {
 			runnable.setState(state);
 		}
 	}
 
-	public void addAgent(AgentRunnable runnable) {
+	public void addActor(ActorRunnable runnable) {
 		if (this.simulationStarted) {
 			throw new IllegalThreadStateException("Cannot add a new agent at runtime.");
 		}

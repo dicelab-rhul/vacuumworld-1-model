@@ -10,11 +10,16 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.AgentToId;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.SpeechResultToSenderId;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.Contained;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.IsGreeting;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.IsGreetingAction;
 
 public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
-	private List<String> agentsIAlreadyGreeted;
-	private List<String> agentsWhoAlreadyGreetedMe;
-	private List<String> agentsToGreetOnThisCycle;
+	private List<String> agentsIAlreadyGreeted; //agents IDs of the agents this agent already greeted in the past
+	private List<String> agentsWhoAlreadyGreetedMe; //agents IDs of the agents who already greeted this agent in the past
+	private List<String> agentsToGreetOnThisCycle; //temporary list of agents this agent is going to greet on this cycle / has greeted in the past cycle.
 	
 	private static final String NAME = "RANDOM_SOCIAL";
 
@@ -28,6 +33,19 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		return NAME;
 	}
 	
+	/**
+	 * General idea of the decision process (the [END] label means that the action is selected and the decision process ends):
+	 * 
+	 * get the perception
+	 * get the received communications
+	 * if no perception --> return a PerceiveAction [END]
+	 * filter out the clearly impossible actions (e.g., CleanAction if no Dirt).
+	 * if someone greeted this agent in the past cycle:
+	 * 	if at least one of them was not already greeted by this agent --> greet back all the ones that were not already greeted by this agent [END]
+	 * if this agent can spots other agents within its perception:
+	 *  if at least one of them was not already greeted by this agent --> greet all the ones that were not already greeted by this agent [END]
+	 * select a random action [END]
+	 */
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		VacuumWorldPerception perception = getPerception();
@@ -47,10 +65,56 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 
 	private EnvironmentalAction decideWithPerception(VacuumWorldPerception perception, List<VacuumWorldSpeechActionResult> receivedCommunications) {		
 		if(someoneJustGreetedMe(receivedCommunications)) {
-			List<String> agentsWhoJustGreetedMe = receivedCommunications.stream().filter((VacuumWorldSpeechActionResult result) -> result.getPayload().isGreatingAction()).map((VacuumWorldSpeechActionResult result) -> result.getSenderId()).collect(Collectors.toList());
-			agentsWhoJustGreetedMe.stream().filter((String id) -> !this.agentsWhoAlreadyGreetedMe.contains(id)).collect(Collectors.toList()).forEach(this.agentsWhoAlreadyGreetedMe::add);
 			
-			this.agentsToGreetOnThisCycle = agentsWhoJustGreetedMe.stream().filter((String id) -> !this.agentsIAlreadyGreeted.contains(id)).collect(Collectors.toList());
+			/* 
+			 * From receivedCommunications I create a Stream,
+			 * then I filter out the results which do not respect the IsGreeting() Predicate,
+			 * then I map on the leftovers a Function which gets the sender IDs from the results
+			 * and finally I pack the IDs into a List.
+			 *
+			 * The IsGreeting() Predicate returns true if and only if the Result in input
+			 * has a Payload and that Payload has the isGreeting attribute set to true.
+			 * 
+			 * The SpeechResultToSenderId() Function returns the sender ID of the Payload
+			 * wrapped by a SpeechResult.
+			 * 
+			 * The collect(...) method transforms a Stream intto a Collection thanks to its
+			 * Collector parameter.
+			 */
+			List<String> agentsWhoJustGreetedMe = receivedCommunications.stream().filter(new IsGreeting()).map(new SpeechResultToSenderId()).collect(Collectors.toList());
+			
+			/* 
+			 * From agentsWhoJustGreetedMe I create a Stream,
+			 * then I filter out the results which respect the Contained(...) Predicate w.r.t. this.agentsWhoAlreadyGreetedMe,
+			 * then I pack the leftovers into a List
+			 * and finally I add each member of that List to this.agentsWhoAlreadyGreetedMe.
+			 * 
+			 * The Contained(...) Predicate requires a List<String> and checks whether the String in input
+			 * is contained into that list.
+			 * The negate() method represents the logical negation of the predicate.
+			 * 
+			 * The collect(...) method transforms a Stream into a Collection thanks to its
+			 * Collector parameter.
+			 * 
+			 * The forEach(...) method accepts a named function and applies that to every elements
+			 * of the List its applied to.
+			 */
+			agentsWhoJustGreetedMe.stream().filter(new Contained(this.agentsWhoAlreadyGreetedMe).negate()).collect(Collectors.toList()).forEach(this.agentsWhoAlreadyGreetedMe::add);
+			
+			/* 
+			 * From agentsWhoJustGreetedMe I create a Stream,
+			 * then I filter out the results which respect the Contained(...) Predicate w.r.t. this.agentsWhoAlreadyGreetedMe,
+			 * then I pack the leftovers into a List
+			 * and finally I assign that List to this.agentsToGreetOnThisCycle.
+			 * 
+			 * The Contained(...) Predicate requires a List<String> and checks whether the String in input
+			 * is contained into that list.
+			 * The negate() method represents the logical negation of the predicate.
+			 * 
+			 * The collect(...) method transforms a Stream into a Collection thanks to its
+			 * Collector parameter.
+			 */
+			this.agentsToGreetOnThisCycle = agentsWhoJustGreetedMe.stream().filter(new Contained(this.agentsIAlreadyGreeted).negate()).collect(Collectors.toList());
 			
 			if(Utils.isCollectionNotNullAndNotEmpty(this.agentsToGreetOnThisCycle)) {
 				return greetBack();
@@ -61,10 +125,36 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	}
 
 	private EnvironmentalAction decideWithPerception(VacuumWorldPerception perception) {
-		List<String> agentsISee = perception.getAgentsInPerception(getBodyId()).stream().map((VacuumWorldCleaningAgent agent) -> agent.getId()).collect(Collectors.toList());
+		/*
+		 * From perception I get all the agents within it whose ID is different from this agent's ID,
+		 * then I create a Stream from those,
+		 * then I map on the Stream elements a Function which gets the IDs from the agents,
+		 * then I pack the IDs into a List
+		 * and finally I add each member of that List to agentsISee.
+		 * 
+		 * The AgentToId() Function returns the Agent ID of an Agent.
+		 * 
+		 * The collect(...) method transforms a Stream into a Collection thanks to its
+		 * Collector parameter.
+		 */
+		List<String> agentsISee = perception.getAgentsInPerception(getBodyId()).stream().map(new AgentToId()).collect(Collectors.toList());
 		
 		if(Utils.isCollectionNotNullAndNotEmpty(agentsISee)) {
-			this.agentsToGreetOnThisCycle = agentsISee.stream().filter((String id) -> !this.agentsIAlreadyGreeted.contains(id)).collect(Collectors.toList());
+			
+			/*
+			 * From agentsISee I create a Stream,
+			 * then I filter out the IDs which respect the Contained(...) Predicate w.r.t. this.agentsIAlreadyGreeted,
+			 * then I pack the leftovers into a List
+			 * and finally I add each member of that List to this.agentsToGreetOnThisCycle.
+			 * 
+			 * The Contained(...) Predicate requires a List<String> and checks whether the String in input
+			 * is contained into that list.
+			 * The negate() method represents the logical negation of the predicate.
+			 * 
+			 * The collect(...) method transforms a Stream into a Collection thanks to its
+			 * Collector parameter.
+			 */
+			this.agentsToGreetOnThisCycle = agentsISee.stream().filter(new Contained(this.agentsIAlreadyGreeted).negate()).collect(Collectors.toList());
 			
 			return decideWithAgentsToGreetOnThisCycle();
 		}
@@ -85,7 +175,24 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	private void addAgentsIJustGreatedToListIfNecessary() {
 		if(didIGreetAnyoneInThePastCycle()) {			
 			List<String> agentsIJustGreeted = getAgentsIJustGreeted();
-			agentsIJustGreeted.stream().filter((String id) -> !this.agentsIAlreadyGreeted.contains(id)).collect(Collectors.toList()).forEach(this.agentsIAlreadyGreeted::add);
+			
+			/*
+			 * From agentsIJustGreeted I create a Stream,
+			 * then I filter out the IDs which respect the Contained(...) Predicate w.r.t. this.agentsIAlreadyGreeted,
+			 * then I pack the leftovers into a List
+			 * and finally I add each member of that List to this.agentsIAlreadyGreeted.
+			 * 
+			 * The Contained(...) Predicate requires a List<String> and checks whether the String in input
+			 * is contained into that list.
+			 * The negate() method represents the logical negation of the predicate.
+			 * 
+			 * The collect(...) method transforms a Stream into a Collection thanks to its
+			 * Collector parameter.
+			 * 
+			 * The forEach(...) method accepts a named function and applies that to every elements
+			 * of the List its applied to.
+			 */
+			agentsIJustGreeted.stream().filter(new Contained(this.agentsIAlreadyGreeted).negate()).collect(Collectors.toList()).forEach(this.agentsIAlreadyGreeted::add);
 		}
 	}
 
@@ -106,7 +213,15 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	}
 
 	private boolean someoneJustGreetedMe(List<VacuumWorldSpeechActionResult> receivedCommunications) {
-		return receivedCommunications.stream().anyMatch((VacuumWorldSpeechActionResult result) -> result.getPayload().isGreatingAction());
+		
+		/*
+		 * From receivedCommunications I create a Stream,
+		 * then I return true if and only if at least one element respects the IsGreeting() Predicate.
+		 * 
+		 * The IsGreeting() Predicate returns true if and only if the Result in input
+		 * has a Payload and that Payload has the isGreeting attribute set to true.
+		 */
+		return receivedCommunications.stream().anyMatch(new IsGreeting());
 	}
 
 	private List<String> getAgentsIJustGreeted() {
@@ -124,7 +239,14 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		EnvironmentalAction lastAction = getNextAction();
 		
 		if(lastAction instanceof SpeechAction) {
-			return ((VacuumWorldSpeechPayload) ((SpeechAction) lastAction).getPayload()).isGreatingAction();
+			
+			/*
+			 * I return true if and only if last action respects the IsGreatingAction() Predicate.
+			 * 
+			 * The IsGreatingAction Predicate returns true if and only if the Action in input
+			 * has a Payload and that Payload has the isGreeting attribute set to true.
+			 */
+			return new IsGreetingAction().test((SpeechAction) lastAction);
 		}
 		
 		return false;

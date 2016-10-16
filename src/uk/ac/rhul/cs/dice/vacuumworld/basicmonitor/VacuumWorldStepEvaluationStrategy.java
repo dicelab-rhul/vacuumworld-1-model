@@ -8,7 +8,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpaceRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
@@ -128,10 +128,10 @@ public class VacuumWorldStepEvaluationStrategy implements EvaluationStrategy<Str
 	private class SimpleAgentRepresentation {
 		private int x;
 		private int y;
-		private AgentFacingDirection dir;
+		private ActorFacingDirection dir;
 		private SpeechAction lastSpeechAction;
 
-		private SimpleAgentRepresentation(int x, int y, AgentFacingDirection dir, SpeechAction lastSpeechAction) {
+		private SimpleAgentRepresentation(int x, int y, ActorFacingDirection dir, SpeechAction lastSpeechAction) {
 			this.x = x;
 			this.y = y;
 			this.dir = dir;

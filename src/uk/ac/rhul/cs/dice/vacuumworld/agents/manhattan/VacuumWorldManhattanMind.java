@@ -10,7 +10,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
@@ -39,11 +39,11 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	}
 
 	private EnvironmentalAction buildNewPlan() {
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": new plan generation: seeking for a target...");
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": new plan generation: seeking for a target...");
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception == null) {
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": perception is null: the only reasonable plan is to get a new one...");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": perception is null: the only reasonable plan is to get a new one...");
 			
 			return buildPerceiveAction();
 		}
@@ -57,7 +57,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	private EnvironmentalAction buildNewPlanHelper(VacuumWorldPerception perception) {
 		if(perception.canAgentClean()) {
 			//no need to build a plan, just clean ASAP.
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + " is on a location with compatible dirt. The only reasonable plan is to clean now.");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + " is on a location with compatible dirt. The only reasonable plan is to clean now.");
 			
 			return buildPhysicalAction(CleanAction.class);
 		}
@@ -66,7 +66,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 		else {
 			//here it's impossible to build a new plan.
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + " cannot spot any compatible dirt. The next action will be a random one.");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + " cannot spot any compatible dirt. The next action will be a random one.");
 			
 			return decideActionRandomly();
 		}
@@ -74,7 +74,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 
 	private EnvironmentalAction followPlan(Object... parameters) {
 		if(!isPlanStillValid()) {
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": plan is no more valid. Trying to build a new one...");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": plan is no more valid. Trying to build a new one...");
 			this.plan = null;
 			
 			return buildNewPlan();
@@ -115,7 +115,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 		else {
 			this.plan = null;
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": too many failures! Trying to build a new plan...");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": too many failures! Trying to build a new plan...");
 			
 			return decide(parameters);
 		}
@@ -131,40 +131,40 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	private EnvironmentalAction buildPlan(VacuumWorldPerception perception, VacuumWorldLocation closest, VacuumWorldCoordinates agentCoordinates) {
 		int xDifference = closest.getCoordinates().getX() - agentCoordinates.getX();
 		int yDifference = closest.getCoordinates().getY() - agentCoordinates.getY();
-		AgentFacingDirection facingDirection = perception.getAgentCurrentFacingDirection();
+		ActorFacingDirection facingDirection = perception.getAgentCurrentFacingDirection();
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": building Manhattan distance driven plan...");
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": building Manhattan distance driven plan...");
 		
 		this.plan = new ManhattanPlan();
 		this.plan.setCurrentAgentType(perception.getAgentType());
 		this.plan.setTargetDirtType(((DirtAppearance) closest.getDirt().getExternalAppearance()).getDirtType());
 		this.plan.setTargetLocation(closest);
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": target: " + this.plan.getTargetDirtType().toString() + " dirt on " + closest.getCoordinates().toString() + ".");
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": target: " + this.plan.getTargetDirtType().toString() + " dirt on " + closest.getCoordinates().toString() + ".");
 		
 		return buildPlan(xDifference, yDifference, facingDirection);
 	}
 
-	private EnvironmentalAction buildPlan(int xDifference, int yDifference, AgentFacingDirection facingDirection) {
+	private EnvironmentalAction buildPlan(int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		String planCode = this.plan.getPlanCodes().getPlanCodes().get(new Pair<>(Integer.signum(xDifference), Integer.signum(yDifference))).get(facingDirection);
 		
 		return fillPlan(planCode, xDifference, yDifference, facingDirection);
 	}
 	
-	private EnvironmentalAction fillPlan(String planCode, int xDifference, int yDifference, AgentFacingDirection facingDirection) {
+	private EnvironmentalAction fillPlan(String planCode, int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		for(char character : planCode.toCharArray()) {
 			addActionsToPlan(character, xDifference, yDifference, facingDirection);
 		}
 		
 		this.plan.pushActionToPerform(CleanAction.class, getBodyId());
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + getBodyId() + ": finished bulding plan.");
+		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": finished bulding plan.");
 		
 		this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
 		
 		return buildPhysicalAction(this.plan.getLastAction());
 	}
 
-	private void addActionsToPlan(char character, int xDifference, int yDifference, AgentFacingDirection facingDirection) {
+	private void addActionsToPlan(char character, int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		switch(character) {
 		case 'L':
 			this.plan.pushActionToPerform(TurnLeftAction.class, getBodyId());
@@ -186,7 +186,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private Collection<? extends Class<? extends EnvironmentalAction>> getAllNecessaryMoveActions(int xDifference, int yDifference, AgentFacingDirection facingDirection) {
+	private Collection<? extends Class<? extends EnvironmentalAction>> getAllNecessaryMoveActions(int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		switch(facingDirection) {
 			case NORTH:
 			case SOUTH:
@@ -209,7 +209,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		return actions;
 	}
 
-	private VacuumWorldLocation determineClosestLocationWithCompatibleDirt(List<VacuumWorldLocation> locationsWithCompatibleDirt, VacuumWorldCoordinates agentCoordinates, AgentFacingDirection agentFacingDirection) {
+	private VacuumWorldLocation determineClosestLocationWithCompatibleDirt(List<VacuumWorldLocation> locationsWithCompatibleDirt, VacuumWorldCoordinates agentCoordinates, ActorFacingDirection agentFacingDirection) {
 		VacuumWorldLocation closest = null;
 		Integer currentOptimalDistance = Integer.MAX_VALUE;
 		
@@ -225,14 +225,14 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		return closest;
 	}
 
-	private int getNumberOfTurnActionsNeeded(VacuumWorldCoordinates agentCoordinates, VacuumWorldCoordinates targetCoordinates, AgentFacingDirection agentFacingDirection) {
+	private int getNumberOfTurnActionsNeeded(VacuumWorldCoordinates agentCoordinates, VacuumWorldCoordinates targetCoordinates, ActorFacingDirection agentFacingDirection) {
 		int xDifference = targetCoordinates.getX() - agentCoordinates.getX();
 		int yDifference = targetCoordinates.getY() - agentCoordinates.getY();
 		
 		PlanCodes codes = PlanCodes.getInstance();
-		Map<Pair<Integer>, Map<AgentFacingDirection, String>> planCodes = codes.getPlanCodes();
+		Map<Pair<Integer>, Map<ActorFacingDirection, String>> planCodes = codes.getPlanCodes();
 		Pair<Integer> key = new Pair<>(Integer.signum(xDifference), Integer.signum(yDifference));
-		Map<AgentFacingDirection, String> m = planCodes.get(key);
+		Map<ActorFacingDirection, String> m = planCodes.get(key);
 		String planCode = m.get(agentFacingDirection);
 		
 		return (int) planCode.chars().filter(character -> character == 'L' || character == 'R').count();

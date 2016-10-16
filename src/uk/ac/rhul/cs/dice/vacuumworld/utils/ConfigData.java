@@ -1,10 +1,17 @@
 package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
 import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonValue;
+
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.manhattan.VacuumWorldManhattanMind;
 
 public class ConfigData {	
 	private static int modelPort;
@@ -15,6 +22,10 @@ public class ConfigData {
 
 	private static boolean log;
 	private static boolean printGrid;
+	private static String logsPath;
+	
+	private static Map<String, String> colorToMindMap;
+	private static Map<String, Class<? extends VacuumWorldDefaultMind>> admissibleMindTypes;
 
 	private static String dbName;
 	private static String dbHostname;
@@ -46,6 +57,39 @@ public class ConfigData {
 
 	public static boolean getPrintGridFlag() {
 		return ConfigData.printGrid;
+	}
+	
+	public static String getLogsPath() {
+		return ConfigData.logsPath;
+	}
+	
+	public static Map<String, String> getColorToMindMap() {
+		return ConfigData.colorToMindMap;
+	}
+	
+	public static Map<String, Class<? extends VacuumWorldDefaultMind>> getAdmissibleMindTypes() {
+		return ConfigData.admissibleMindTypes;
+	}
+	
+	public static Class<? extends VacuumWorldDefaultMind> getMindClassFromColor(String color) {
+		String key = ConfigData.colorToMindMap.get(color);
+		
+		if(key == null) {
+			return VacuumWorldManhattanMind.class;
+		}
+		
+		Class<? extends VacuumWorldDefaultMind> toReturn = ConfigData.admissibleMindTypes.get(key);
+		
+		if(toReturn == null) {
+			return VacuumWorldManhattanMind.class;
+		}
+		else {
+			return toReturn;
+		}
+	}
+	
+	public static String getLogPath(String filename) {
+		return ConfigData.logsPath + filename;
 	}
 
 	public static String getDbName() {
@@ -88,8 +132,47 @@ public class ConfigData {
 		ConfigData.evaluate = config.getBoolean("evaluate");
 		ConfigData.log = config.getBoolean("log");
 		ConfigData.printGrid = config.getBoolean("print_grid");
+		ConfigData.logsPath = config.getString("logs_path");
 		
-		return initDatabaseData(config);
+		return initColorToMindMap(config) && initAdmissibleMindTypes(config) && initDatabaseData(config);
+	}
+
+	private static boolean initColorToMindMap(JsonObject config) {
+		ConfigData.colorToMindMap = new HashMap<>();
+		JsonObject colorsToMind = config.getJsonObject("colors_to_mind");
+		
+		ConfigData.colorToMindMap.put("green", colorsToMind.getString("green"));
+		ConfigData.colorToMindMap.put("orange", colorsToMind.getString("orange"));
+		ConfigData.colorToMindMap.put("white", colorsToMind.getString("white"));
+		
+		return true;
+	}
+
+	private static boolean initAdmissibleMindTypes(JsonObject config) {
+		ConfigData.admissibleMindTypes = new HashMap<>();
+		JsonObject mindTypes = config.getJsonObject("mind_types");
+		
+		try {
+			return fillMindTypesMap(mindTypes);
+		}
+		catch(ClassNotFoundException e) {
+			Utils.log(e);
+			
+			return false;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static boolean fillMindTypesMap(JsonObject mindTypes) throws ClassNotFoundException {
+		for(Entry<String, JsonValue> entry : mindTypes.entrySet()) {
+			Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
+			
+			if(Class.forName(VacuumWorldDefaultMind.class.getCanonicalName()).isAssignableFrom(temp)) {
+				ConfigData.admissibleMindTypes.put(entry.getKey(), (Class<VacuumWorldDefaultMind>) temp);
+			}
+		}
+		
+		return true;
 	}
 
 	private static boolean initDatabaseData(JsonObject config) {

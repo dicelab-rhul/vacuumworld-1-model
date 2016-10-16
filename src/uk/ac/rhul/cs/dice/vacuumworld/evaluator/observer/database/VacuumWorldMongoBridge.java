@@ -30,7 +30,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldReadAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldReadResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldWriteAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
@@ -154,7 +154,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	}
 
 	// creates a new cycle object that should be pushed to the cycle list
-	private BasicDBObject createNewCycleObject(int x, int y, AgentFacingDirection dir, SpeechAction lastSpeechAction) {
+	private BasicDBObject createNewCycleObject(int x, int y, ActorFacingDirection dir, SpeechAction lastSpeechAction) {
 		BasicDBObject cycle = new BasicDBObject();
 		cycle.append(CYCLEDATABASEREPRESENTATIONFIELDS[0], x);
 		cycle.append(CYCLEDATABASEREPRESENTATIONFIELDS[1], y);

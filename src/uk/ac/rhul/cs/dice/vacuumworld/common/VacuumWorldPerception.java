@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
@@ -46,7 +46,7 @@ public class VacuumWorldPerception implements Perception {
 		return this.perception.get(this.agentCoordinates);
 	}
 	
-	public AgentFacingDirection getAgentCurrentFacingDirection() {
+	public ActorFacingDirection getAgentCurrentFacingDirection() {
 		return getAgentCurentLocation().getAgent().getFacingDirection();
 	}
 	

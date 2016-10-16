@@ -1,5 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.common;
 
+import java.util.Random;
+
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 
 public enum DirtType {
@@ -42,6 +44,21 @@ public enum DirtType {
 			return "o";
 		default:
 			return "n";
+		}
+	}
+	
+	public static DirtType random() {
+		Random rng = new Random();
+		
+		return random(rng);
+	}
+
+	private static DirtType random(Random rng) {
+		if(rng.nextBoolean()) {
+			return DirtType.GREEN;
+		}
+		else {
+			return DirtType.ORANGE;
 		}
 	}
 }

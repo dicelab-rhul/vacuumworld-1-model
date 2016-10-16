@@ -21,12 +21,19 @@ public class Main {
 		else {
 			double delay = parseDelay(args);
 			String configFilePath = retrieveConfigFilePath(args);
-			ConfigData.initConfigData(configFilePath);
-			startModelServer(delay);
-			
+			tryToStart(configFilePath, delay);
 			Utils.logWithClass(Main.class.getSimpleName(), "Bye!!!");
 			
 			System.exit(0);
+		}
+	}
+
+	private static void tryToStart(String configFilePath, double delay) {
+		if(!ConfigData.initConfigData(configFilePath)) {
+			Utils.logWithClass(Main.class.getSimpleName(), "Error in parsing config file!!!");
+		}
+		else {
+			startModelServer(delay);
 		}
 	}
 

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
@@ -29,7 +29,7 @@ public class Generator {
 
 	private static final Random RANDOM = new Random();
 	private static final String AGENT = "agent";
-	private static final String[] DIRECTIONS = new String[] { AgentFacingDirection.NORTH.toString().toLowerCase(), AgentFacingDirection.SOUTH.toString().toLowerCase(), AgentFacingDirection.EAST.toString().toLowerCase(), AgentFacingDirection.WEST.toString().toLowerCase() };
+	private static final String[] DIRECTIONS = new String[] { ActorFacingDirection.NORTH.toString().toLowerCase(), ActorFacingDirection.SOUTH.toString().toLowerCase(), ActorFacingDirection.EAST.toString().toLowerCase(), ActorFacingDirection.WEST.toString().toLowerCase() };
 	private static final String[] COLORS = new String[] { VacuumWorldAgentType.ORANGE.toString().toLowerCase(), VacuumWorldAgentType.GREEN.toString().toLowerCase(), VacuumWorldAgentType.WHITE.toString().toLowerCase() };
 
 	public void generate(File file, int width, int height, int numAgents, int numDirts) {

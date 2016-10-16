@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -21,7 +25,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
@@ -30,10 +34,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldRandomMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSmartRandomSocialMind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.manhattan.VacuumWorldManhattanMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserAppearance;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserBrain;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.common.AgentAwarenessRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
@@ -44,34 +51,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldMonitoringPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 
 public class InitialStateParser {
-	private static Map<String, String> colorToMindMap = initColorToMindMap();
-	private static Map<String, Class<? extends VacuumWorldDefaultMind>> admissibleMindTypes = initAdmissibleMindTypes();
 	
 	private InitialStateParser() {}
-	
-	private static Map<String, String> initColorToMindMap() {
-		Map<String, String> colorsToMindMap = new HashMap<>();
-		
-		colorsToMindMap.put("green", VacuumWorldManhattanMind.getName());
-		colorsToMindMap.put("orange", VacuumWorldManhattanMind.getName());
-		colorsToMindMap.put("white", VacuumWorldSmartRandomSocialMind.getName());
-		
-		return colorsToMindMap;
-	}
-
-	private static Map<String, Class<? extends VacuumWorldDefaultMind>> initAdmissibleMindTypes() {
-		Map<String, Class<? extends VacuumWorldDefaultMind>>  mindTypes = new HashMap<>();
-		
-		mindTypes.put(VacuumWorldSmartRandomSocialMind.getName(), VacuumWorldSmartRandomSocialMind.class);
-		mindTypes.put(VacuumWorldRandomMind.getName(), VacuumWorldRandomMind.class);
-		mindTypes.put(VacuumWorldManhattanMind.getName(), VacuumWorldManhattanMind.class);
-		
-		return mindTypes;
-	}
 
 	public static VacuumWorldMonitoringContainer parseInitialState(InputStream input) throws IOException {
 		JsonObject json = null;
@@ -87,6 +73,8 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldMonitoringContainer parseInitialState(JsonObject json) throws IOException {
+		Utils.dumpInitialState(json);
+		
 		VacuumWorldSpace space = createInitialState(json);
 		checkAgentsNumber(space);
 		
@@ -144,10 +132,62 @@ public class InitialStateParser {
 		return packState(spaceMap, width, height, user, monitoring);
 	}
 
-	private static VacuumWorldSpace packState(Map<LocationKey, Location> spaceMap, int width, int height, boolean user, boolean monitoring) {
+	private static VacuumWorldSpace packState(Map<LocationKey, Location> spaceMap, int width, int height, boolean userPresent, boolean monitoring) {
 		int[] dimensions = new int[] {width, height};
-
+		User user = createAndInitUser(userPresent, spaceMap);
+		
 		return new VacuumWorldSpace(dimensions, spaceMap, user, monitoring);
+	}
+
+	private static User createAndInitUser(boolean userPreent, Map<LocationKey, Location> spaceMap) {
+		User user = createUser(userPreent);
+		
+		return user == null ? null : setupUser(user, spaceMap);
+	}
+
+	private static User setupUser(User user, Map<LocationKey, Location> spaceMap) {
+		VacuumWorldCoordinates coordinates = getRandomFreeCoordinates(spaceMap);
+		
+		if(coordinates != null) {
+			user.setCurrentLocation(coordinates);
+			((VacuumWorldLocation) spaceMap.get(coordinates)).addUser(user);
+			
+			return user;
+		}
+		else {
+			return null;
+		}
+	}
+
+	private static VacuumWorldCoordinates getRandomFreeCoordinates(Map<LocationKey, Location> spaceMap) {
+		List<VacuumWorldCoordinates> coordinatesList = spaceMap.values().stream().map((Location location) -> (VacuumWorldLocation) location).filter(VacuumWorldLocation::isFree).map(VacuumWorldLocation::getCoordinates).collect(Collectors.toList());
+		Collections.shuffle(coordinatesList);
+		
+		try {
+			return coordinatesList.get(0);
+		}
+		catch(ArrayIndexOutOfBoundsException e) {
+			Utils.fakeLog(e);
+			
+			return null;
+		}
+	}
+
+	private static User createUser(boolean user) {
+		if(!user) {
+			return null;
+		}
+		
+		UserMind mind = new UserMind();
+		UserBrain brain = new UserBrain();
+		String id = "User-" + UUID.randomUUID().toString();
+		UserSensor seeingSensor = new UserSensor(id, VacuumWorldSensorRole.SEEING_SENSOR);
+		UserSensor listeningSensor = new UserSensor(id, VacuumWorldSensorRole.LISTENING_SENSOR);
+		UserActuator physicalActuator = new UserActuator(id, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR);
+		UserActuator speakingActuator = new UserActuator(id, VacuumWorldActuatorRole.SPEAKING_ACTUATOR);
+		UserAppearance appearance = new UserAppearance(id, new Double[] {(double) 1, (double) 1});
+		
+		return new User(appearance, Arrays.asList(seeingSensor, listeningSensor), Arrays.asList(physicalActuator, speakingActuator), mind, brain, ActorFacingDirection.random());
 	}
 
 	private static void putNewLocationIfNecessary(Map<LocationKey, Location> spaceMap, int i, int j, int width, int height) {
@@ -254,13 +294,13 @@ public class InitialStateParser {
 		int width = agentObject.getInt("width");
 		int height = agentObject.getInt("height");
 
-		AgentFacingDirection agentFacingDirection = AgentFacingDirection.fromString(agentObject.getString("facing_direction"));
+		ActorFacingDirection agentFacingDirection = ActorFacingDirection.fromString(agentObject.getString("facing_direction"));
 		Double[] dimensions = new Double[] {(double) width, (double) height};
 
 		return createAgent(id, name, color, sensorsNumber, actuatorsNumber, dimensions, agentFacingDirection);
 	}
 
-	private static VacuumWorldCleaningAgent createAgent(String id, String name, String color, int sensorsNumber, int actuatorsNumber, Double[] dimensions, AgentFacingDirection agentFacingDirection) {
+	private static VacuumWorldCleaningAgent createAgent(String id, String name, String color, int sensorsNumber, int actuatorsNumber, Double[] dimensions, ActorFacingDirection agentFacingDirection) {
 		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(sensorsNumber, id);
 		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(actuatorsNumber, id);
 
@@ -270,10 +310,10 @@ public class InitialStateParser {
 		return createAgent(id, appearance, sensors, actuators, agentFacingDirection);
 	}
 
-	private static VacuumWorldCleaningAgent createAgent(String id, AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, AgentFacingDirection agentFacingDirection) {
+	private static VacuumWorldCleaningAgent createAgent(String id, AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, ActorFacingDirection agentFacingDirection) {
 		try {
 			String color = ((VacuumWorldAgentAppearance) appearance).getType().toString().toLowerCase();
-			VacuumWorldDefaultMind mind = InitialStateParser.admissibleMindTypes.get(InitialStateParser.colorToMindMap.get(color)).getConstructor().newInstance();
+			VacuumWorldDefaultMind mind = ConfigData.getMindClassFromColor(color).getConstructor().newInstance();
 			mind.setBodyId(id);		
 			VacuumWorldDefaultBrain brain = new VacuumWorldDefaultBrain(mind.getClass());
 			VacuumWorldCleaningAgent agent = new VacuumWorldCleaningAgent(appearance, sensors, actuators, mind, brain, agentFacingDirection);
@@ -283,6 +323,7 @@ public class InitialStateParser {
 		}
 		catch (Exception e) {
 			Utils.log(e);
+			
 			return null;
 		}
 	}

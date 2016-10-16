@@ -1,16 +1,16 @@
 package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 
 public abstract class TurningAction extends PhysicalAction {
-	private AgentFacingDirection agentOldFacingDirection;
+	private ActorFacingDirection actorOldFacingDirection;
 
-	public AgentFacingDirection getAgentOldFacingDirection() {
-		return this.agentOldFacingDirection;
+	public ActorFacingDirection getActorOldFacingDirection() {
+		return this.actorOldFacingDirection;
 	}
 
-	public void setAgentOldFacingDirection(AgentFacingDirection agentOldFacingDirection) {
-		this.agentOldFacingDirection = AgentFacingDirection.fromString(agentOldFacingDirection.toString().toLowerCase());
+	public void setActorOldFacingDirection(ActorFacingDirection actorOldFacingDirection) {
+		this.actorOldFacingDirection = ActorFacingDirection.fromString(actorOldFacingDirection.toString().toLowerCase());
 	}
 }

@@ -2,12 +2,11 @@ package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
 
-public class AgentRunnable implements Runnable {
-
+public abstract class ActorRunnable implements Runnable {
 	private Mind agent;
 	private ThreadState state;
 
-	public AgentRunnable(Mind agent) {
+	public ActorRunnable(Mind agent) {
 		this.agent = agent;
 	}
 

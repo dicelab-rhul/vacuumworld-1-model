@@ -1,7 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.AgentDatabaseRepresentation;
@@ -26,7 +26,7 @@ public class AgentRepresentation {
 	private boolean clean;
 	// was the clean successful
 	private boolean successfulClean;
-	private AgentFacingDirection direction;
+	private ActorFacingDirection direction;
 	private int x;
 	private int y;
 	private SpeechAction lastSpeechAction;
@@ -49,7 +49,7 @@ public class AgentRepresentation {
 	 * @param y
 	 *            position
 	 */
-	public AgentRepresentation(String id, VacuumWorldAgentType type, int sensors, int actuators, AgentFacingDirection direction, int x, int y) {
+	public AgentRepresentation(String id, VacuumWorldAgentType type, int sensors, int actuators, ActorFacingDirection direction, int x, int y) {
 		this._id = id;
 		this.type = type;
 		this.sensors = sensors;
@@ -98,11 +98,11 @@ public class AgentRepresentation {
 		this.actuators = actuators;
 	}
 
-	public AgentFacingDirection getDirection() {
+	public ActorFacingDirection getDirection() {
 		return this.direction;
 	}
 
-	public void setDirection(AgentFacingDirection direction) {
+	public void setDirection(ActorFacingDirection direction) {
 		this.direction = direction;
 	}
 

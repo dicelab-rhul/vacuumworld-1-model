@@ -73,7 +73,7 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 	}
 
 	@Override
-	protected void doCycleStep(Set<AgentRunnable> agentsRunnables, boolean... flags) {
+	protected void doCycleStep(Set<ActorRunnable> agentsRunnables, boolean... flags) {
 		long p = timePerceive(agentsRunnables);
 		long d = timeDecide(agentsRunnables);
 		long e = timeExecute(agentsRunnables);
@@ -81,21 +81,21 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 		this.pdeTimes.add(new long[] { p, d, e });
 	}
 
-	private long timeDecide(Set<AgentRunnable> agentsRunnables) {
+	private long timeDecide(Set<ActorRunnable> agentsRunnables) {
 		Long l = System.nanoTime();
 		doDecide(agentsRunnables);
 		
 		return System.nanoTime() - l;
 	}
 
-	private long timePerceive(Set<AgentRunnable> agentsRunnables) {
+	private long timePerceive(Set<ActorRunnable> agentsRunnables) {
 		Long l = System.nanoTime();
 		doPerceive(agentsRunnables, true);
 	
 		return System.nanoTime() - l;
 	}
 
-	private long timeExecute(Set<AgentRunnable> agentsRunnables) {
+	private long timeExecute(Set<ActorRunnable> agentsRunnables) {
 		Long l = System.nanoTime();
 		doExecute(agentsRunnables);
 		

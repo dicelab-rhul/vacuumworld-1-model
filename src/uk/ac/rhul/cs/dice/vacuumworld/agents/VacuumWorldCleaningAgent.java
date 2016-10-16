@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.AbstractAgentAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
@@ -15,6 +16,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
@@ -23,15 +26,10 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	private static final int PERCEPTION_RANGE = 2;
 	private static final boolean CAN_SEE_BEHIND = false;
 
-	private static final int ACTION_ACTUATOR_INDEX = 0;
-	private static final int SERVER_MESSAGE_SENSOR_INDEX = 1;
-	private static final int ACTION_RESULT_SENSOR_INDEX = 0;
-	private static final int MIND_SIGNAL_ACTUATOR_INDEX = 1;
-
 	private VacuumWorldCoordinates currentLocation;
-	private AgentFacingDirection facingDirection;
+	private ActorFacingDirection facingDirection;
 
-	public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, AbstractAgentMind mind, AbstractAgentBrain brain, AgentFacingDirection facingDirection) {
+	public VacuumWorldCleaningAgent(AbstractAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, AbstractAgentMind mind, AbstractAgentBrain brain, ActorFacingDirection facingDirection) {
 		super(appearance, sensors, actuators, mind, brain);
 
 		this.facingDirection = facingDirection;
@@ -104,24 +102,6 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	}
 
 	@Override
-	public final int getActionActuatorIndex() {
-		return ACTION_ACTUATOR_INDEX;
-	}
-
-	public final int getMindSignalActuatorIndex() {
-		return MIND_SIGNAL_ACTUATOR_INDEX;
-	}
-
-	@Override
-	public final int getActionResultSensorIndex() {
-		return ACTION_RESULT_SENSOR_INDEX;
-	}
-
-	public final int getServerMessageSensorIndex() {
-		return SERVER_MESSAGE_SENSOR_INDEX;
-	}
-
-	@Override
 	public Object simulate() {
 		return null;
 	}
@@ -179,8 +159,11 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	}
 
 	private String selectActuatorRecipientId(Object arg) {
-		if (AbstractAction.class.isAssignableFrom(arg.getClass())) {
-			return ((VacuumWorldDefaultActuator) getActuators().get(ACTION_ACTUATOR_INDEX)).getActuatorId();
+		if (PhysicalAction.class.isAssignableFrom(arg.getClass()) || PerceiveAction.class.isAssignableFrom(arg.getClass())) {
+			return getPhysicalActuators().get(0).getActuatorId();
+		}
+		else if(SpeechAction.class.isAssignableFrom(arg.getClass())) {
+			return getSpeakingActuators().get(0).getActuatorId();
 		}
 
 		return null;
@@ -188,7 +171,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 
 	private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
 		if (AbstractAction.class.isAssignableFrom(action.getClass())) {
-			return ((VacuumWorldDefaultSensor) getSensors().get(ACTION_RESULT_SENSOR_INDEX)).getSensorId();
+			return getSeeingSensors().get(0).getSensorId();
 		}
 
 		return null;
@@ -202,7 +185,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 		this.currentLocation = coordinates;
 	}
 
-	public AgentFacingDirection getFacingDirection() {
+	public ActorFacingDirection getFacingDirection() {
 		return this.facingDirection;
 	}
 
@@ -244,5 +227,17 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	@Override
 	public String toString() {
 		return "{" + this.getClass().getSimpleName() + "(" + this.currentLocation.getX() + "," + this.currentLocation.getY() + "," + this.facingDirection + "),Sensors: " + this.getSensors().size() + ",Actuators: " + this.getActuators().size() + "}";
+	}
+
+	//useless
+	@Override
+	public int getActionActuatorIndex() {
+		return 0;
+	}
+
+	//useless
+	@Override
+	public int getActionResultSensorIndex() {
+		return 0;
 	}
 }

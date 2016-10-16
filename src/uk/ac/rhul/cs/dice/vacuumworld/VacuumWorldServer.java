@@ -34,6 +34,7 @@ import uk.ac.rhul.cs.dice.monitor.mongo.AbstractMongoBridge;
 import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
 import uk.ac.rhul.cs.dice.monitor.mongo.MongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.DropDirtAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
@@ -44,8 +45,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorBrain;
@@ -74,10 +77,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.VacuumWorldMon
 import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.VacuumWorldMongoConnector;
 import uk.ac.rhul.cs.dice.vacuumworld.generation.ConfigFileException;
 import uk.ac.rhul.cs.dice.vacuumworld.generation.ExperimentConnector;
-import uk.ac.rhul.cs.dice.vacuumworld.threading.AgentRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadExperimentManager;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
-import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldCleaningAgentRunnable;
+import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
@@ -112,6 +114,7 @@ public class VacuumWorldServer implements Observer {
 		this.vacuumWorldActions.add(CleanAction.class);
 		this.vacuumWorldActions.add(PerceiveAction.class);
 		this.vacuumWorldActions.add(SpeechAction.class);
+		this.vacuumWorldActions.add(DropDirtAction.class);
 
 		this.monitoringWorldActions = new HashSet<>();
 		this.monitoringWorldActions.add(TotalPerceptionAction.class);
@@ -282,17 +285,42 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void startSimulation(VacuumWorldMonitoringContainer container, double delayInSeconds) throws InterruptedException {
-		Set<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace().getAgents();
-		
-		for(VacuumWorldCleaningAgent agent : agents) {
-			setUpVacuumWorldCleaningAgent(agent);
-		}
-		
+		setupAgents(container);
+		setupUser(container);		
 		startListeningService(container);
 		
 		// START!
 		this.threadManager.addObserver(this);
 		this.threadManager.start(delayInSeconds);
+	}
+
+	private void setupUser(User user, VacuumWorldMonitoringContainer container) {
+		VacuumWorldSpace space = container.getSubContainerSpace();
+		
+		user.getSeeingSensors().forEach(space::addObserver);
+		user.getListeningSensors().forEach(space::addObserver);
+		user.getPhysicalActuators().forEach((UserActuator actuator) -> actuator.addObserver(container.getSubContainerSpace()));
+		user.getSpeakingActuators().forEach((UserActuator actuator) -> actuator.addObserver(container.getSubContainerSpace()));
+		
+		((UserMind) user.getMind()).setVacuumWorldActions(this.vacuumWorldActions);
+
+		this.threadManager.addActor(new VacuumWorldActorRunnable(user.getMind()));
+	}
+
+	private void setupUser(VacuumWorldMonitoringContainer container) {
+		User user = container.getSubContainerSpace().getUser();
+		
+		if(user != null) {
+			setupUser(user, container);
+		}
+	}
+
+	private void setupAgents(VacuumWorldMonitoringContainer container) {
+		Set<VacuumWorldCleaningAgent> agents = container.getSubContainerSpace().getAgents();
+		
+		for(VacuumWorldCleaningAgent agent : agents) {
+			setUpVacuumWorldCleaningAgent(agent);
+		}
 	}
 
 	private void startListeningService(VacuumWorldMonitoringContainer initialState) {
@@ -396,22 +424,16 @@ public class VacuumWorldServer implements Observer {
 		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.universe.getState();
 		VacuumWorldSpace space = container.getSubContainerSpace();
 		
-		for(VacuumWorldDefaultSensor sensor : agent.getSeeingSensors()) {
-			space.addObserver(sensor);
-		}
+		agent.getSeeingSensors().forEach(space::addObserver);
+		agent.getListeningSensors().forEach(space::addObserver);
+		agent.getPhysicalActuators().forEach((VacuumWorldDefaultActuator actuator) -> actuator.addObserver(container.getSubContainerSpace()));
+		agent.getSpeakingActuators().forEach((VacuumWorldDefaultActuator actuator) -> actuator.addObserver(container.getSubContainerSpace()));
 		
-		for(VacuumWorldDefaultSensor sensor : agent.getListeningSensors()) {
-			space.addObserver(sensor);
-		}
-
-		VacuumWorldDefaultActuator actuator = (VacuumWorldDefaultActuator) agent.getActuators().get(agent.getActionActuatorIndex());
-		actuator.addObserver(container.getSubContainerSpace());
-
 		((VacuumWorldDefaultMind) agent.getMind()).setCanSeeBehind(agent.canSeeBehind());
 		((VacuumWorldDefaultMind) agent.getMind()).setPerceptionRange(agent.getPerceptionRange());
 		((VacuumWorldDefaultMind) agent.getMind()).setVacuumWorldActions(this.vacuumWorldActions);
 
-		this.threadManager.addAgent(new VacuumWorldCleaningAgentRunnable((VacuumWorldDefaultMind) agent.getMind()));
+		this.threadManager.addActor(new VacuumWorldActorRunnable(agent.getMind()));
 	}
 
 	// ******** LOAD BASIC MONITOR MODEL ******** //
@@ -426,7 +448,7 @@ public class VacuumWorldServer implements Observer {
 		
 		for (VacuumWorldMonitorAgent m : mas) {			
 			Utils.logWithClass(this.getClass().getSimpleName(), "Starting monitor agent thread #" + ++counter + "...");
-			this.threadManager.addAgent(new AgentRunnable(m.getMind()));
+			this.threadManager.addActor(new VacuumWorldActorRunnable(m.getMind()));
 			((VacuumWorldMonitorMind) m.getMind()).setAvailableActions(this.monitoringWorldActions);
 		}
 	}
@@ -470,7 +492,7 @@ public class VacuumWorldServer implements Observer {
 		
 		for (VWObserverAgent oa : oas) {
 			Utils.logWithClass(this.getClass().getSimpleName(), "Starting observer agent thread #" + ++counter + "...");
-			this.threadManager.addAgent(new AgentRunnable(oa.getMind()));
+			this.threadManager.addActor(new VacuumWorldActorRunnable(oa.getMind()));
 			((VWObserverMind) oa.getMind()).setAvailableActions(this.monitoringWorldActions);
 		}
 
@@ -478,7 +500,7 @@ public class VacuumWorldServer implements Observer {
 		
 		for (VWEvaluatorAgent ea : eas) {
 			Utils.logWithClass(this.getClass().getSimpleName(), "Starting evaluator agent thread #" + ++counter + "...");
-			this.threadManager.addAgent(new AgentRunnable(ea.getMind()));
+			this.threadManager.addActor(new VacuumWorldActorRunnable(ea.getMind()));
 		}
 	}
 

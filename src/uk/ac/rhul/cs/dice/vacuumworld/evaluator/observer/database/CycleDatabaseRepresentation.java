@@ -3,12 +3,12 @@ package uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 
 /**
  * The representation of the {@link VacuumWorldLocation},
- * {@link AgentFacingDirection} and {@link SpeechAction} if it was performed of
+ * {@link ActorFacingDirection} and {@link SpeechAction} if it was performed of
  * a {@link VacuumWorldCleaningAgent} in a given cycle. </br>
  * Uses: in {@link AgentDatabaseRepresentation} to representation cyclic data.
  * This representation will be converted to a JSON String by
@@ -23,7 +23,7 @@ public class CycleDatabaseRepresentation {
 	// IMPORTANT TO KEEP variable names as are for JSON generation!
 	private int x;
 	private int y;
-	private AgentFacingDirection dir;
+	private ActorFacingDirection dir;
 	private SpeechDatabaseRepresentation speech;
 
 	/**
@@ -38,7 +38,7 @@ public class CycleDatabaseRepresentation {
 	 * @param the
 	 *            speech action that was performed on this cycle
 	 */
-	public CycleDatabaseRepresentation(int x, int y, AgentFacingDirection dir, SpeechDatabaseRepresentation speech) {
+	public CycleDatabaseRepresentation(int x, int y, ActorFacingDirection dir, SpeechDatabaseRepresentation speech) {
 		this.x = x;
 		this.y = y;
 		this.dir = dir;
@@ -55,7 +55,7 @@ public class CycleDatabaseRepresentation {
 	 * @param dir
 	 *            direction of facing
 	 */
-	public CycleDatabaseRepresentation(int x, int y, AgentFacingDirection dir) {
+	public CycleDatabaseRepresentation(int x, int y, ActorFacingDirection dir) {
 		this.x = x;
 		this.y = y;
 		this.dir = dir;
@@ -83,11 +83,11 @@ public class CycleDatabaseRepresentation {
 		this.y = y;
 	}
 
-	public AgentFacingDirection getDir() {
+	public ActorFacingDirection getDir() {
 		return this.dir;
 	}
 
-	public void setDir(AgentFacingDirection dir) {
+	public void setDir(ActorFacingDirection dir) {
 		this.dir = dir;
 	}
 

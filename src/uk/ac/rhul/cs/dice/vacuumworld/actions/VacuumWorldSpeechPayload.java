@@ -11,7 +11,7 @@ public class VacuumWorldSpeechPayload implements Payload<String> {
 		this.isGreeting = isGreeting;
 	}
 	
-	public boolean isGreatingAction() {
+	public boolean isGreetingAction() {
 		return this.isGreeting;
 	}
 

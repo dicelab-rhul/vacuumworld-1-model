@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,10 +18,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPerceptionResultWrapper;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
@@ -29,7 +33,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	private static final String BAD_DIRECTION = "Bad agent direction: ";
 	private Map<String, VacuumWorldCleaningAgent> agents;
 	
-	private boolean user;
+	private User user;
 	private boolean monitoring;
 
 	public VacuumWorldSpace(int[] dimensions) {
@@ -39,7 +43,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		initEmptyMap();
 	}
 	
-	public VacuumWorldSpace(int[] dimensions, Map<LocationKey, Location> grid, boolean user, boolean monitoring) {
+	public VacuumWorldSpace(int[] dimensions, Map<LocationKey, Location> grid, User user, boolean monitoring) {
 		super(grid);
 		
 		this.user = user;
@@ -69,6 +73,10 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	public boolean isUserPresent() {
+		return this.user != null;
+	}
+	
+	public User getUser() {
 		return this.user;
 	}
 	
@@ -87,76 +95,93 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	public VacuumWorldCleaningAgent getAgentById(String id) {
 		return this.agents.get(id);
 	}
-
+	
 	public Set<VacuumWorldCleaningAgent> getAgents() {
 		return new HashSet<>(this.agents.values());
 	}
+	
+	public Map<VacuumWorldCoordinates, VacuumWorldLocation> getFullGrid() {
+		Map<VacuumWorldCoordinates, VacuumWorldLocation> toReturn = new HashMap<>();
+		
+		for(Entry<LocationKey, Location> entry : super.getGrid().entrySet()) {
+			if(entry.getKey() instanceof VacuumWorldCoordinates && entry.getValue() instanceof VacuumWorldLocation) {
+				toReturn.put((VacuumWorldCoordinates) entry.getKey(), (VacuumWorldLocation) entry.getValue());
+			}
+		}
+		
+		return toReturn;
+	}
+	
+	@Override
+	public VacuumWorldLocation getLocation(LocationKey locationKey) {
+		return (VacuumWorldLocation) this.getGrid().get(locationKey);
+	}
 
 	public VacuumWorldLocation getNorthernLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x, y - 1));
+		return this.getLocation(new VacuumWorldCoordinates(x, y - 1));
 	}
 
 	public VacuumWorldLocation getNorthernLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getNorthernCoordinates());
+		return this.getLocation(coordinates.getNorthernCoordinates());
 	}
 
 	public VacuumWorldLocation getSouthernLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x, y + 1));
+		return this.getLocation(new VacuumWorldCoordinates(x, y + 1));
 	}
 
 	public VacuumWorldLocation getSouthernLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getSouthernCoordinates());
+		return this.getLocation(coordinates.getSouthernCoordinates());
 	}
 
 	public VacuumWorldLocation getWesternLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x - 1, y));
+		return this.getLocation(new VacuumWorldCoordinates(x - 1, y));
 	}
 
 	public VacuumWorldLocation getWesternLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getWesternCoordinates());
+		return this.getLocation(coordinates.getWesternCoordinates());
 	}
 
 	public VacuumWorldLocation getEasternLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x + 1, y));
+		return this.getLocation(new VacuumWorldCoordinates(x + 1, y));
 	}
 
 	public VacuumWorldLocation getEasternLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getEasternCoordinates());
+		return this.getLocation(coordinates.getEasternCoordinates());
 	}
 
 	public VacuumWorldLocation getNorthWesternLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x - 1, y - 1));
+		return this.getLocation(new VacuumWorldCoordinates(x - 1, y - 1));
 	}
 
 	public VacuumWorldLocation getNorthWesternLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getNorthWesternCoordinates());
+		return this.getLocation(coordinates.getNorthWesternCoordinates());
 	}
 
 	public VacuumWorldLocation getNorthEasternLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x + 1, y - 1));
+		return this.getLocation(new VacuumWorldCoordinates(x + 1, y - 1));
 	}
 
 	public VacuumWorldLocation getNorthEasternLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getNorthEasternCoordinates());
+		return this.getLocation(coordinates.getNorthEasternCoordinates());
 	}
 
 	public VacuumWorldLocation getSouthWesternLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x - 1, y + 1));
+		return this.getLocation(new VacuumWorldCoordinates(x - 1, y + 1));
 	}
 
 	public VacuumWorldLocation getSouthWesternLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getSouthWesternCoordinates());
+		return this.getLocation(coordinates.getSouthWesternCoordinates());
 	}
 
 	public VacuumWorldLocation getSouthEasternLocation(int x, int y) {
-		return (VacuumWorldLocation) this.getLocation(new VacuumWorldCoordinates(x + 1, y + 1));
+		return this.getLocation(new VacuumWorldCoordinates(x + 1, y + 1));
 	}
 
 	public VacuumWorldLocation getSouthEasternLocation(VacuumWorldCoordinates coordinates) {
-		return (VacuumWorldLocation) this.getLocation(coordinates.getSouthEasternCoordinates());
+		return this.getLocation(coordinates.getSouthEasternCoordinates());
 	}
 
-	public VacuumWorldLocation getFrontLocation(VacuumWorldCoordinates coordinates, AgentFacingDirection agentDirection) {
+	public VacuumWorldLocation getFrontLocation(VacuumWorldCoordinates coordinates, ActorFacingDirection agentDirection) {
 		switch (agentDirection) {
 		case NORTH:
 			return getNorthernLocation(coordinates);
@@ -171,7 +196,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	public VacuumWorldLocation getFrontLeftLocation(VacuumWorldCoordinates coordinates, AgentFacingDirection agentDirection) {
+	public VacuumWorldLocation getFrontLeftLocation(VacuumWorldCoordinates coordinates, ActorFacingDirection agentDirection) {
 		switch (agentDirection) {
 		case NORTH:
 			return getNorthWesternLocation(coordinates);
@@ -186,7 +211,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	public VacuumWorldLocation getFrontRightLocation(VacuumWorldCoordinates coordinates, AgentFacingDirection agentDirection) {
+	public VacuumWorldLocation getFrontRightLocation(VacuumWorldCoordinates coordinates, ActorFacingDirection agentDirection) {
 		switch (agentDirection) {
 		case NORTH:
 			return getNorthEasternLocation(coordinates);
@@ -201,7 +226,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	public VacuumWorldLocation getLeftLocation(VacuumWorldCoordinates coordinates, AgentFacingDirection agentDirection) {
+	public VacuumWorldLocation getLeftLocation(VacuumWorldCoordinates coordinates, ActorFacingDirection agentDirection) {
 		switch (agentDirection) {
 		case NORTH:
 			return getWesternLocation(coordinates);
@@ -216,7 +241,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	public VacuumWorldLocation getRightLocation(VacuumWorldCoordinates coordinates, AgentFacingDirection agentDirection) {
+	public VacuumWorldLocation getRightLocation(VacuumWorldCoordinates coordinates, ActorFacingDirection agentDirection) {
 		switch (agentDirection) {
 		case NORTH:
 			return getEasternLocation(coordinates);
@@ -233,7 +258,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if (o instanceof VacuumWorldDefaultActuator && arg instanceof VacuumWorldEvent) {
+		if ((o instanceof VacuumWorldDefaultActuator || o instanceof UserActuator) && arg instanceof VacuumWorldEvent) {
 			manageActuatorRequest((VacuumWorldEvent) arg);
 		} 
 		else if (o instanceof VacuumWorldPhysics) {
@@ -276,13 +301,22 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		
 		for(CustomObserver recipient : recipients) {
 			if(recipient instanceof VacuumWorldDefaultSensor) {
-				notifySensorIfNeeded((VacuumWorldDefaultSensor) recipient, sensorsToNotifyIds, result);
+				notifyAgentSensorIfNeeded((VacuumWorldDefaultSensor) recipient, sensorsToNotifyIds, result);
+			}
+			else if(recipient instanceof UserSensor) {
+				notifyUserSensorIfNeeded((UserSensor) recipient, sensorsToNotifyIds, result);
 			}
 		}
 	}
 
-	private void notifySensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> senderSensorIds, DefaultActionResult result) {
-		if(senderSensorIds.contains(recipient.getSensorId())) {
+	private void notifyUserSensorIfNeeded(UserSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult result) {
+		if(sensorsToNotifyIds.contains(recipient.getSensorId())) {
+			recipient.update(this, result);
+		}
+	}
+
+	private void notifyAgentSensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult result) {
+		if(sensorsToNotifyIds.contains(recipient.getSensorId())) {
 			recipient.update(this, result);
 		}
 	}
@@ -303,16 +337,16 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	private void logResult(VacuumWorldActionResult result) {
 		switch(result.getActionResult()) {
 		case ACTION_DONE:
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + result.getActorId() + ": the action was successful!");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + result.getActorId() + ": the action was successful!");
 			break;
 		case ACTION_FAILED:
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + result.getActorId() + ": the action was recognized as possible, but it failed during the execution!");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + result.getActorId() + ": the action was recognized as possible, but it failed during the execution!");
 			break;
 		case ACTION_IMPOSSIBLE:
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.AGENT + result.getActorId() + ": the action was recognized as impossible and it was not performed!");
+			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + result.getActorId() + ": the action was recognized as impossible and it was not performed!");
 			break;
 		default:
-			throw new IllegalArgumentException(Utils.AGENT + result.getActorId() + ": unknown result: " + result.getActionResult());
+			throw new IllegalArgumentException(Utils.ACTOR + result.getActorId() + ": unknown result: " + result.getActionResult());
 		}
 	}
 

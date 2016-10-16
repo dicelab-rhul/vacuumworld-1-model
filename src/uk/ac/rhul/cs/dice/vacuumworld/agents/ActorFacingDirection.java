@@ -1,9 +1,11 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
-public enum AgentFacingDirection {
+import java.util.Random;
+
+public enum ActorFacingDirection {
 	NORTH, SOUTH, WEST, EAST;
 	
-	public static AgentFacingDirection fromString(String value) {
+	public static ActorFacingDirection fromString(String value) {
 		switch(value) {
 		case "north":
 			return NORTH;
@@ -18,7 +20,7 @@ public enum AgentFacingDirection {
 		}
 	}
 	
-	public AgentFacingDirection getLeftDirection() {
+	public ActorFacingDirection getLeftDirection() {
 		switch(this) {
 		case NORTH:
 			return WEST;
@@ -33,7 +35,7 @@ public enum AgentFacingDirection {
 		}
 	}
 	
-	public AgentFacingDirection getRightDirection() {
+	public ActorFacingDirection getRightDirection() {
 		switch(this) {
 		case NORTH:
 			return EAST;
@@ -48,7 +50,7 @@ public enum AgentFacingDirection {
 		}
 	}
 	
-	public boolean isOpposite(AgentFacingDirection candidate) {
+	public boolean isOpposite(ActorFacingDirection candidate) {
 		switch(this) {
 		case NORTH:
 			return candidate.equals(SOUTH);
@@ -75,6 +77,35 @@ public enum AgentFacingDirection {
 			return "E";
 		default:
 			throw new IllegalArgumentException();
+		}
+	}
+	
+	public static ActorFacingDirection random() {
+		Random random = new Random();
+		
+		if(random.nextBoolean()) {
+			return northOrSouth(random);
+		}
+		else {
+			return westOrEast(random);
+		}
+	}
+
+	private static ActorFacingDirection westOrEast(Random random) {
+		if(random.nextBoolean()) {
+			return ActorFacingDirection.WEST;
+		}
+		else {
+			return ActorFacingDirection.EAST;
+		}
+	}
+
+	private static ActorFacingDirection northOrSouth(Random random) {
+		if(random.nextBoolean()) {
+			return ActorFacingDirection.NORTH;
+		}
+		else {
+			return ActorFacingDirection.SOUTH;
 		}
 	}
 }

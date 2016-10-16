@@ -8,7 +8,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Coordinates;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.gawl.interfaces.utils.AbstractSingleTypedPair;
 import uk.ac.rhul.cs.dice.gawl.interfaces.utils.Utils;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.AgentFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 
 public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> implements Coordinates {
 	public VacuumWorldCoordinates(int x, int y) {
@@ -68,7 +68,7 @@ public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> imp
 		return toReturn;
 	}
 	
-	public VacuumWorldCoordinates getNewCoordinates(AgentFacingDirection agentDirection) {
+	public VacuumWorldCoordinates getNewCoordinates(ActorFacingDirection agentDirection) {
 		switch(agentDirection) {
 		case NORTH:
 			return getNorthernCoordinates();
