@@ -92,7 +92,7 @@ public class UserMind extends AbstractAgentMind {
 
 	private EnvironmentalAction buildDropDirtAction() {
 		try {
-			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) ? DirtType.ORANGE : DirtType.GREEN;
+			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceded() ? DirtType.ORANGE : DirtType.GREEN;
 			this.lastDroppedDirt = dirtType;
 			
 			return DropDirtAction.class.getConstructor(DirtType.class).newInstance(dirtType);
