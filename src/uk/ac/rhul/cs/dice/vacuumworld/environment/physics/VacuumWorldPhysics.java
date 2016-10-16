@@ -179,7 +179,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		if(this.activeAgents.containsKey(threadId)) {
 			return this.activeAgents.get(threadId).getId();
 		}
-		else if(this.activeUsers.containsKey(threadId)) {
+		else if(this.activeUsers.containsKey(threadId)) {			
 			return this.activeUsers.get(threadId).getId();
 		}
 		else {
@@ -333,7 +333,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	public synchronized boolean isPossible(MoveAction action, Space context) {
 		long threadId = Thread.currentThread().getId();
 		
-		ActorFacingDirection actorFacingDirection = isCurrentActorAgent() ? this.activeAgents.get(threadId).getFacingDirection() : isCurrentActorUser() ? this.activeAgents.get(threadId).getFacingDirection() : null;
+		ActorFacingDirection actorFacingDirection = isCurrentActorAgent() ? this.activeAgents.get(threadId).getFacingDirection() : isCurrentActorUser() ? this.activeUsers.get(threadId).getFacingDirection() : null;
 		VacuumWorldLocation actorLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 		VacuumWorldCoordinates originalCooridinates = actorLocation.getCoordinates();
 		VacuumWorldLocation targetLocation = ((VacuumWorldSpace) context).getFrontLocation(originalCooridinates, actorFacingDirection);
@@ -389,7 +389,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	private Result doMove(MoveAction action, VacuumWorldSpace context) throws AlreadyLockedException {
 		long threadId = Thread.currentThread().getId();
 		
-		ActorFacingDirection actorFacingDirection = isCurrentActorAgent() ? this.activeAgents.get(threadId).getFacingDirection() : isCurrentActorUser() ? this.activeAgents.get(threadId).getFacingDirection() : null;
+		ActorFacingDirection actorFacingDirection = isCurrentActorAgent() ? this.activeAgents.get(threadId).getFacingDirection() : isCurrentActorUser() ? this.activeUsers.get(threadId).getFacingDirection() : null;
 		VacuumWorldLocation actorLocation = getCurrentActorLocation(context);
 		VacuumWorldCoordinates originalCooridinates = actorLocation.getCoordinates();
 		VacuumWorldLocation targetLocation = context.getFrontLocation(originalCooridinates, actorFacingDirection);

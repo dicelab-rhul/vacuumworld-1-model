@@ -12,6 +12,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
@@ -57,23 +58,61 @@ public class JsonForControllerBuilder {
 			JsonObjectBuilder builder = Json.createObjectBuilder();
 			builder.add("x", ((VacuumWorldLocation) location).getCoordinates().getX()).add("y", ((VacuumWorldLocation) location).getCoordinates().getY());
 			
-			JsonObject agent = buildAgentIfPresent(location);
-			
-			if(agent != null) {
-				builder.add("agent", agent);
-			}
-			
-			String dirt = buildDirtIfPresent(location);
-			
-			if(dirt != null) {
-				builder.add("dirt", dirt);
-			}
+			addAgentIfPresent(builder, location);
+			addUserIfPresent(builder, location);
+			addDirtIfPresent(builder, location);
 			
 			return builder.build();
 		}
 		else {
 			return null;
 		}
+	}
+
+	private static void addDirtIfPresent(JsonObjectBuilder builder, Location location) {
+		String dirt = buildDirtIfPresent(location);
+		
+		if(dirt != null) {
+			builder.add("dirt", dirt);
+		}
+	}
+
+	private static void addUserIfPresent(JsonObjectBuilder builder, Location location) {
+		JsonObject user = buildUserIfPresent(location);
+		
+		if(user != null) {
+			builder.add("user", user);
+		}
+	}
+
+	private static void addAgentIfPresent(JsonObjectBuilder builder, Location location) {
+		JsonObject agent = buildAgentIfPresent(location);
+		
+		if(agent != null) {
+			builder.add("agent", agent);
+		}
+	}
+
+	private static JsonObject buildUserIfPresent(Location location) {
+		if(((VacuumWorldLocation) location).isAUserPresent()) {
+			return buildUser((VacuumWorldLocation) location);
+		}
+		else {
+			return null;
+		}
+	}
+
+	private static JsonObject buildUser(VacuumWorldLocation location) {
+		JsonObjectBuilder userBuilder = Json.createObjectBuilder();
+		
+		User user = location.getUser();
+		String id = user.getId();
+		String name = user.getExternalAppearance().getName();
+		String facingDirection = user.getFacingDirection().toString().toLowerCase();
+		
+		userBuilder.add("id", id).add("name", name).add("facing_direction", facingDirection);
+		
+		return userBuilder.build();
 	}
 
 	private static String buildDirtIfPresent(Location location) {
@@ -98,7 +137,7 @@ public class JsonForControllerBuilder {
 		JsonObjectBuilder agentBuilder = Json.createObjectBuilder();
 		
 		VacuumWorldCleaningAgent agent = location.getAgent();
-		String id = (String) agent.getId();
+		String id = agent.getId();
 		String name = agent.getExternalAppearance().getName();
 		String color = ((VacuumWorldAgentAppearance) agent.getExternalAppearance()).getType().toString().toLowerCase();
 		int sensorsNumber = 2;

@@ -14,6 +14,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
@@ -81,7 +82,7 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 	}
 	
 	private String selectActuatorRecipientId(AbstractAction action) {
-		if(PhysicalAction.class.isAssignableFrom(action.getClass())) {
+		if(PhysicalAction.class.isAssignableFrom(action.getClass()) || PerceiveAction.class.isAssignableFrom(action.getClass())) {
 			return getPhysicalActuators().get(0).getActuatorId();
 		}
 		else if(SpeechAction.class.isAssignableFrom(action.getClass())) {

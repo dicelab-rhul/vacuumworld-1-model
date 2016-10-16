@@ -27,6 +27,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurningAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
@@ -158,7 +159,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 			this.logger.info(event.getAction().getClass().getSimpleName() + ":" + event.getResult() + ":" + event.getActor().toString());
 		}
 
-		if (event.getResult().equals(ActionResult.ACTION_DONE)) {
+		if (event.getResult().equals(ActionResult.ACTION_DONE) && !(event.getActor() instanceof User)) {
 			AgentRepresentation agent = this.vacuumWorldSpaceRepresentation.getAgent((String) ((AbstractAgent<?,?>) event.getActor()).getId());
 			EnvironmentalAction a = event.getAction();
 			agent.setClean(false);

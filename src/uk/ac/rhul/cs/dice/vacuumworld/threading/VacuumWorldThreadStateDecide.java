@@ -9,8 +9,8 @@ public class VacuumWorldThreadStateDecide extends DefaultThreadStateDecide {
 	@Override
 	public void run(ActorRunnable runnable) {
 		if(runnable instanceof VacuumWorldActorRunnable) {
-			EnvironmentalAction nextAction = runnable.getAgentMind().decide();
-			Mind mind = ((VacuumWorldActorRunnable) runnable).getAgentMind();
+			EnvironmentalAction nextAction = runnable.getActorMind().decide();
+			Mind mind = ((VacuumWorldActorRunnable) runnable).getActorMind();
 			setNextAction(nextAction, mind);
 		}
 		else {

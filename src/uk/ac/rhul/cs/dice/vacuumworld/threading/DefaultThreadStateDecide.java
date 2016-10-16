@@ -4,7 +4,7 @@ public class DefaultThreadStateDecide implements ThreadState {
 
 	@Override
 	public void run(ActorRunnable runnable) {
-		runnable.getAgentMind().decide();
+		runnable.getActorMind().decide();
 	}
 
 	@Override

@@ -1,7 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
-import java.util.Random;
-
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
@@ -11,17 +9,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 
 public class DropDirtAction extends PhysicalAction {
 	private DirtType dirtType;
-	
-	public DropDirtAction() {
-		Random rng = new Random();
-		
-		if(rng.nextBoolean()) {
-			this.dirtType = DirtType.GREEN;
-		}
-		else {
-			this.dirtType = DirtType.ORANGE;
-		}
-	}
 	
 	public DropDirtAction(DirtType dirtType) {
 		this.dirtType = dirtType;

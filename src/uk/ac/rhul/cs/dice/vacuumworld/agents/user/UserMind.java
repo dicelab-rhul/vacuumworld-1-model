@@ -15,6 +15,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.DropDirtAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
@@ -23,6 +24,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
@@ -30,6 +32,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 
 public class UserMind extends AbstractAgentMind {
+	private DirtType lastDroppedDirt;
 	private Random rng;
 	private String bodyId;
 	private VacuumWorldActionResult lastAttemptedActionResult;
@@ -41,6 +44,7 @@ public class UserMind extends AbstractAgentMind {
 	public UserMind() {
 		this.rng = new Random();
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
+		this.lastDroppedDirt = DirtType.GREEN;
 	}
 	
 	@Override
@@ -78,8 +82,25 @@ public class UserMind extends AbstractAgentMind {
 		else if(actionPrototype.equals(PerceiveAction.class)) {
 			return buildPerceiveAction();
 		}
+		else if(actionPrototype.equals(DropDirtAction.class)) {
+			return buildDropDirtAction();
+		}
 		else {
 			return buildPhysicalAction(actionPrototype);
+		}
+	}
+
+	private EnvironmentalAction buildDropDirtAction() {
+		try {
+			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) ? DirtType.ORANGE : DirtType.GREEN;
+			this.lastDroppedDirt = dirtType;
+			
+			return DropDirtAction.class.getConstructor(DirtType.class).newInstance(dirtType);
+		}
+		catch (Exception e) {
+			Utils.log(e);
+			
+			return null;
 		}
 	}
 

@@ -4,7 +4,7 @@ public class DefaultThreadStatePerceive implements ThreadState {
 
 	@Override
 	public void run(ActorRunnable runnable) {
-		runnable.getAgentMind().perceive(null);
+		runnable.getActorMind().perceive(null);
 	}
 
 	@Override

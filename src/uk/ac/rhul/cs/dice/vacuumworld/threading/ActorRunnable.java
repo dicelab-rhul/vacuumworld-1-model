@@ -27,7 +27,7 @@ public abstract class ActorRunnable implements Runnable {
 		this.agent = agent;
 	}
 
-	public Mind getAgentMind() {
+	public Mind getActorMind() {
 		return this.agent;
 	}
 }

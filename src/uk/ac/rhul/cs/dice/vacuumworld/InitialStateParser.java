@@ -173,21 +173,25 @@ public class InitialStateParser {
 		}
 	}
 
-	private static User createUser(boolean user) {
-		if(!user) {
+	private static User createUser(boolean userPresent) {
+		if(!userPresent) {
 			return null;
 		}
 		
 		UserMind mind = new UserMind();
 		UserBrain brain = new UserBrain();
 		String id = "User-" + UUID.randomUUID().toString();
+		mind.setBodyId(id);
 		UserSensor seeingSensor = new UserSensor(id, VacuumWorldSensorRole.SEEING_SENSOR);
 		UserSensor listeningSensor = new UserSensor(id, VacuumWorldSensorRole.LISTENING_SENSOR);
 		UserActuator physicalActuator = new UserActuator(id, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR);
 		UserActuator speakingActuator = new UserActuator(id, VacuumWorldActuatorRole.SPEAKING_ACTUATOR);
 		UserAppearance appearance = new UserAppearance(id, new Double[] {(double) 1, (double) 1});
 		
-		return new User(appearance, Arrays.asList(seeingSensor, listeningSensor), Arrays.asList(physicalActuator, speakingActuator), mind, brain, ActorFacingDirection.random());
+		User user = new User(appearance, Arrays.asList(seeingSensor, listeningSensor), Arrays.asList(physicalActuator, speakingActuator), mind, brain, ActorFacingDirection.random());
+		user.setId(id);
+		
+		return user;
 	}
 
 	private static void putNewLocationIfNecessary(Map<LocationKey, Location> spaceMap, int i, int j, int width, int height) {

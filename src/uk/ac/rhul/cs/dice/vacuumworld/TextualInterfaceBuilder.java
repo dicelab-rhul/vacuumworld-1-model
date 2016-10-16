@@ -3,8 +3,8 @@ package uk.ac.rhul.cs.dice.vacuumworld;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.PhysicalBody;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
@@ -35,11 +35,14 @@ public class TextualInterfaceBuilder {
 	private static String representLocation(Location location) {
 		VacuumWorldLocation loc = (VacuumWorldLocation) location;
 
-		if (loc.isAnAgentPresent() && loc.isDirtPresent()) {
-			return getOverlappingSymbol(loc.getAgent(), loc.getDirt());
+		if (isOverlapping(loc)) {
+			return getOverlappingSymbol(loc);
 		}
 		else if (loc.isAnAgentPresent()) {
 			return loc.getAgent().getExternalAppearance().represent();
+		}
+		else if (loc.isAUserPresent()) {
+			return loc.getUser().getExternalAppearance().represent();
 		}
 		else if (loc.isDirtPresent()) {
 			return loc.getDirt().getExternalAppearance().represent();
@@ -49,10 +52,26 @@ public class TextualInterfaceBuilder {
 		}
 	}
 
-	private static String getOverlappingSymbol(VacuumWorldCleaningAgent agent, Dirt dirt) {
-		String agentString = agent.getExternalAppearance().represent().toLowerCase();
+	private static String getOverlappingSymbol(VacuumWorldLocation loc) {
+		if(loc.isAnAgentPresent()) {
+			return getOverlappingSymbol(loc.getAgent(), loc.getDirt());
+		}
+		else if(loc.isAUserPresent()) {
+			return getOverlappingSymbol(loc.getUser(), loc.getDirt());
+		}
+		else {
+			return null;
+		}
+	}
+
+	private static boolean isOverlapping(VacuumWorldLocation loc) {
+		return loc.isDirtPresent() && (loc.isAnAgentPresent() || loc.isAUserPresent());
+	}
+
+	private static String getOverlappingSymbol(PhysicalBody actor, Dirt dirt) {
+		String actorString = actor.getExternalAppearance().represent().toLowerCase();
 		String dirtString = dirt.getExternalAppearance().represent();
 
-		return agentString.equals(dirtString) ? "@" : "!";
+		return actorString.equals(dirtString) ? "@" : "!";
 	}
 }

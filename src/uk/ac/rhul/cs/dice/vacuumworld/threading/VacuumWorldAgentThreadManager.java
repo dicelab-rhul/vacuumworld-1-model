@@ -147,7 +147,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 			throw new IllegalThreadStateException("Cannot add a new agent at runtime.");
 		}
 
-		if (runnable.getAgentMind() instanceof DatabaseAgentMind || runnable.getAgentMind() instanceof VacuumWorldMonitorMind) {
+		if (runnable.getActorMind() instanceof DatabaseAgentMind || runnable.getActorMind() instanceof VacuumWorldMonitorMind) {
 			this.monitorRunnables.add(runnable);
 		}
 		else {
