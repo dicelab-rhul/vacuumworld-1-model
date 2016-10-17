@@ -40,11 +40,13 @@ public class UserMind extends AbstractAgentMind {
 	private Set<Class<? extends AbstractAction>> actions;
 	private List<Class<? extends EnvironmentalAction>> availableActions;
 	private EnvironmentalAction nextAction;
+	private UserPlan plan;
 	
 	public UserMind() {
 		this.rng = new Random();
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		this.lastDroppedDirt = DirtType.GREEN;
+		this.plan = null;
 	}
 	
 	@Override
@@ -55,6 +57,10 @@ public class UserMind extends AbstractAgentMind {
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
+		if(this.plan != null) {
+			return followPlan(false);
+		}
+		
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception == null) {
@@ -63,10 +69,80 @@ public class UserMind extends AbstractAgentMind {
 		else {
 			updateAvailableActions(perception);
 			
-			return decideActionRandomly();
+			return decideWithPerceptionAndMessages(perception);
 		}
 	}
 	
+	private EnvironmentalAction followPlan(boolean specialFlag) {
+		if(lastActionSucceded() || specialFlag) {
+			this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
+			this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
+			
+			
+			return buildNewAction(this.plan.getLastAction());
+		}
+		else {
+			this.plan.incrementNumberOfConsecutiveFailuresOfTheSameAction();
+			
+			return retryIfPossible();
+		}
+	}
+
+	private EnvironmentalAction retryIfPossible() {
+		if(this.plan.getNumberOfConsecutiveFailuresOfTheSameAction() <= 10) {
+			return buildPhysicalAction(this.plan.getLastAction());
+		}
+		else {
+			this.plan = null;
+			
+			return decideActionRandomly();
+		}
+	}
+
+	private EnvironmentalAction decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
+		List<VacuumWorldSpeechActionResult> messages = getReceivedCommunications();
+		
+		EnvironmentalAction toReturn;
+		
+		for(VacuumWorldSpeechActionResult result : messages) {
+			toReturn = getNextActionFromMessage(result.getPayload().getPayload(), perception);
+			
+			if(toReturn == null) {
+				continue;
+			}
+			else {
+				return toReturn;
+			}
+		}
+		
+		return decideActionRandomly();
+	}
+
+	private EnvironmentalAction getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
+		if(payload.matches("^move[NSWE]$")) {
+			this.plan = buildPlan(payload, perception);
+			
+			if(this.plan == null) {
+				return null;
+			}
+			
+			return followPlan(true);
+		}
+		else {
+			return null;
+		}
+	}
+
+	private UserPlan buildPlan(String payload, VacuumWorldPerception perception) {
+		String temp = payload.replaceAll("move", "");
+		
+		return buildPlanHelper(ActorFacingDirection.fromCompactRepresentation(temp), perception.getAgentCurrentFacingDirection());
+	}
+
+	private UserPlan buildPlanHelper(ActorFacingDirection target, ActorFacingDirection direction) {
+		return new UserPlan(direction.getBestStrategyForMoving(target), getBodyId());
+	}
+
 	protected EnvironmentalAction decideActionRandomly() {		
 		int size = this.getAvailableActions().size();
 		int randomNumber = this.rng.nextInt(size);
