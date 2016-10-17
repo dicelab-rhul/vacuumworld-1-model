@@ -23,6 +23,7 @@ public class ConfigData {
 	private static boolean log;
 	private static boolean printGrid;
 	private static String logsPath;
+	private static int timeoutInSeconds;
 	
 	private static Map<String, String> colorToMindMap;
 	private static Map<String, Class<? extends VacuumWorldDefaultMind>> admissibleMindTypes;
@@ -61,6 +62,10 @@ public class ConfigData {
 	
 	public static String getLogsPath() {
 		return ConfigData.logsPath;
+	}
+	
+	public static int getTimeoutInSeconds() {
+		return ConfigData.timeoutInSeconds;
 	}
 	
 	public static Map<String, String> getColorToMindMap() {
@@ -133,6 +138,7 @@ public class ConfigData {
 		ConfigData.log = config.getBoolean("log");
 		ConfigData.printGrid = config.getBoolean("print_grid");
 		ConfigData.logsPath = config.getString("logs_path");
+		ConfigData.timeoutInSeconds = config.getInt("timeout_in_seconds");
 		
 		return initColorToMindMap(config) && initAdmissibleMindTypes(config) && initDatabaseData(config);
 	}
@@ -156,7 +162,8 @@ public class ConfigData {
 			return fillMindTypesMap(mindTypes);
 		}
 		catch(ClassNotFoundException e) {
-			Utils.log(e);
+			Utils.log(e, ConfigData.class.getSimpleName());
+			Utils.logWithClass(ConfigData.class.getSimpleName(), "The specified class does not exist. Check the configuration file for typos and errors...\n   ...and remember to specify the full package path [uk.ac.rhul.(...).<MyMind>] ...\n   ...where <MyMind> is the class simple name without [.java / .class].");
 			
 			return false;
 		}

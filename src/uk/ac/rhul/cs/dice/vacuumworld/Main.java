@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 
 public class Main {
   

@@ -82,6 +82,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeCodes;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;

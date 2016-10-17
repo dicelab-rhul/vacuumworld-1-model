@@ -73,6 +73,12 @@ public class Utils {
 		}
 	}
 	
+	public static void log(Exception e, String className) {
+		if(e.getMessage() != null) {
+			log(className + ": " + e.getMessage(), e);
+		}
+	}
+	
 	public static void fakeLog(Exception e) {
 		//this exception does not need to be logged
 	}

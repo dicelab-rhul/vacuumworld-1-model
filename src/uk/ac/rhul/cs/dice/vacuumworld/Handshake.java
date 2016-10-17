@@ -8,11 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeCodes;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 
 public class Handshake {
 	private static final String ERROR = "Bad handshake.";
-	private static final int TIME_TO_WAIT = 100000;
 	
 	private Handshake(){}
 	
@@ -21,7 +23,7 @@ public class Handshake {
 			return attemptHanshakeWithControllerHelper(toController, fromController, code); 
 		}
 		else {
-			throw new HandshakeException(ERROR);
+			throw new HandshakeException(Handshake.ERROR);
 		}
 	}
 	
@@ -31,7 +33,7 @@ public class Handshake {
 		Future<Boolean> future = executor.submit(() -> doHandshake(toController, fromController, code));
 		
 		try {
-			return future.get(TIME_TO_WAIT, TimeUnit.MILLISECONDS);
+			return future.get(ConfigData.getTimeoutInSeconds(), TimeUnit.SECONDS);
 		}
 		catch (Exception e) {
 			throw new HandshakeException(e);
@@ -45,7 +47,7 @@ public class Handshake {
 		case CHVM:
 			return continueHandshake(toController, fromController, code, HandshakeCodes.MHMV);
 		default:
-			throw new HandshakeException(ERROR);
+			throw new HandshakeException(Handshake.ERROR);
 		}
 	}
 
@@ -61,13 +63,13 @@ public class Handshake {
 			return finalizeHandshake(toController, oldCode, codeFromController);
 		}
 		else {
-			throw new HandshakeException(ERROR);
+			throw new HandshakeException(Handshake.ERROR);
 		}
 	}
 
 	private static Boolean finalizeHandshake(ObjectOutputStream toController, HandshakeCodes oldCode, HandshakeCodes codeFromController) throws HandshakeException, IOException {
 		if(oldCode.equals(codeFromController)) {
-			throw new HandshakeException(ERROR);
+			throw new HandshakeException(Handshake.ERROR);
 		}
 		
 		switch(codeFromController) {
@@ -76,7 +78,7 @@ public class Handshake {
 		case CHVM:
 			return finalizeHandshake(toController, HandshakeCodes.MHMV);
 		default:
-			throw new HandshakeException(ERROR);
+			throw new HandshakeException(Handshake.ERROR);
 		}
 	}
 
