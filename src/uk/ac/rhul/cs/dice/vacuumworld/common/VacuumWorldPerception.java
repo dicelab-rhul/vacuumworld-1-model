@@ -5,21 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 
 public class VacuumWorldPerception implements Perception {
 	private Map<VacuumWorldCoordinates, VacuumWorldLocation> perception;
-	private VacuumWorldCoordinates agentCoordinates;
+	private VacuumWorldCoordinates actorCoordinates;
 	
-	public VacuumWorldPerception(Map<VacuumWorldCoordinates, VacuumWorldLocation> perception, VacuumWorldCoordinates agentCoordinates) {
+	public VacuumWorldPerception(Map<VacuumWorldCoordinates, VacuumWorldLocation> perception, VacuumWorldCoordinates actorCoordinates) {
 		this.perception = perception != null ? perception : new HashMap<>();
-		this.agentCoordinates = agentCoordinates;
+		this.actorCoordinates = actorCoordinates;
 	}
 	
 	public void addPerceivedLocation(VacuumWorldCoordinates coordinates, VacuumWorldLocation location) {
@@ -38,37 +40,53 @@ public class VacuumWorldPerception implements Perception {
 		this.perception = perception;
 	}
 	
-	public VacuumWorldCoordinates getAgentCoordinates() {
-		return this.agentCoordinates;
+	public VacuumWorldCoordinates getActorCoordinates() {
+		return this.actorCoordinates;
 	}
 	
-	public VacuumWorldLocation getAgentCurentLocation() {
-		return this.perception.get(this.agentCoordinates);
+	public VacuumWorldLocation getActorCurentLocation() {
+		return this.perception.get(this.actorCoordinates);
 	}
 	
-	public ActorFacingDirection getAgentCurrentFacingDirection() {
-		return getAgentCurentLocation().getAgent().getFacingDirection();
+	public ActorFacingDirection getActorCurrentFacingDirection() {
+		if(getActorCurentLocation().isAnAgentPresent()) {
+			return getActorCurentLocation().getAgent().getFacingDirection();
+		}
+		else if(getActorCurentLocation().isAUserPresent()) {
+			return getActorCurentLocation().getUser().getFacingDirection();
+		}
+		else {
+			return null;
+		}
 	}
 	
-	public boolean isDirtOnAgentCurrentLocation() {
-		return getAgentCurentLocation().isDirtPresent();
+	public boolean isDirtOnActorCurrentLocation() {
+		return getActorCurentLocation().isDirtPresent();
 	}
 	
 	public VacuumWorldAgentType getAgentType() {
-		return ((VacuumWorldAgentAppearance) getAgentCurentLocation().getAgent().getExternalAppearance()).getType();
+		if(!getActorCurentLocation().isAnAgentPresent()) {
+			return null;
+		}
+		
+		return ((VacuumWorldAgentAppearance) getActorCurentLocation().getAgent().getExternalAppearance()).getType();
 	}
 	
 	public boolean canAgentClean() {
-		if(!isDirtOnAgentCurrentLocation()) {
+		if(!isDirtOnActorCurrentLocation() || !getActorCurentLocation().isAnAgentPresent()) {
 			return false;
 		}
 		
-		DirtType dirtType = ((DirtAppearance) getAgentCurentLocation().getDirt().getExternalAppearance()).getDirtType();
+		DirtType dirtType = ((DirtAppearance) getActorCurentLocation().getDirt().getExternalAppearance()).getDirtType();
 		
 		return DirtType.agentAndDirtCompatible(dirtType, getAgentType());
 	}
 	
 	public boolean canAgentSpotCompatibleDirt() {
+		if(!getActorCurentLocation().isAnAgentPresent()) {
+			return false;
+		}
+		
 		for(VacuumWorldLocation location : this.perception.values()) {
 			if(isCompatibleDirtPresent(location)) {
 				return true;
@@ -91,6 +109,10 @@ public class VacuumWorldPerception implements Perception {
 	}
 
 	private boolean areAgentAndDirtCompatible(Dirt dirt) {
+		if(!getActorCurentLocation().isAnAgentPresent()) {
+			return false;
+		}
+		
 		DirtType dirtType = ((DirtAppearance) dirt.getExternalAppearance()).getDirtType();
 		
 		return DirtType.agentAndDirtCompatible(dirtType, getAgentType());
@@ -111,21 +133,21 @@ public class VacuumWorldPerception implements Perception {
 		return locationsWithCompatibleDirt;
 	}
 	
-	public List<VacuumWorldCleaningAgent> getAgentsInPerception(String agentId) {
-		List<VacuumWorldCleaningAgent> agents = new ArrayList<>();
+	public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerception(String actorId) {
+		List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> actors = new ArrayList<>();
 		
-		this.perception.values().forEach((VacuumWorldLocation location) -> addAgentToAgentsListIfNecessary(agents, location, agentId));
+		this.perception.values().forEach((VacuumWorldLocation location) -> addActorToActorsListIfNecessary(actors, location, actorId));
 		
-		return agents;
+		return actors;
 	}
 
-	private void addAgentToAgentsListIfNecessary(List<VacuumWorldCleaningAgent> agents, VacuumWorldLocation location, String agentId) {
+	private void addActorToActorsListIfNecessary(List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> actors, VacuumWorldLocation location, String actorId) {
 		if(!location.isAnAgentPresent()) {
 			return;
 		}
 		
-		if(!agentId.equals(location.getAgent().getId())) {
-			agents.add(location.getAgent());
+		if(!actorId.equals(location.getAgent().getId())) {
+			actors.add(location.getAgent());
 		}
 	}
 }

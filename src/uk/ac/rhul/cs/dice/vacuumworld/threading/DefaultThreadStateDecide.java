@@ -1,10 +1,14 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
-public class DefaultThreadStateDecide implements ThreadState {
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
+
+public abstract class DefaultThreadStateDecide implements ThreadState {
 
 	@Override
 	public void run(ActorRunnable runnable) {
-		runnable.getActorMind().decide();
+		EnvironmentalAction action = runnable.getActorMind().decide();
+		((VacuumWorldDefaultMind) runnable.getActorMind()).setNextActionForExecution(action);
 	}
 
 	@Override

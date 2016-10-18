@@ -2,7 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
 
 public class VacuumWorldThreadStateDecide extends DefaultThreadStateDecide {
@@ -24,6 +24,9 @@ public class VacuumWorldThreadStateDecide extends DefaultThreadStateDecide {
 		}
 		else if(mind instanceof UserMind) {
 			((UserMind) mind).setNextActionForExecution(nextAction);
+		}
+		else {
+			throw new IllegalArgumentException("Bad mind: " + mind.getClass().getSimpleName());
 		}
 	}
 }

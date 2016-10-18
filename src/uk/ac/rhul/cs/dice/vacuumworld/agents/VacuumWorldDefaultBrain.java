@@ -8,6 +8,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 
 public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
 	private ConcurrentLinkedQueue<DefaultActionResult> receivedResults;

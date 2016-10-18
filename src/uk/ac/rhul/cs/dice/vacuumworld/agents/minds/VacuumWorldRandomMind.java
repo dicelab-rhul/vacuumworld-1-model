@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.agents;
+package uk.ac.rhul.cs.dice.vacuumworld.agents.minds;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;

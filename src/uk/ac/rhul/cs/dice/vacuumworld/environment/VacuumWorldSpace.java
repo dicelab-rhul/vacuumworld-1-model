@@ -276,24 +276,38 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	private void manageSpeechActionResult(VacuumWorldSpeechPerceptionResultWrapper wrapper) {
-		List<String> recipientAgentsIds = wrapper.getSpeechResult().getRecipientsIds();
+		List<String> recipientActorsIds = wrapper.getSpeechResult().getRecipientsIds();
 		List<String> senderSensorIds = wrapper.getRecipientsIds();
 
 		notifyActor(senderSensorIds, wrapper.getPerceptionResult());
-		notifyTargets(recipientAgentsIds, wrapper.getSpeechResult());
+		notifyTargets(recipientActorsIds, wrapper.getSpeechResult());
 	}
 
 	private void notifyActor(List<String> senderSensorIds, DefaultActionResult result) {
 		notifyObserversIfNeeded(senderSensorIds, result);
 	}
 	
-	private void notifyTargets(List<String> recipientAgentsIds, VacuumWorldSpeechActionResult result) {
-		List<VacuumWorldCleaningAgent> recipientAgents = this.agents.values().stream().filter((VacuumWorldCleaningAgent agent) -> recipientAgentsIds.contains(agent.getId())).collect(Collectors.toList());
+	private void notifyTargets(List<String> recipientActorsIds, VacuumWorldSpeechActionResult result) {
+		List<VacuumWorldCleaningAgent> recipientAgents = this.agents.values().stream().filter((VacuumWorldCleaningAgent agent) -> recipientActorsIds.contains(agent.getId())).collect(Collectors.toList());
 		recipientAgents.forEach((VacuumWorldCleaningAgent agent) -> notifyListeningSensors(agent, result));
+		
+		if(this.user != null) {
+			notifyUserIfNecessary(result, recipientActorsIds);
+		}
+	}
+
+	private void notifyUserIfNecessary(VacuumWorldSpeechActionResult result, List<String> recipientActorsIds) {
+		if(recipientActorsIds.contains(this.user.getId())) {
+			notifyListeningSensors(this.user, result);
+		}
 	}
 
 	private void notifyListeningSensors(VacuumWorldCleaningAgent agent, VacuumWorldSpeechActionResult result) {
 		agent.getListeningSensors().forEach((VacuumWorldDefaultSensor sensor) -> sensor.update(this, result));
+	}
+	
+	private void notifyListeningSensors(User user, VacuumWorldSpeechActionResult result) {
+		user.getListeningSensors().forEach((UserSensor sensor) -> sensor.update(this, result));
 	}
 
 	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, DefaultActionResult result) {

@@ -71,11 +71,17 @@ public class Utils {
 		if(e.getMessage() != null) {
 			log(e.getMessage(), e);
 		}
+		else {
+			log(e.getClass().getSimpleName(), e);
+		}
 	}
 	
 	public static void log(Exception e, String className) {
 		if(e.getMessage() != null) {
 			log(className + ": " + e.getMessage(), e);
+		}
+		else {
+			log(className + ": " + e.getClass().getSimpleName(), e);
 		}
 	}
 	

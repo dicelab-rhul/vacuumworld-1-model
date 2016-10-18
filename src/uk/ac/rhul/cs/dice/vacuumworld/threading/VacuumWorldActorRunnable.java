@@ -7,4 +7,9 @@ public class VacuumWorldActorRunnable extends ActorRunnable {
 	public VacuumWorldActorRunnable(Mind mind) {
 		super(mind);
 	}
+	
+	@Override
+	public void run() {
+		super.getState().run(this);
+	}
 }

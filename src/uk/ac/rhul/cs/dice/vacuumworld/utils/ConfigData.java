@@ -10,8 +10,8 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.manhattan.VacuumWorldManhattanMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.manhattan.VacuumWorldManhattanMind;
 
 public class ConfigData {	
 	private static int modelPort;

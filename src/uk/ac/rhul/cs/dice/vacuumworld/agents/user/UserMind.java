@@ -43,7 +43,7 @@ public class UserMind extends AbstractAgentMind {
 	private UserPlan plan;
 	
 	public UserMind() {
-		this.rng = new Random();
+		this.rng = new Random(System.currentTimeMillis());
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		this.lastDroppedDirt = DirtType.GREEN;
 		this.plan = null;
@@ -58,9 +58,21 @@ public class UserMind extends AbstractAgentMind {
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		if(this.plan != null) {
-			return followPlan(false);
+			if(!this.plan.getActionsToPerform().isEmpty()) {
+				return followPlan(false);
+			}
+			else {
+				Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": Plan is empty: I will follow it no more!");
+				this.plan = null;
+			}
 		}
 		
+		Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": No plan found! I'm free to decide what to do!");
+		
+		return decideWithPerception();
+	}
+	
+	private EnvironmentalAction decideWithPerception() {
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception == null) {
@@ -72,7 +84,7 @@ public class UserMind extends AbstractAgentMind {
 			return decideWithPerceptionAndMessages(perception);
 		}
 	}
-	
+
 	private EnvironmentalAction followPlan(boolean specialFlag) {
 		if(lastActionSucceded() || specialFlag) {
 			this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
@@ -101,7 +113,6 @@ public class UserMind extends AbstractAgentMind {
 
 	private EnvironmentalAction decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
 		List<VacuumWorldSpeechActionResult> messages = getReceivedCommunications();
-		
 		EnvironmentalAction toReturn;
 		
 		for(VacuumWorldSpeechActionResult result : messages) {
@@ -120,7 +131,7 @@ public class UserMind extends AbstractAgentMind {
 
 	private EnvironmentalAction getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
 		if(payload.matches("^move[NSWE]$")) {
-			this.plan = buildPlan(payload, perception);
+			this.plan = buildPlanMaybe(payload, perception);
 			
 			if(this.plan == null) {
 				return null;
@@ -133,10 +144,23 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
+	private UserPlan buildPlanMaybe(String payload, VacuumWorldPerception perception) {
+		if(this.rng.nextBoolean()) {
+			Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": I agree to build a plan...");
+			
+			return buildPlan(payload, perception);
+		}
+		else {
+			Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": I don't want to build a plan...");
+			
+			return null;
+		}
+	}
+
 	private UserPlan buildPlan(String payload, VacuumWorldPerception perception) {
 		String temp = payload.replaceAll("move", "");
 		
-		return buildPlanHelper(ActorFacingDirection.fromCompactRepresentation(temp), perception.getAgentCurrentFacingDirection());
+		return buildPlanHelper(ActorFacingDirection.fromCompactRepresentation(temp), perception.getActorCurrentFacingDirection());
 	}
 
 	private UserPlan buildPlanHelper(ActorFacingDirection target, ActorFacingDirection direction) {
@@ -219,7 +243,7 @@ public class UserMind extends AbstractAgentMind {
 	}
 	
 	protected void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
-		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldCoordinates agentCoordinates = perception.getActorCoordinates();
 		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
 		VacuumWorldCleaningAgent agent = agentLocation.getAgent();
 

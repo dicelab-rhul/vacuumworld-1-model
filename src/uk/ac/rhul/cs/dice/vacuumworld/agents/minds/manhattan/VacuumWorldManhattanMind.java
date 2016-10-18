@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.agents.manhattan;
+package uk.ac.rhul.cs.dice.vacuumworld.agents.minds.manhattan;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,7 +11,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
@@ -123,15 +123,15 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 
 	private EnvironmentalAction getCloserToDirt(VacuumWorldPerception perception) {
 		List<VacuumWorldLocation> locationsWithCompatibleDirt = perception.getLocationsWithCompatibleDirt();
-		VacuumWorldLocation closest = determineClosestLocationWithCompatibleDirt(locationsWithCompatibleDirt, perception.getAgentCoordinates(), perception.getAgentCurrentFacingDirection());
+		VacuumWorldLocation closest = determineClosestLocationWithCompatibleDirt(locationsWithCompatibleDirt, perception.getActorCoordinates(), perception.getActorCurrentFacingDirection());
 		
-		return buildPlan(perception, closest, perception.getAgentCoordinates());
+		return buildPlan(perception, closest, perception.getActorCoordinates());
 	}
 
 	private EnvironmentalAction buildPlan(VacuumWorldPerception perception, VacuumWorldLocation closest, VacuumWorldCoordinates agentCoordinates) {
 		int xDifference = closest.getCoordinates().getX() - agentCoordinates.getX();
 		int yDifference = closest.getCoordinates().getY() - agentCoordinates.getY();
-		ActorFacingDirection facingDirection = perception.getAgentCurrentFacingDirection();
+		ActorFacingDirection facingDirection = perception.getActorCurrentFacingDirection();
 		
 		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": building Manhattan distance driven plan...");
 		

@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.agents;
+package uk.ac.rhul.cs.dice.vacuumworld.agents.minds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +137,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		 * The collect(...) method transforms a Stream into a Collection thanks to its
 		 * Collector parameter.
 		 */
-		List<String> agentsISee = perception.getAgentsInPerception(getBodyId()).stream().map(new AgentToId()).collect(Collectors.toList());
+		List<String> agentsISee = perception.getActorsInPerception(getBodyId()).stream().map(new AgentToId()).collect(Collectors.toList());
 		
 		if(Utils.isCollectionNotNullAndNotEmpty(agentsISee)) {
 			

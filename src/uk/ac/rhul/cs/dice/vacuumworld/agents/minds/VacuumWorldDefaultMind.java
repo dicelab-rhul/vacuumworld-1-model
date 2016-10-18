@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.agents;
+package uk.ac.rhul.cs.dice.vacuumworld.agents.minds;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -22,6 +22,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
@@ -124,7 +127,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	protected SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
 		try {
 			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
-			return constructor.newInstance(senderId, new ArrayList<>(recipientIds), payload);
+			return constructor.newInstance(senderId, recipientIds == null ? new ArrayList<>() : new ArrayList<>(recipientIds), payload);
 		}
 		catch (Exception e) {
 			Utils.log(e);
@@ -139,7 +142,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	}
 
 	protected void updateCleaningActionIfNecessary(VacuumWorldPerception perception) {
-		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldCoordinates agentCoordinates = perception.getActorCoordinates();
 		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
 
 		if (!agentLocation.isDirtPresent()) {
@@ -161,7 +164,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	}
 
 	protected void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
-		VacuumWorldCoordinates agentCoordinates = perception.getAgentCoordinates();
+		VacuumWorldCoordinates agentCoordinates = perception.getActorCoordinates();
 		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
 		VacuumWorldCleaningAgent agent = agentLocation.getAgent();
 

@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.agents.manhattan;
+package uk.ac.rhul.cs.dice.vacuumworld.agents.minds.manhattan;
 
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;

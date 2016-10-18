@@ -3,16 +3,11 @@ package uk.ac.rhul.cs.dice.vacuumworld.threading;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
 
 public abstract class ActorRunnable implements Runnable {
-	private Mind agent;
+	private Mind agentMind;
 	private ThreadState state;
 
-	public ActorRunnable(Mind agent) {
-		this.agent = agent;
-	}
-
-	@Override
-	public void run() {
-		this.state.run(this);
+	public ActorRunnable(Mind agentMind) {
+		this.agentMind = agentMind;
 	}
 
 	public ThreadState getState() {
@@ -23,11 +18,11 @@ public abstract class ActorRunnable implements Runnable {
 		this.state = state;
 	}
 
-	public void setAgentMind(Mind agent) {
-		this.agent = agent;
+	public void setAgentMind(Mind agentMind) {
+		this.agentMind = agentMind;
 	}
 
 	public Mind getActorMind() {
-		return this.agent;
+		return this.agentMind;
 	}
 }

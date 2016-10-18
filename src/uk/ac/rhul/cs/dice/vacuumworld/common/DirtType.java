@@ -21,6 +21,9 @@ public enum DirtType {
 	}
 
 	public static boolean agentAndDirtCompatible(DirtType dirtType, VacuumWorldAgentType agentType) {
+		if(agentType == null) {
+			return false;
+		}
 		if(dirtType.toString().equals(agentType.toString())) {
 			return true;
 		}
