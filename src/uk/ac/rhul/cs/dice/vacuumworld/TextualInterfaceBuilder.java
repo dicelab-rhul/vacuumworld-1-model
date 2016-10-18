@@ -5,7 +5,7 @@ import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.PhysicalBody;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
-import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;

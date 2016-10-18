@@ -1,8 +1,10 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
-import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
-import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.DirtDatabaseRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.database.DirtDatabaseRepresentation;
 
 /**
  * The representation of a {@link Dirt} used internally by

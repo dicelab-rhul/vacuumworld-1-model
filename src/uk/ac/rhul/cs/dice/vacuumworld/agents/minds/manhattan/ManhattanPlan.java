@@ -5,7 +5,7 @@ import java.util.concurrent.LinkedTransferQueue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
-import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 

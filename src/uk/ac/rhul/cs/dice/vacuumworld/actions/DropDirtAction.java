@@ -4,7 +4,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
-import uk.ac.rhul.cs.dice.vacuumworld.common.DirtType;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 
 public class DropDirtAction extends PhysicalAction {

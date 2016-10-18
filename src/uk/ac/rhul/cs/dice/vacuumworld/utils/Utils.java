@@ -14,6 +14,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.utils.InfoLogFormatter;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
 public class Utils {

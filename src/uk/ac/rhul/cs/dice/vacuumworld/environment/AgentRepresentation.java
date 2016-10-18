@@ -4,7 +4,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.evaluator.observer.database.AgentDatabaseRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.database.AgentDatabaseRepresentation;
 
 /**
  * The representation of a {@link VacuumWorldCleaningAgent} used internally by

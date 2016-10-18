@@ -4,8 +4,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
-import uk.ac.rhul.cs.dice.vacuumworld.common.Dirt;
-import uk.ac.rhul.cs.dice.vacuumworld.common.Obstacle;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
+import uk.ac.rhul.cs.dice.vacuumworld.dirt.Obstacle;
 
 public class VacuumWorldLocation implements Location, Lockable {
 	private VacuumWorldCoordinates coordinates;

@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
-import uk.ac.rhul.cs.dice.vacuumworld.basicmonitor.VacuumWorldMonitorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.basicmonitor.VacuumWorldMonitorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 
