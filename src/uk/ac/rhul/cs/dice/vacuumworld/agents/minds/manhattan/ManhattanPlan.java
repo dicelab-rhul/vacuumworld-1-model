@@ -7,7 +7,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class ManhattanPlan {
 	private Queue<Class<? extends EnvironmentalAction>> actionsToPerform;
@@ -38,7 +38,7 @@ public class ManhattanPlan {
 	
 	public Class<? extends EnvironmentalAction> pullActionToPerform(String agentId) {
 		Class<? extends EnvironmentalAction> selected = this.actionsToPerform.poll();
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + agentId + ": selecting " + selected.getSimpleName() + " from plan...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + agentId + ": selecting " + selected.getSimpleName() + " from plan...");
 		
 		return selected;
 	}
@@ -52,7 +52,7 @@ public class ManhattanPlan {
 	}
 	
 	public void pushActionToPerform(Class<? extends EnvironmentalAction> actionToPerform, String agentId) {
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + agentId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + agentId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
 		this.actionsToPerform.add(actionToPerform);
 	}
 

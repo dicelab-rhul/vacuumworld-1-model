@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 /**
  * Class is specifically for formatting experiment output in its original format
@@ -37,7 +37,7 @@ public class ExperimentOrderedOutputFormatter implements ExperimentOutputFormatt
 			}			
 		}
 		catch (IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ExperimentOrderedOutputFormatter implements ExperimentOutputFormatt
 				writer.write(s + "\n");
 			}
 			catch (IOException e) {
-				Utils.log(e);
+				VWUtils.log(e);
 			}
 		}
 		
@@ -72,6 +72,6 @@ public class ExperimentOrderedOutputFormatter implements ExperimentOutputFormatt
 
 	@Override
 	public void format(String[] data, File output) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Format method not supported by: " + this.getClass().getSimpleName());
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Format method not supported by: " + this.getClass().getSimpleName());
 	}
 }

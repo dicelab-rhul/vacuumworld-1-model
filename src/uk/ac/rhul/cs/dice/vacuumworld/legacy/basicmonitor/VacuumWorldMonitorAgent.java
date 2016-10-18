@@ -16,7 +16,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionAction;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldMonitorAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> implements VacuumWorldAgentInterface {
 
@@ -27,7 +27,7 @@ public class VacuumWorldMonitorAgent extends AbstractAgent<VacuumWorldSensorRole
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if (o instanceof VacuumWorldMonitorBrain && arg instanceof TotalPerceptionAction) {
-			MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) Utils.getCycleNumber(), this);
+			MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) VWUtils.getCycleNumber(), this);
 			event.setActuatorRecipient(((VacuumWorldMonitorActuator) this.getActuators().get(this.getActionActuatorIndex())).getActuatorId());
 			event.setSensorToCallBackId(((VacuumWorldMonitorSensor) this.getSensors().get(this.getActionResultSensorIndex())).getSensorId());
 			notifyObservers(event, VacuumWorldMonitorActuator.class);
@@ -37,12 +37,10 @@ public class VacuumWorldMonitorAgent extends AbstractAgent<VacuumWorldSensorRole
 		}
 	}
 
-	@Override
 	public int getActionActuatorIndex() {
 		return 0;
 	}
 
-	@Override
 	public int getActionResultSensorIndex() {
 		return 0;
 	}

@@ -122,7 +122,7 @@ public class ConfigData {
 			return initData(reader);
 		}
 		catch(Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return false;
 		}
@@ -162,8 +162,8 @@ public class ConfigData {
 			return fillMindTypesMap(mindTypes);
 		}
 		catch(ClassNotFoundException e) {
-			Utils.log(e, ConfigData.class.getSimpleName());
-			Utils.logWithClass(ConfigData.class.getSimpleName(), "The specified class does not exist. Check the configuration file for typos and errors...\n   ...and remember to specify the full package path [uk.ac.rhul.(...).<MyMind>] ...\n   ...where <MyMind> is the class simple name without [.java / .class].");
+			VWUtils.log(e, ConfigData.class.getSimpleName());
+			VWUtils.logWithClass(ConfigData.class.getSimpleName(), "The specified class does not exist. Check the configuration file for typos and errors...\n   ...and remember to specify the full package path [uk.ac.rhul.(...).<MyMind>] ...\n   ...where <MyMind> is the class simple name without [.java / .class].");
 			
 			return false;
 		}

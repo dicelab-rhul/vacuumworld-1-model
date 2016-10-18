@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class GenerationSequence {
 
@@ -49,7 +49,7 @@ public class GenerationSequence {
 	}
 
 	private void generateDirectories(String path) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "generating directories...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "generating directories...");
 		
 		generateDirectoriesHelper(path);
 		generateFilesNames();

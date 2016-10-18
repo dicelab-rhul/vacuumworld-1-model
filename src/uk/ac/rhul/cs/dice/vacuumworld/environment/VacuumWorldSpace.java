@@ -26,7 +26,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldSpace extends EnvironmentalSpace {
 	private int[] dimensions;
@@ -351,16 +351,16 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	private void logResult(VacuumWorldActionResult result) {
 		switch(result.getActionResult()) {
 		case ACTION_DONE:
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + result.getActorId() + ": the action was successful!");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + result.getActorId() + ": the action was successful!");
 			break;
 		case ACTION_FAILED:
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + result.getActorId() + ": the action was recognized as possible, but it failed during the execution!");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + result.getActorId() + ": the action was recognized as possible, but it failed during the execution!");
 			break;
 		case ACTION_IMPOSSIBLE:
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + result.getActorId() + ": the action was recognized as impossible and it was not performed!");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + result.getActorId() + ": the action was recognized as impossible and it was not performed!");
 			break;
 		default:
-			throw new IllegalArgumentException(Utils.ACTOR + result.getActorId() + ": unknown result: " + result.getActionResult());
+			throw new IllegalArgumentException(VWUtils.ACTOR + result.getActorId() + ": unknown result: " + result.getActionResult());
 		}
 	}
 

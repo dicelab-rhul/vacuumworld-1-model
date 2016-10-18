@@ -28,8 +28,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtAppearance;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
@@ -44,7 +42,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.VWEvaluatorAgent
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.VWObserverActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.VWObserverAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 	private List<Agent> monitoringAgents;
@@ -70,7 +68,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 			
 			deleteFileIfNecessary(lck, log);
 			
-			this.logger = Utils.fileLogger(log.getPath(), true);
+			this.logger = VWUtils.fileLogger(log.getPath(), true);
 		}
 	}
 
@@ -82,7 +80,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 			}
 		} 
 		catch (IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
@@ -160,7 +158,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
 	private void manageSubContainerMessage(MonitoringUpdateEvent event) {
 		if (ConfigData.getLoggingFlag()) {
-			Utils.logWithClass(this.getClass().getSimpleName(), "Message from subcontainer: " + event.represent());
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "Message from subcontainer: " + event.represent());
 			this.logger.info(event.getAction().getClass().getSimpleName() + ":" + event.getResult() + ":" + event.getActor().toString());
 		}
 

@@ -17,7 +17,7 @@ import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
 import uk.ac.rhul.cs.dice.monitor.mongo.MongoBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.VacuumWorldWriteAction;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 /**
  * A Vacuum World implementation of {@link ObserverMind}. Contains Vacuum World
@@ -58,7 +58,7 @@ public class VWObserverMind extends ObserverMind {
 			this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
 		}
 		catch (InstantiationException | IllegalAccessException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 		
 		return this.nextAction;
@@ -95,7 +95,7 @@ public class VWObserverMind extends ObserverMind {
 			return;
 		}
 		else {
-			Utils.log(result.getFailureReason());
+			VWUtils.log(result.getFailureReason());
 		}
 	}
 

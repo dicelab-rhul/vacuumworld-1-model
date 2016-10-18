@@ -29,29 +29,4 @@ public class VacuumWorldAppearance extends UniverseAppearance {
 		
 		return representation.toString() + "\n";
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((this.stringRepresentation == null) ? 0 : this.stringRepresentation.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		VacuumWorldAppearance other = (VacuumWorldAppearance) obj;
-		if (this.stringRepresentation == null) {
-			if (other.stringRepresentation != null)
-				return false;
-		} else if (!this.stringRepresentation.equals(other.stringRepresentation))
-			return false;
-		return true;
-	}
 }

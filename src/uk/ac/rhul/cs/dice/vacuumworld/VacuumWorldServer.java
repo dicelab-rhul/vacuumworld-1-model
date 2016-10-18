@@ -78,10 +78,11 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.database.VacuumW
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.generation.ConfigFileException;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.generation.ExperimentConnector;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.threading.VacuumWorldAgentThreadExperimentManager;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.utils.LegacyUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeCodes;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
@@ -129,7 +130,7 @@ public class VacuumWorldServer implements Observer {
 	}
 	
 	public void startServer(String[] args, double delayInSeconds) throws HandshakeException {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Starting server...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting server...");
 		
 		try {
 			startServerHelper(args, delayInSeconds);
@@ -143,7 +144,7 @@ public class VacuumWorldServer implements Observer {
 	}
 	
 	private void startServerHelper(String[] args, double delayInSeconds) throws ClassNotFoundException, HandshakeException, InterruptedException {
-		if (args[0].equals(Main.TEST)) {
+		if (args[0].equals(LegacyUtils.TEST)) {
 			test(args);
 		} 
 		else {
@@ -154,7 +155,7 @@ public class VacuumWorldServer implements Observer {
 	private void startWithoutTest(String[] args, double delayInSeconds) throws ClassNotFoundException, HandshakeException, InterruptedException {
 		this.threadManager = new VacuumWorldAgentThreadManager(this.sharedStopSignal);
 		
-		if (args[0].equals(Main.DEBUG)) {
+		if (args[0].equals(LegacyUtils.DEBUG)) {
 			startServerFromFile(args[1]);
 		}
 		else {
@@ -177,7 +178,7 @@ public class VacuumWorldServer implements Observer {
 			
 			ExperimentConnector tester = new ExperimentConnector();
 			
-			if (checkTestArgs(args, Main.GENERATEFILES)) {
+			if (checkTestArgs(args, LegacyUtils.GENERATEFILES)) {
 				tester.generateTestFiles();
 			}
 			
@@ -190,7 +191,7 @@ public class VacuumWorldServer implements Observer {
 				((VacuumWorldAgentThreadExperimentManager) this.threadManager).clear();
 			}
 		} catch (ConfigFileException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
@@ -202,16 +203,16 @@ public class VacuumWorldServer implements Observer {
 			constructUniverseAndStart(initialState, 1);
 		} 
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
 	private void manageExceptionInStartup(Exception e) {
-		if(Utils.INVALID_INITIAL_STATE.equals(e.getMessage())) {
+		if(VWUtils.INVALID_INITIAL_STATE.equals(e.getMessage())) {
 			sendErrorToView();
 		}
 		else {
-			Utils.log(e);
+			VWUtils.log(e);
 			stopServer();
 		}
 	}
@@ -223,7 +224,7 @@ public class VacuumWorldServer implements Observer {
 			this.output.flush();
 		}
 		catch(IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			stopSystem(ModelMessagesEnum.STOP_FORWARD);
 		}
 	}
@@ -244,7 +245,7 @@ public class VacuumWorldServer implements Observer {
 		ObjectInputStream i = new ObjectInputStream(candidate.getInputStream());
 
 		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) i.readObject());
-		Utils.logWithClass(this.getClass().getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");  //CHCM
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");  //CHCM
 		
 		if(Handshake.attemptHanshakeWithController(o, i, codeFromController)) {
 			this.clientSocket = candidate;
@@ -255,7 +256,7 @@ public class VacuumWorldServer implements Observer {
 
 	private void manageRequests(double delayInSeconds) throws IOException, ClassNotFoundException, InterruptedException {
 		VacuumWorldMonitoringContainer initialState = InitialStateParser.parseInitialState(this.input);
-		Utils.logWithClass(this.getClass().getSimpleName(), "Parser suceeded in parsing the initial state.\n");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Parser suceeded in parsing the initial state.\n");
 		constructUniverseAndStart(initialState, delayInSeconds);
 	}
 
@@ -341,7 +342,7 @@ public class VacuumWorldServer implements Observer {
 	 */
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		Utils.increaseCycleNumber();
+		VWUtils.increaseCycleNumber();
 		
 		if (ConfigData.getPrintGridFlag()) {
 			printState();
@@ -351,7 +352,7 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void manageViewRequest() {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Waiting for view request.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Waiting for view request.");
 		this.listeningThreadSemaphore.release();
 		
 		ViewRequestsEnum code;
@@ -367,7 +368,7 @@ public class VacuumWorldServer implements Observer {
 	// ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
 
 	private void manageViewRequest(ViewRequestsEnum code) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Got " + code + " from view through controller.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Got " + code + " from view through controller.");
 		
 		switch(code) {
 		case GET_STATE:
@@ -388,12 +389,12 @@ public class VacuumWorldServer implements Observer {
 			this.threadManager.getClientListener().getOutputStream().flush();
 		}
 		catch(IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
 	private void stopSystem(ModelMessagesEnum code) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Stopping the system and forwarding the stop request to the controller for him to shutdown...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Stopping the system and forwarding the stop request to the controller for him to shutdown...");
 		
 		try {
 			ModelUpdate update = new ModelUpdate(code, null);
@@ -403,7 +404,7 @@ public class VacuumWorldServer implements Observer {
 			this.server.close();
 		}
 		catch(IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 		finally {
 			this.sharedStopSignal.stop();
@@ -415,7 +416,7 @@ public class VacuumWorldServer implements Observer {
 		try {
 			this.executor.shutdownNow();
 			this.executor.awaitTermination(2, TimeUnit.SECONDS);
-			Utils.logWithClass(this.getClass().getSimpleName(), "Requests listener termination complete.");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "Requests listener termination complete.");
 		}
 		catch(InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -449,7 +450,7 @@ public class VacuumWorldServer implements Observer {
 		int counter = 0;
 		
 		for (VacuumWorldMonitorAgent m : mas) {			
-			Utils.logWithClass(this.getClass().getSimpleName(), "Starting monitor agent thread #" + ++counter + "...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting monitor agent thread #" + ++counter + "...");
 			this.threadManager.addActor(new VacuumWorldActorRunnable(m.getMind()));
 			((VacuumWorldMonitorMind) m.getMind()).setAvailableActions(this.monitoringWorldActions);
 		}
@@ -493,7 +494,7 @@ public class VacuumWorldServer implements Observer {
 		int counter = 0;
 		
 		for (VWObserverAgent oa : oas) {
-			Utils.logWithClass(this.getClass().getSimpleName(), "Starting observer agent thread #" + ++counter + "...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting observer agent thread #" + ++counter + "...");
 			this.threadManager.addActor(new VacuumWorldActorRunnable(oa.getMind()));
 			((VWObserverMind) oa.getMind()).setAvailableActions(this.monitoringWorldActions);
 		}
@@ -501,7 +502,7 @@ public class VacuumWorldServer implements Observer {
 		counter = 0;
 		
 		for (VWEvaluatorAgent ea : eas) {
-			Utils.logWithClass(this.getClass().getSimpleName(), "Starting evaluator agent thread #" + ++counter + "...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting evaluator agent thread #" + ++counter + "...");
 			this.threadManager.addActor(new VacuumWorldActorRunnable(ea.getMind()));
 		}
 	}
@@ -565,7 +566,7 @@ public class VacuumWorldServer implements Observer {
 			closeServerSocket();
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -584,6 +585,6 @@ public class VacuumWorldServer implements Observer {
 
 	public void printState() {
 		((VacuumWorldAppearance) this.universe.getAppearance()).updateRepresentation((VacuumWorldSpace) ((VacuumWorldMonitoringContainer) this.universe.getState()).getSubContainerSpace());
-		Utils.logState(this.universe.getAppearance().represent());
+		VWUtils.logState(this.universe.getAppearance().represent());
 	}
 }

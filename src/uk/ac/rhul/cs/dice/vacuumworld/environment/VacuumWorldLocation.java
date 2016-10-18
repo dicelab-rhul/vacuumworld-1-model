@@ -1,11 +1,13 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
+import uk.ac.rhul.cs.dice.gawl.interfaces.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Obstacle;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldLocation implements Location, Lockable {
 	private VacuumWorldCoordinates coordinates;
@@ -211,50 +213,70 @@ public class VacuumWorldLocation implements Location, Lockable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
+		if(!Utils.equalsHelper(this, obj)){
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
+		
 		VacuumWorldLocation other = (VacuumWorldLocation) obj;
-		if (this.agent == null) {
-			if (other.agent != null)
-				return false;
-		} else if (!this.agent.equals(other.agent))
+		
+		if(other == null) {
 			return false;
-		if (this.user == null) {
-			if (other.user != null)
-				return false;
-		} else if (!this.user.equals(other.user))
+		}
+		
+		return checkFields(other);
+	}
+
+	private boolean checkFields(VacuumWorldLocation other) {
+		if(!checkFieldsHelper(other)) {
 			return false;
-		if (this.coordinates == null) {
-			if (other.coordinates != null)
-				return false;
-		} else if (!coordinates.equals(other.coordinates))
+		}
+		
+		if(!VWUtils.checkObjectsEquality(this.type, other.type)) {
 			return false;
-		if (this.easternLocationType != other.easternLocationType)
+		}
+		
+		if(!checkNeighbors(other)) {
 			return false;
-		if (this.northernLocationType != other.northernLocationType)
+		}
+		
+		if(!checkLockstate(other)) {
 			return false;
-		if (this.obstacle == null) {
-			if (other.obstacle != null)
-				return false;
-		} else if (!obstacle.equals(other.obstacle))
-			return false;
-		if (this.readers != other.readers)
-			return false;
-		if (this.southernLocationType != other.southernLocationType)
-			return false;
-		if (this.type != other.type)
-			return false;
-		if (this.underExclusiveWriteLock != other.underExclusiveWriteLock)
-			return false;
-		if (this.underSharedReadLock != other.underSharedReadLock)
-			return false;
-		if (this.westernLocationType != other.westernLocationType)
-			return false;
+		}
+		
 		return true;
+	}
+
+	private boolean checkFieldsHelper(VacuumWorldLocation other) {
+		if(!VWUtils.checkObjectsEquality(this.agent, other.agent)) {
+			return false;
+		}
+		
+		if(!VWUtils.checkObjectsEquality(this.user, other.user)) {
+			return false;
+		}
+		
+		if(!VWUtils.checkObjectsEquality(this.obstacle, other.obstacle)) {
+			return false;
+		}
+		
+		if(!VWUtils.checkObjectsEquality(this.coordinates, other.coordinates)) {
+			return false;
+		}
+		
+		return true;
+	}
+
+	private boolean checkLockstate(VacuumWorldLocation other) {
+		return this.underSharedReadLock == other.underSharedReadLock &&
+				this.underExclusiveWriteLock == other.underExclusiveWriteLock &&
+				this.readers == other.readers;
+	}
+
+	private boolean checkNeighbors(VacuumWorldLocation other) {
+		return VWUtils.checkObjectsEquality(this.northernLocationType, other.northernLocationType) &&
+				VWUtils.checkObjectsEquality(this.southernLocationType, other.southernLocationType) &&
+				VWUtils.checkObjectsEquality(this.westernLocationType, other.westernLocationType) &&
+				VWUtils.checkObjectsEquality(this.easternLocationType, other.easternLocationType);
 	}
 
 	@Override

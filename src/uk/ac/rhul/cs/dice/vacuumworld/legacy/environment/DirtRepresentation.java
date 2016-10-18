@@ -1,9 +1,8 @@
-package uk.ac.rhul.cs.dice.vacuumworld.environment;
+package uk.ac.rhul.cs.dice.vacuumworld.legacy.environment;
 
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.database.DirtDatabaseRepresentation;
 
 /**

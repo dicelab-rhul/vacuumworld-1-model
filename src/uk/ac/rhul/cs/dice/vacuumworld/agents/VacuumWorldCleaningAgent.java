@@ -228,16 +228,4 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	public String toString() {
 		return "{" + this.getClass().getSimpleName() + "(" + this.currentLocation.getX() + "," + this.currentLocation.getY() + "," + this.facingDirection + "),Sensors: " + this.getSensors().size() + ",Actuators: " + this.getActuators().size() + "}";
 	}
-
-	//useless
-	@Override
-	public int getActionActuatorIndex() {
-		return 0;
-	}
-
-	//useless
-	@Override
-	public int getActionResultSensorIndex() {
-		return 0;
-	}
 }

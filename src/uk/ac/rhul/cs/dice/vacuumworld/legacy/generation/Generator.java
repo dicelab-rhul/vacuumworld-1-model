@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class Generator {
 	private ObjectMapper mapper;
@@ -37,7 +37,7 @@ public class Generator {
 			init(width, height, numAgents, numDirts, file);
 		}
 		else {
-			Utils.logWithClass(this.getClass().getSimpleName(), "Failed to generate output.");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "Failed to generate output.");
 		}
 	}
 
@@ -49,7 +49,7 @@ public class Generator {
 			this.mapper.writeValue(file, struct);
 		}
 		catch (IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class Generator {
 			return generateLocationWithDirt(width, height);
 		}
 		else {
-			Utils.logWithClass(this.getClass().getSimpleName(), "All locations exist: " + this.allLocations.size());
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "All locations exist: " + this.allLocations.size());
 			addDirtToLocation(generateRandomColor());
 			this.dirts++;
 			
@@ -152,7 +152,7 @@ public class Generator {
 			this.dirtFreeLocations.remove(struct);
 		}
 		else {
-			Utils.logWithClass(this.getClass().getSimpleName(), "No free locations to add dirt.");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "No free locations to add dirt.");
 		}
 	}
 
@@ -216,7 +216,7 @@ public class Generator {
 			this.agentFreeLocations.remove(struct);
 		}
 		else {
-			Utils.logWithClass(this.getClass().getSimpleName(), "No free locations to add an agent.");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "No free locations to add an agent.");
 		}
 	}
 
@@ -290,10 +290,10 @@ public class Generator {
 	}
 
 	private void densityWarning(float per, String type) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "MAP " + type + " POPULATION DENSE AT: " + per * 100 + "% : CONSIDER ENLARGING MAP");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "MAP " + type + " POPULATION DENSE AT: " + per * 100 + "% : CONSIDER ENLARGING MAP");
 	}
 
 	private void densityFailure(String type, int width, int height, int num) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "CANNOT ADD " + num + " " + type + " TO A GRID SIZE OF (" + width + "," + height + ")");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "CANNOT ADD " + num + " " + type + " TO A GRID SIZE OF (" + width + "," + height + ")");
 	}
 }

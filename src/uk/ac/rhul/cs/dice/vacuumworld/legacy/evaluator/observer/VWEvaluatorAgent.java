@@ -36,7 +36,6 @@ public class VWEvaluatorAgent extends EvaluatorAgent<VacuumWorldSensorRole, Vacu
 	 * 
 	 * @return the index
 	 */
-	@Override
 	public int getActionActuatorIndex() {
 		return 0;
 	}
@@ -48,7 +47,6 @@ public class VWEvaluatorAgent extends EvaluatorAgent<VacuumWorldSensorRole, Vacu
 	 * 
 	 * @return the index
 	 */
-	@Override
 	public int getActionResultSensorIndex() {
 		return 0;
 	}

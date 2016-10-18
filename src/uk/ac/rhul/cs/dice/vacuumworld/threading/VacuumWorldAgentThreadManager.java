@@ -12,7 +12,7 @@ import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.basicmonitor.VacuumWorldMonitorMind;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 
 public class VacuumWorldAgentThreadManager extends Observable {
@@ -49,7 +49,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	
 	public void start(double delayInSeconds) throws InterruptedException {
 		this.simulationStarted = true;
-		Utils.logWithClass(this.getClass().getSimpleName(), "Thread manager correctly started.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Thread manager correctly started.");
 		
 		cycle(delayInSeconds);
 	}
@@ -59,21 +59,21 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		boolean doPerceive = false;
 		
 		while (this.simulationStarted && !this.sharedStopSignal.mustStop()) {
-			Utils.logWithClass(this.getClass().getSimpleName(), "START CYCLE");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "START CYCLE");
 			
 			doCycleStep(this.cleaningRunnables, doPerceive);
 
-			Utils.logWithClass(this.getClass().getSimpleName(), "NEXT CYCLE!!\n\n");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "NEXT CYCLE!!\n\n");
 			doPerceive = true;
 			this.notifyObservers();
 			
-			Utils.doWait((int) Math.max(Math.floor(1000 * delayInSeconds), 200));
+			VWUtils.doWait((int) Math.max(Math.floor(1000 * delayInSeconds), 200));
 		}
 		
 		this.executor.shutdownNow();
 		this.executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), "Agents threads termination complete.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Agents threads termination complete.");
 	}
 
 	protected void doCycleStep(Set<ActorRunnable> agentsRunnables, boolean... flags) {

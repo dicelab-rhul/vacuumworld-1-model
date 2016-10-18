@@ -9,7 +9,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.AgentToId;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.SpeechResultToSenderId;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.Contained;
@@ -116,7 +116,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 			 */
 			this.agentsToGreetOnThisCycle = agentsWhoJustGreetedMe.stream().filter(new Contained(this.agentsIAlreadyGreeted).negate()).collect(Collectors.toList());
 			
-			if(Utils.isCollectionNotNullAndNotEmpty(this.agentsToGreetOnThisCycle)) {
+			if(VWUtils.isCollectionNotNullAndNotEmpty(this.agentsToGreetOnThisCycle)) {
 				return greetBack();
 			}
 		}
@@ -139,7 +139,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		 */
 		List<String> agentsISee = perception.getActorsInPerception(getBodyId()).stream().map(new AgentToId()).collect(Collectors.toList());
 		
-		if(Utils.isCollectionNotNullAndNotEmpty(agentsISee)) {
+		if(VWUtils.isCollectionNotNullAndNotEmpty(agentsISee)) {
 			
 			/*
 			 * From agentsISee I create a Stream,
@@ -164,7 +164,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	}
 
 	private EnvironmentalAction decideWithAgentsToGreetOnThisCycle() {
-		if(Utils.isCollectionNotNullAndNotEmpty(this.agentsToGreetOnThisCycle)) {
+		if(VWUtils.isCollectionNotNullAndNotEmpty(this.agentsToGreetOnThisCycle)) {
 			return greetAgents();
 		}
 		else {

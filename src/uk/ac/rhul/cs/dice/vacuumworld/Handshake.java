@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeCodes;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 
@@ -54,10 +54,10 @@ public class Handshake {
 	private static Boolean continueHandshake(ObjectOutputStream toController, ObjectInputStream fromController, HandshakeCodes oldCode, HandshakeCodes code) throws IOException, HandshakeException, ClassNotFoundException {
 		toController.writeObject(code.toString());
 		toController.flush();
-		Utils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller."); //MHMC
+		VWUtils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller."); //MHMC
 		
 		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) fromController.readObject());
-		Utils.logWithClass(Handshake.class.getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");
+		VWUtils.logWithClass(Handshake.class.getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");
 		
 		if(codeFromController != null) {
 			return finalizeHandshake(toController, oldCode, codeFromController);
@@ -85,7 +85,7 @@ public class Handshake {
 	private static Boolean finalizeHandshake(ObjectOutputStream toController, HandshakeCodes code) throws IOException {
 		toController.writeObject(code.toString());
 		toController.flush();
-		Utils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller.\n");
+		VWUtils.logWithClass(Handshake.class.getSimpleName(), "Sent " + code.toString() + " to controller.\n");
 		
 		return true;
 	}

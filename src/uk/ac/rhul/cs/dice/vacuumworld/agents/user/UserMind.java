@@ -29,7 +29,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class UserMind extends AbstractAgentMind {
 	private DirtType lastDroppedDirt;
@@ -62,12 +62,12 @@ public class UserMind extends AbstractAgentMind {
 				return followPlan(false);
 			}
 			else {
-				Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": Plan is empty: I will follow it no more!");
+				VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": Plan is empty: I will follow it no more!");
 				this.plan = null;
 			}
 		}
 		
-		Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": No plan found! I'm free to decide what to do!");
+		VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": No plan found! I'm free to decide what to do!");
 		
 		return decideWithPerception();
 	}
@@ -146,12 +146,12 @@ public class UserMind extends AbstractAgentMind {
 
 	private UserPlan buildPlanMaybe(String payload, VacuumWorldPerception perception) {
 		if(this.rng.nextBoolean()) {
-			Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": I agree to build a plan...");
+			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I agree to build a plan...");
 			
 			return buildPlan(payload, perception);
 		}
 		else {
-			Utils.logWithClass(getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": I don't want to build a plan...");
+			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I don't want to build a plan...");
 			
 			return null;
 		}
@@ -198,7 +198,7 @@ public class UserMind extends AbstractAgentMind {
 			return DropDirtAction.class.getConstructor(DirtType.class).newInstance(dirtType);
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return null;
 		}
@@ -209,7 +209,7 @@ public class UserMind extends AbstractAgentMind {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
 		}
 		catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-			Utils.fakeLog(e);
+			VWUtils.fakeLog(e);
 			
 			return new PerceiveAction();
 		}
@@ -220,7 +220,7 @@ public class UserMind extends AbstractAgentMind {
 			return actionPrototype.newInstance();
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return null;
 		}
@@ -232,7 +232,7 @@ public class UserMind extends AbstractAgentMind {
 			return constructor.newInstance(senderId, new ArrayList<>(recipientIds), payload);
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return null;
 		}
@@ -261,7 +261,7 @@ public class UserMind extends AbstractAgentMind {
 
 		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
 			if (a.isAssignableFrom(name)) {
-				Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
+				VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
 				toRemove.add(name);
 			}
 		}
@@ -274,7 +274,7 @@ public class UserMind extends AbstractAgentMind {
 		this.lastAttemptedActionResult = null;
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 		notifyObservers(this.getNextAction(), UserBrain.class);
 	}
 

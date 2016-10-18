@@ -29,7 +29,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private Random rng;
@@ -45,7 +45,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private EnvironmentalAction nextAction;
 
 	public VacuumWorldDefaultMind() {
-		this.rng = new Random();
+		this.rng = new Random(System.currentTimeMillis());
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 	}
 
@@ -67,7 +67,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		this.lastAttemptedActionResult = null;
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 		notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
 	}
 	
@@ -107,7 +107,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(this.perceptionRange, this.canSeeBehind);
 		}
 		catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-			Utils.fakeLog(e);
+			VWUtils.fakeLog(e);
 			
 			return new PerceiveAction();
 		}
@@ -118,7 +118,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 			return actionPrototype.newInstance();
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return null;
 		}
@@ -130,7 +130,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 			return constructor.newInstance(senderId, recipientIds == null ? new ArrayList<>() : new ArrayList<>(recipientIds), payload);
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return null;
 		}
@@ -155,7 +155,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 
 		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
 			if (a.isAssignableFrom(name)) {
-				Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
+				VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
 				toRemove.add(name);
 			}
 		}
@@ -177,6 +177,10 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		}
 	}
 
+	public Random getRNG() {
+		return this.rng;
+	}
+	
 	public void setVacuumWorldActions(Set<Class<? extends AbstractAction>> actions) {
 		List<Class<? extends AbstractAction>> temp = new ArrayList<>(actions);
 		temp.remove(DropDirtAction.class);

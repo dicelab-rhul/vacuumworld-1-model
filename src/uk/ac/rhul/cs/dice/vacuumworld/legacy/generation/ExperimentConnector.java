@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class ExperimentConnector {
 
@@ -32,7 +32,7 @@ public class ExperimentConnector {
 			stream.forEach((String s) -> handle(lines, s));
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
@@ -42,7 +42,7 @@ public class ExperimentConnector {
 			handleLine(line);
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 	
@@ -139,7 +139,7 @@ public class ExperimentConnector {
 
 	private void logPaths(Set<File> files) {
 		for(File file : files) {
-			Utils.logWithClass(this.getClass().getSimpleName(), "File: " + file.getPath() + "...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "File: " + file.getPath() + "...");
 		}
 	}
 

@@ -19,7 +19,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.VacuumWorldReadAction;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.VacuumWorldReadResult;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.basicmonitor.VacuumWorldStepCollectiveEvaluation;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.basicmonitor.VacuumWorldStepEvaluation;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VWEvaluatorMind extends EvaluatorMind {
 	private int changes = 0;
@@ -43,7 +43,7 @@ public class VWEvaluatorMind extends EvaluatorMind {
 
 	private void outputEvaluation(VacuumWorldStepCollectiveEvaluation eval) {
 		File e = new File("logs/eval/evaluation.log");
-		Logger log = Utils.fileLogger(e.getPath(), true);
+		Logger log = VWUtils.fileLogger(e.getPath(), true);
 		log.info("Evaluation up to cycle: " + this.lastCycleRead);
 		
 		for(Entry<String, VacuumWorldStepEvaluation> evaluation : eval.getEvaluations().entrySet()) {

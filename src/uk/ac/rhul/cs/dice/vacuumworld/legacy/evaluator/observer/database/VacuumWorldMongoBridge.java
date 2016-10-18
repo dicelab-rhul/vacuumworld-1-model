@@ -30,14 +30,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.VacuumWorldReadAction;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.VacuumWorldReadResult;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.VacuumWorldWriteAction;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.AgentRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,7 +115,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	private void checkForDirts(CollectionRepresentation collection, VacuumWorldSpaceRepresentation p) {
 		if (!p.getRemovedDirts().isEmpty()) {
 			for (DirtRepresentation rep : p.getRemovedDirts()) {
-				this.connector.incrementSingleValueInDocument(collection.getCollectionName(), DIRTDATABASEREPRESENTATIONFIELDS[0], rep.getId(), DIRTDATABASEREPRESENTATIONFIELDS[5], Utils.getCycleNumber() - 1);
+				this.connector.incrementSingleValueInDocument(collection.getCollectionName(), DIRTDATABASEREPRESENTATIONFIELDS[0], rep.getId(), DIRTDATABASEREPRESENTATIONFIELDS[5], VWUtils.getCycleNumber() - 1);
 			}
 			
 			p.getRemovedDirts().clear();
@@ -206,7 +206,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 			return this.mapper.readValue(json, DirtDatabaseRepresentation.class);
 		}
 		catch (IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			return null;
 		}
 	}
@@ -216,7 +216,7 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 			return this.mapper.readValue(json, AgentDatabaseRepresentation.class);
 		}
 		catch (IOException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			return null;
 		}
 	}
@@ -289,11 +289,11 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	private void insertDirts(CollectionRepresentation collectionRepresentation, DirtRepresentation value, VacuumWorldCoordinates coord) {
 		try {
 			String json = this.mapper.writeValueAsString(new DirtDatabaseRepresentation(value.getId(), value.getType(), coord.getX(), coord.getY(), 0, 0));
-			Utils.logWithClass(this.getClass().getSimpleName(), "\n" + json);
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "\n" + json);
 			this.connector.insertDocument(collectionRepresentation.getCollectionName(), json);
 		}
 		catch (JsonProcessingException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 
@@ -320,11 +320,11 @@ public class VacuumWorldMongoBridge extends AbstractMongoBridge {
 	private void insertAgents(CollectionRepresentation collectionRepresentation, AgentRepresentation agent) {
 		try {
 			String json = this.mapper.writeValueAsString(new AgentDatabaseRepresentation(agent.getId(), agent.getType(), agent.getSensors(), agent.getActuators(), 0, 0, new CycleDatabaseRepresentation[] {}));
-			Utils.logWithClass(this.getClass().getSimpleName(), "\n" + json);
+			VWUtils.logWithClass(this.getClass().getSimpleName(), "\n" + json);
 			this.connector.insertDocument(collectionRepresentation.getCollectionName(), json);
 		}
 		catch (JsonProcessingException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 }

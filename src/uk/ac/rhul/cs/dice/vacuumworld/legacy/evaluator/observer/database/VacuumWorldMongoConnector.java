@@ -9,7 +9,7 @@ import org.bson.Document;
 
 import uk.ac.rhul.cs.dice.monitor.mongo.CollectionRepresentation;
 import uk.ac.rhul.cs.dice.monitor.mongo.MongoConnector;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
@@ -31,7 +31,7 @@ public class VacuumWorldMongoConnector extends MongoConnector {
 
 	public List<String> efficentAgentRead(CollectionRepresentation collectionRepresentation, int lastCycleRead) {
 		MongoCollection<Document> collection = this.database.getCollection(collectionRepresentation.getCollectionName());
-		MongoIterable<Document> iter = collection.find().projection(slice("cycleList", -((Utils.getCycleNumber() + 1) - lastCycleRead)));
+		MongoIterable<Document> iter = collection.find().projection(slice("cycleList", -((VWUtils.getCycleNumber() + 1) - lastCycleRead)));
 		List<String> jsons = new ArrayList<>();
 		
 		for(Document document : iter) {

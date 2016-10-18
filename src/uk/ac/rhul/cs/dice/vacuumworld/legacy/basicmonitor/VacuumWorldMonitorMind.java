@@ -12,7 +12,7 @@ import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldMonitorMind extends AbstractAgentMind {
 	private EvaluationStrategy<?> strategy;
@@ -25,7 +25,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 		this.strategy = strategy;
 		
 		if (ConfigData.getLoggingFlag()) {
-			this.logger = Utils.fileLogger("logs/eval/evaluation.log", false);
+			this.logger = VWUtils.fileLogger("logs/eval/evaluation.log", false);
 		}
 	}
 
@@ -35,7 +35,7 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 			this.nextAction = getAvailableActionsForThisCycle().get(0).newInstance();
 		}
 		catch (InstantiationException | IllegalAccessException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 		
 		return this.nextAction;
@@ -54,8 +54,8 @@ public class VacuumWorldMonitorMind extends AbstractAgentMind {
 	public void execute(EnvironmentalAction action) {
 		notifyObservers(this.nextAction, VacuumWorldMonitorBrain.class);
 
-		if (Utils.getCycleNumber() % 5 == 0 && Utils.getCycleNumber() != 0) {
-			Evaluation e = this.strategy.evaluate(null, 0, Utils.getCycleNumber());
+		if (VWUtils.getCycleNumber() % 5 == 0 && VWUtils.getCycleNumber() != 0) {
+			Evaluation e = this.strategy.evaluate(null, 0, VWUtils.getCycleNumber());
 			
 			if (ConfigData.getLoggingFlag()) {
 				this.logger.info(((VacuumWorldStepCollectiveEvaluation) e).represent());

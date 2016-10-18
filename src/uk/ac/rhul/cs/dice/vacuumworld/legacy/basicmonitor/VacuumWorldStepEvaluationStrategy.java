@@ -9,9 +9,9 @@ import uk.ac.rhul.cs.dice.monitor.evaluation.Evaluation;
 import uk.ac.rhul.cs.dice.monitor.evaluation.EvaluationStrategy;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.AgentRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.AgentRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldStepEvaluationStrategy implements EvaluationStrategy<String> {
 
@@ -25,7 +25,7 @@ public class VacuumWorldStepEvaluationStrategy implements EvaluationStrategy<Str
 
 	@Override
 	public Evaluation evaluate(String actor, int startCycle, int endCycle) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Evaluation done, returning it...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Evaluation done, returning it...");
 		return this.evaluations;
 	}
 

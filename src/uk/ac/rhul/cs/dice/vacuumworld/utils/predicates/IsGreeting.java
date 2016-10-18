@@ -3,7 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils.predicates;
 import java.util.function.Predicate;
 
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class IsGreeting implements Predicate<VacuumWorldSpeechActionResult> {
 
@@ -13,7 +13,8 @@ public class IsGreeting implements Predicate<VacuumWorldSpeechActionResult> {
 			return result.getPayload().isGreetingAction();
 		}
 		catch(Exception e) {
-			Utils.fakeLog(e);
+			VWUtils.fakeLog(e);
+			
 			return false;
 		}
 	}

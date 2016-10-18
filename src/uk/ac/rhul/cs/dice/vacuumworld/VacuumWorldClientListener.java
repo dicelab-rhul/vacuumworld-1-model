@@ -5,7 +5,7 @@ import java.io.ObjectOutputStream;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
@@ -40,13 +40,13 @@ public class VacuumWorldClientListener implements Runnable {
 			runListener();
 		}
 		catch(InterruptedException e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			Thread.currentThread().interrupt();
 		}
 	}
 
 	private void runListener() throws InterruptedException {
-		Utils.logWithClass(this.getClass().getSimpleName(), "View listening thread started.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "View listening thread started.");
 		boolean canContinue = true;
 		
 		while(canContinue) {			
@@ -70,7 +70,7 @@ public class VacuumWorldClientListener implements Runnable {
 			return true;
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			return false;
 		}
 	}

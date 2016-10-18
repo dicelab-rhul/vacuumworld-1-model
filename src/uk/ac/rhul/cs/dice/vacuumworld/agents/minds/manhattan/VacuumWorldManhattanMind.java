@@ -18,7 +18,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Pair;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	private ManhattanPlan plan;
@@ -39,11 +39,11 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	}
 
 	private EnvironmentalAction buildNewPlan() {
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": new plan generation: seeking for a target...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": new plan generation: seeking for a target...");
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception == null) {
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": perception is null: the only reasonable plan is to get a new one...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": perception is null: the only reasonable plan is to get a new one...");
 			
 			return buildPerceiveAction();
 		}
@@ -57,7 +57,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	private EnvironmentalAction buildNewPlanHelper(VacuumWorldPerception perception) {
 		if(perception.canAgentClean()) {
 			//no need to build a plan, just clean ASAP.
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + " is on a location with compatible dirt. The only reasonable plan is to clean now.");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + " is on a location with compatible dirt. The only reasonable plan is to clean now.");
 			
 			return buildPhysicalAction(CleanAction.class);
 		}
@@ -66,7 +66,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 		else {
 			//here it's impossible to build a new plan.
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + " cannot spot any compatible dirt. The next action will be a random one.");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + " cannot spot any compatible dirt. The next action will be a random one.");
 			
 			return decideActionRandomly();
 		}
@@ -74,7 +74,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 
 	private EnvironmentalAction followPlan(Object... parameters) {
 		if(!isPlanStillValid()) {
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": plan is no more valid. Trying to build a new one...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": plan is no more valid. Trying to build a new one...");
 			this.plan = null;
 			
 			return buildNewPlan();
@@ -115,7 +115,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 		else {
 			this.plan = null;
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": too many failures! Trying to build a new plan...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": too many failures! Trying to build a new plan...");
 			
 			return decide(parameters);
 		}
@@ -133,14 +133,14 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		int yDifference = closest.getCoordinates().getY() - agentCoordinates.getY();
 		ActorFacingDirection facingDirection = perception.getActorCurrentFacingDirection();
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": building Manhattan distance driven plan...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": building Manhattan distance driven plan...");
 		
 		this.plan = new ManhattanPlan();
 		this.plan.setCurrentAgentType(perception.getAgentType());
 		this.plan.setTargetDirtType(((DirtAppearance) closest.getDirt().getExternalAppearance()).getDirtType());
 		this.plan.setTargetLocation(closest);
 		
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": target: " + this.plan.getTargetDirtType().toString() + " dirt on " + closest.getCoordinates().toString() + ".");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": target: " + this.plan.getTargetDirtType().toString() + " dirt on " + closest.getCoordinates().toString() + ".");
 		
 		return buildPlan(xDifference, yDifference, facingDirection);
 	}
@@ -157,7 +157,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 		
 		this.plan.pushActionToPerform(CleanAction.class, getBodyId());
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + getBodyId() + ": finished bulding plan.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": finished bulding plan.");
 		
 		this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
 		

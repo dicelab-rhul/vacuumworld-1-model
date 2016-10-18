@@ -52,7 +52,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.common.AgentAwarenessRepresentation
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 
 public class InitialStateParser {
@@ -73,7 +73,7 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldMonitoringContainer parseInitialState(JsonObject json) throws IOException {
-		Utils.dumpInitialState(json);
+		VWUtils.dumpInitialState(json);
 		
 		VacuumWorldSpace space = createInitialState(json);
 		checkAgentsNumber(space);
@@ -85,11 +85,11 @@ public class InitialStateParser {
 
 	private static void checkAgentsNumber(VacuumWorldSpace space) throws IOException {
 		if(space.getAgents() == null) {
-			throw new IOException(Utils.INVALID_INITIAL_STATE);
+			throw new IOException(VWUtils.INVALID_INITIAL_STATE);
 		}
 		
 		if(space.getAgents().isEmpty()) {
-			throw new IOException(Utils.INVALID_INITIAL_STATE);
+			throw new IOException(VWUtils.INVALID_INITIAL_STATE);
 		}
 	}
 
@@ -167,7 +167,7 @@ public class InitialStateParser {
 			return coordinatesList.get(0);
 		}
 		catch(ArrayIndexOutOfBoundsException e) {
-			Utils.fakeLog(e);
+			VWUtils.fakeLog(e);
 			
 			return null;
 		}
@@ -326,7 +326,7 @@ public class InitialStateParser {
 			return agent;
 		}
 		catch (Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 			
 			return null;
 		}
@@ -441,8 +441,8 @@ public class InitialStateParser {
 	private static JsonObject parseInitialStateFromController(ViewRequest viewRequest, ObjectInputStream input) {
 		switch(viewRequest.getCode()) {
 		case NEW:
-			return Utils.parseJsonObjectFromString((String) viewRequest.getPayload());
-		case LOAD_TEMPLATE_FROM_FILE:
+			return VWUtils.parseJsonObjectFromString((String) viewRequest.getPayload());
+		case LOAD_TEMPLATE_FROM_FILE: //for now this cannot happen.
 			return parseJsonObjectFromFile(input);
 		default:
 			return null;
@@ -452,12 +452,12 @@ public class InitialStateParser {
 	private static JsonObject parseJsonObjectFromFile(ObjectInputStream input) {
 		try {
 			input.readObject();
-			//TODO
+			//this is incomplete.
 		}
 		catch(Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 		
-		return null;
+		return null; //change this upon implementation.
 	}
 }

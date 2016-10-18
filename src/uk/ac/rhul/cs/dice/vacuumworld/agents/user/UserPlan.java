@@ -5,7 +5,7 @@ import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class UserPlan {
 	private Queue<Class<? extends EnvironmentalAction>> actionsToPerform;
@@ -20,7 +20,7 @@ public class UserPlan {
 	
 	public UserPlan(List<Class<? extends EnvironmentalAction>> actions, String actorId) {
 		for(Class<? extends EnvironmentalAction> actionToPerform : actions) {
-			Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + actorId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + actorId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
 		}
 		
 		this.actionsToPerform = new LinkedTransferQueue<>(actions);
@@ -34,7 +34,7 @@ public class UserPlan {
 	
 	public Class<? extends EnvironmentalAction> pullActionToPerform(String agentId) {
 		Class<? extends EnvironmentalAction> selected = this.actionsToPerform.poll();
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + agentId + ": selecting " + selected.getSimpleName() + " from plan...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + agentId + ": selecting " + selected.getSimpleName() + " from plan...");
 		
 		return selected;
 	}
@@ -48,7 +48,7 @@ public class UserPlan {
 	}
 	
 	public void pushActionToPerform(Class<? extends EnvironmentalAction> actionToPerform, String agentId) {
-		Utils.logWithClass(this.getClass().getSimpleName(), Utils.ACTOR + agentId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + agentId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
 		this.actionsToPerform.add(actionToPerform);
 	}
 

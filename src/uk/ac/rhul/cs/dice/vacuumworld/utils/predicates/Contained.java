@@ -3,7 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils.predicates;
 import java.util.List;
 import java.util.function.Predicate;
 
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class Contained implements Predicate<String> {
 	private List<String> container;
@@ -18,7 +18,8 @@ public class Contained implements Predicate<String> {
 			return this.container.contains(candidate);
 		}
 		catch(Exception e) {
-			Utils.fakeLog(e);
+			VWUtils.fakeLog(e);
+			
 			return false;
 		}
 	}

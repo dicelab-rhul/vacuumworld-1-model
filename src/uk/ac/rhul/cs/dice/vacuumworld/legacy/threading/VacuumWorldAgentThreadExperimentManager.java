@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import uk.ac.rhul.cs.dice.vacuumworld.threading.ActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 
 public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThreadManager {
@@ -33,8 +33,8 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 
 	@Override
 	protected void cycle(double delayInSeconds) {
-		Utils.logWithClass(this.getClass().getSimpleName(), "Start: " + this.testCase + " experiment...");
-		Utils.doWait(Math.max((int) (delayInSeconds * 1000), 200));
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Start: " + this.testCase + " experiment...");
+		VWUtils.doWait(Math.max((int) (delayInSeconds * 1000), 200));
 		
 		cycleHelper();
 		log();
@@ -49,7 +49,7 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 			builder.append((v[0] + v[1] + v[2]) + " ");
 		}
 		
-		Logger log = Utils.fileLogger("logs/test/results.txt", true);
+		Logger log = VWUtils.fileLogger("logs/test/results.txt", true);
 		log.info(builder.toString());
 		
 		closeHandlers(log);
@@ -61,7 +61,7 @@ public class VacuumWorldAgentThreadExperimentManager extends VacuumWorldAgentThr
 		for (int k = 0; k < h.length; k++) {
 			h[k].close();
 		}
-		Utils.logWithClass(this.getClass().getSimpleName(), "Experiment done.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Experiment done.");
 	}
 
 	private void cycleHelper() {

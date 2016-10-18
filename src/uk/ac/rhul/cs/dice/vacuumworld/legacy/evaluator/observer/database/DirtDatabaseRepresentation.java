@@ -7,7 +7,7 @@ import uk.ac.rhul.cs.dice.monitor.agents.EvaluatorAgent;
 import uk.ac.rhul.cs.dice.monitor.common.RefinedPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
-import uk.ac.rhul.cs.dice.vacuumworld.environment.DirtRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.DirtRepresentation;
 
 /**
  * The representation of a {@link Dirt} in a MongoDB. Converting an instance of

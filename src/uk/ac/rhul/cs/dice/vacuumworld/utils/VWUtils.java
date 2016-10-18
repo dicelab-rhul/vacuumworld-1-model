@@ -17,14 +17,14 @@ import javax.json.JsonWriter;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.utils.InfoLogFormatter;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
-public class Utils {
+public class VWUtils {
 	private static final Logger LOGGER = initLogger();
 	private static int cycleNumber = 1;
 	public static final String ACTOR = "Actor ";
 	
 	public static final String INVALID_INITIAL_STATE = "The received initial state is not valid.";
 	
-	private Utils(){}
+	private VWUtils(){}
 	
 	private static Logger initLogger() {
 		Logger logger = Logger.getAnonymousLogger();
@@ -57,11 +57,11 @@ public class Utils {
 	}
 
 	public static int getCycleNumber() {
-		return Utils.cycleNumber;
+		return VWUtils.cycleNumber;
 	}
 	
 	public static void increaseCycleNumber() {
-		Utils.cycleNumber++;
+		VWUtils.cycleNumber++;
 	}
 	
 	public static void log(String message) {
@@ -115,7 +115,7 @@ public class Utils {
 			Thread.sleep(milliseconds);
 		}
 		catch(Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 	
@@ -140,11 +140,24 @@ public class Utils {
 			writer.write(json);
 		}
 		catch(Exception e) {
-			Utils.log(e);
+			VWUtils.log(e);
 		}
 	}
 	
 	public static void dumpInitialState(JsonObject initialState) {
 		dumpJson(initialState, ConfigData.getLogPath("initial.json"));
+	}
+	
+	public static boolean checkObjectsEquality(Object first, Object second) {
+		if(first == null) {
+			if(second != null) {
+				return false;
+			}
+		}
+		else if(!first.equals(second)) {
+			return false;
+		}
+		
+		return true;
 	}
 }
