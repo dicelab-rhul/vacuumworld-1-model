@@ -16,8 +16,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionAction;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionActionOld;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldLegacyMonitoringContainer;
 
 public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements VacuumWorldMonitoringPhysicsInterface, CustomObserver {
 	private Physics monitoredContainerPhysics;
@@ -48,28 +48,28 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	}
 
 	@Override
-	public synchronized boolean isPossible(TotalPerceptionAction action, Space context) {
+	public synchronized boolean isPossible(TotalPerceptionActionOld action, Space context) {
 		return true;
 	}
 
 	@Override
-	public synchronized boolean isNecessary(TotalPerceptionAction action, Space context) {
+	public synchronized boolean isNecessary(TotalPerceptionActionOld action, Space context) {
 		return false;
 	}
 
 	@Override
-	public synchronized Result perform(TotalPerceptionAction action, Space context) {
-		return new MonitoringResult(ActionResult.ACTION_DONE, null, null, ((VacuumWorldMonitoringContainer) context).getVacuumWorldSpaceRepresentation());
+	public synchronized Result perform(TotalPerceptionActionOld action, Space context) {
+		return new MonitoringResult(ActionResult.ACTION_DONE, null, null, ((VacuumWorldLegacyMonitoringContainer) context).getVacuumWorldSpaceRepresentation());
 	}
 
 	@Override
-	public synchronized boolean succeeded(TotalPerceptionAction action, Space context) {
+	public synchronized boolean succeeded(TotalPerceptionActionOld action, Space context) {
 		return true;
 	}
 
 	@Override
 	public synchronized void update(CustomObservable o, Object arg) {
-		if (o instanceof VacuumWorldMonitoringContainer && arg instanceof Object[]) {
+		if (o instanceof VacuumWorldLegacyMonitoringContainer && arg instanceof Object[]) {
 			manageEnvironmentRequest((Object[]) arg);
 		}
 	}
@@ -79,12 +79,12 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 			return;
 		}
 
-		if (arg[0] instanceof MonitoringEvent && arg[1] instanceof VacuumWorldMonitoringContainer) {
-			attemptEvent((MonitoringEvent) arg[0], (VacuumWorldMonitoringContainer) arg[1]);
+		if (arg[0] instanceof MonitoringEvent && arg[1] instanceof VacuumWorldLegacyMonitoringContainer) {
+			attemptEvent((MonitoringEvent) arg[0], (VacuumWorldLegacyMonitoringContainer) arg[1]);
 		}
 	}
 
-	private synchronized void attemptEvent(MonitoringEvent event, VacuumWorldMonitoringContainer context) {
+	private synchronized void attemptEvent(MonitoringEvent event, VacuumWorldLegacyMonitoringContainer context) {
 		Result result = event.attempt(this, context);
 		
 		if (result.getRecipientsIds() == null) {
@@ -98,6 +98,6 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 		this.activeAgents.remove(Thread.currentThread().getId());
 		this.sensorsToNotify.remove(Thread.currentThread().getId());
 
-		notifyObservers(result, VacuumWorldMonitoringContainer.class);
+		notifyObservers(result, VacuumWorldLegacyMonitoringContainer.class);
 	}
 }

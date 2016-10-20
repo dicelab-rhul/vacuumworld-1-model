@@ -3,7 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.legacy.basicmonitor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionAction;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionActionOld;
 
 public class VacuumWorldMonitorBrain extends AbstractAgentBrain {
 	private MonitoringResult currentPerception;
@@ -22,7 +22,7 @@ public class VacuumWorldMonitorBrain extends AbstractAgentBrain {
 		if (arg == null) {
 			notifyObservers(this.currentPerception, VacuumWorldMonitorMind.class);
 		}
-		else if (arg instanceof TotalPerceptionAction) {
+		else if (arg instanceof TotalPerceptionActionOld) {
 			notifyObservers(arg, VacuumWorldMonitorAgent.class);
 		}
 	}

@@ -7,7 +7,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.database.DirtDat
 
 /**
  * The representation of a {@link Dirt} used internally by
- * {@link VacuumWorldMonitoringContainer} to build a useful representation of
+ * {@link VacuumWorldLegacyMonitoringContainer} to build a useful representation of
  * what is happening inside its sub container - {@link VacuumWorldSpace}. </br>
  * See also: {@link DirtDatabaseRepresentation},
  * {@link VacuumWorldSpaceRepresentation}. </br>

@@ -1,3 +1,0 @@
-path: JSONTestCases
-sizes: 50
-agents: 1000

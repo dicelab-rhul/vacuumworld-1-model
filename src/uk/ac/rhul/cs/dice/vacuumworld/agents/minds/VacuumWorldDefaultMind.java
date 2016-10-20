@@ -15,7 +15,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.DropDirtAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
@@ -29,6 +28,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
@@ -37,8 +37,8 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 	private String bodyId;
 	private int perceptionRange;
 	private boolean canSeeBehind;
-	private VacuumWorldActionResult lastAttemptedActionResult;
-	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
+	protected VacuumWorldActionResult lastAttemptedActionResult;
+	protected List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
 
 	private Set<Class<? extends AbstractAction>> actions;
 	private List<Class<? extends EnvironmentalAction>> availableActions;
@@ -113,7 +113,7 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		}
 	}
 
-	protected final EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	protected EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
 		}
@@ -181,11 +181,12 @@ public abstract class VacuumWorldDefaultMind extends AbstractAgentMind {
 		return this.rng;
 	}
 	
-	public void setVacuumWorldActions(Set<Class<? extends AbstractAction>> actions) {
-		List<Class<? extends AbstractAction>> temp = new ArrayList<>(actions);
-		temp.remove(DropDirtAction.class);
-		
-		this.actions = new HashSet<>(temp);
+	public void setVacuumWorldCleaningAgentActions() {
+		this.actions = new HashSet<>(ConfigData.getCleaningAgentActions());
+	}
+	
+	protected void setVacuumWorldMonitoringAgentActions() {
+		this.actions = new HashSet<>(ConfigData.getMonitoringAgentActions());
 	}
 	
 	public Set<Class<? extends AbstractAction>> getVacuumWorldActions() {

@@ -13,7 +13,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
 	private ConcurrentLinkedQueue<DefaultActionResult> receivedResults;
 	private List<DefaultActionResult> resultsToSend;
-	private boolean actionResultReturned;
+	protected boolean actionResultReturned;
 	private Class<? extends VacuumWorldDefaultMind> mindClass;
 
 	public VacuumWorldDefaultBrain(Class<? extends VacuumWorldDefaultMind> mindClass) {
@@ -33,7 +33,7 @@ public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
 		}
 	}
 
-	private void manageBodyRequest(Object arg) {
+	protected void manageBodyRequest(Object arg) {
 		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
 			this.receivedResults.add((DefaultActionResult) arg);
 			this.actionResultReturned = true;
@@ -50,7 +50,7 @@ public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
 		}
 	}
 
-	private void manageMindRequest() {
+	protected void manageMindRequest() {
 		updateResultsToSend();
 		
 		if (this.actionResultReturned) {
@@ -59,7 +59,7 @@ public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
 		}
 	}
 
-	private void updateResultsToSend() {
+	protected void updateResultsToSend() {
 		while (!this.receivedResults.isEmpty()) {
 			this.resultsToSend.add(this.receivedResults.poll());
 		}

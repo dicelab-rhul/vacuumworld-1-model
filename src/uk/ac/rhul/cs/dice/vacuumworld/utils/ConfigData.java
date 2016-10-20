@@ -1,7 +1,9 @@
 package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,15 +12,16 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.manhattan.VacuumWorldManhattanMind;
 
 public class ConfigData {	
 	private static int modelPort;
 	
-	private static boolean monitor;
-	private static boolean observe;
-	private static boolean evaluate;
+	private static int monitoringAgentsNumber;
+	private static int observingAgentsNumber;
+	private static int evaluatingAgentsNumber;
 
 	private static boolean log;
 	private static boolean printGrid;
@@ -27,6 +30,9 @@ public class ConfigData {
 	
 	private static Map<String, String> colorToMindMap;
 	private static Map<String, Class<? extends VacuumWorldDefaultMind>> admissibleMindTypes;
+	private static List<Class<? extends AbstractAction>> cleaningAgentActions;
+	private static List<Class<? extends AbstractAction>> userActions;
+	private static List<Class<? extends AbstractAction>> monitoringAgentActions;
 
 	private static String dbName;
 	private static String dbHostname;
@@ -40,16 +46,16 @@ public class ConfigData {
 		return ConfigData.modelPort;
 	}
 	
-	public static boolean getMonitoringFlag() {
-		return ConfigData.monitor;
+	public static int getMonitoringAgentsNumber() {
+		return ConfigData.monitoringAgentsNumber;
 	}
 	
-	public static boolean getObserveFlag() {
-		return ConfigData.observe;
+	public static int getObservingAgentsNumber() {
+		return ConfigData.observingAgentsNumber;
 	}
 
-	public static boolean getEvaluateFlag() {
-		return ConfigData.evaluate;
+	public static int getEvaluatingAgentsNumber() {
+		return ConfigData.evaluatingAgentsNumber;
 	}
 
 	public static boolean getLoggingFlag() {
@@ -93,6 +99,18 @@ public class ConfigData {
 		}
 	}
 	
+	public static List<Class<? extends AbstractAction>> getCleaningAgentActions() {
+		return ConfigData.cleaningAgentActions;
+	}
+	
+	public static List<Class<? extends AbstractAction>> getUserActions() {
+		return ConfigData.userActions;
+	}
+	
+	public static List<Class<? extends AbstractAction>> getMonitoringAgentActions() {
+		return ConfigData.monitoringAgentActions;
+	}
+	
 	public static String getLogPath(String filename) {
 		return ConfigData.logsPath + filename;
 	}
@@ -132,15 +150,93 @@ public class ConfigData {
 		JsonObject config = reader.readObject();
 		
 		ConfigData.modelPort = config.getInt("model_port");
-		ConfigData.monitor = config.getBoolean("monitor");
-		ConfigData.observe = config.getBoolean("observe");
-		ConfigData.evaluate = config.getBoolean("evaluate");
 		ConfigData.log = config.getBoolean("log");
 		ConfigData.printGrid = config.getBoolean("print_grid");
 		ConfigData.logsPath = config.getString("logs_path");
 		ConfigData.timeoutInSeconds = config.getInt("timeout_in_seconds");
 		
-		return initColorToMindMap(config) && initAdmissibleMindTypes(config) && initDatabaseData(config);
+		return initMonitoring(config) && initMaps(config) && initActions(config) && initDatabaseData(config);
+	}
+
+	private static boolean initMonitoring(JsonObject config) {
+		JsonObject monitoringConfig = config.getJsonObject("monitor_observe_evaluate");
+		
+		ConfigData.monitoringAgentsNumber = monitoringConfig.getInt("monitoring_agents_number");
+		ConfigData.observingAgentsNumber = monitoringConfig.getInt("observing_agents_number");
+		ConfigData.evaluatingAgentsNumber = monitoringConfig.getInt("evaluating_agents_number");
+		
+		return true;
+	}
+
+	private static boolean initActions(JsonObject config) {
+		return initCleaningAgentActions(config) && initUserActions(config) && initMonitoringAgentActions(config);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static boolean initUserActions(JsonObject config) {
+		ConfigData.userActions = new ArrayList<>();
+		JsonObject userActions = config.getJsonObject("user_actions");
+		
+		try {
+			for(Entry<String, JsonValue> entry : userActions.entrySet()) {
+				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
+				
+				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
+					ConfigData.userActions.add((Class<AbstractAction>) temp);
+				}
+			}
+			
+			return true;
+		}
+		catch(ClassNotFoundException e) {
+			return manageClassNotFoundExceptionInParsing(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static boolean initMonitoringAgentActions(JsonObject config) {
+		ConfigData.monitoringAgentActions = new ArrayList<>();
+		JsonObject monitoringAgentActions = config.getJsonObject("monitoring_agent_actions");
+		
+		try {
+			for(Entry<String, JsonValue> entry : monitoringAgentActions.entrySet()) {
+				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
+				
+				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
+					ConfigData.monitoringAgentActions.add((Class<AbstractAction>) temp);
+				}
+			}
+			
+			return true;
+		}
+		catch(ClassNotFoundException e) {
+			return manageClassNotFoundExceptionInParsing(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static boolean initCleaningAgentActions(JsonObject config) {
+		ConfigData.cleaningAgentActions = new ArrayList<>();
+		JsonObject cleaningAgentActions = config.getJsonObject("cleaning_agent_actions");
+		
+		try {
+			for(Entry<String, JsonValue> entry : cleaningAgentActions.entrySet()) {
+				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
+				
+				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
+					ConfigData.cleaningAgentActions.add((Class<AbstractAction>) temp);
+				}
+			}
+			
+			return true;
+		}
+		catch(ClassNotFoundException e) {
+			return manageClassNotFoundExceptionInParsing(e);
+		}
+	}
+
+	private static boolean initMaps(JsonObject config) {
+		return initColorToMindMap(config) && initAdmissibleMindTypes(config);
 	}
 
 	private static boolean initColorToMindMap(JsonObject config) {
@@ -162,10 +258,7 @@ public class ConfigData {
 			return fillMindTypesMap(mindTypes);
 		}
 		catch(ClassNotFoundException e) {
-			VWUtils.log(e, ConfigData.class.getSimpleName());
-			VWUtils.logWithClass(ConfigData.class.getSimpleName(), "The specified class does not exist. Check the configuration file for typos and errors...\n   ...and remember to specify the full package path [uk.ac.rhul.(...).<MyMind>] ...\n   ...where <MyMind> is the class simple name without [.java / .class].");
-			
-			return false;
+			return manageClassNotFoundExceptionInParsing(e);
 		}
 	}
 
@@ -192,5 +285,12 @@ public class ConfigData {
 		ConfigData.dirtsCollection = db.getString("dirts_collection");
 		
 		return true;
+	}
+	
+	private static boolean manageClassNotFoundExceptionInParsing(ClassNotFoundException e) {
+		VWUtils.log(e, ConfigData.class.getSimpleName());
+		VWUtils.logWithClass(ConfigData.class.getSimpleName(), "The specified class does not exist. Check the configuration file for typos and errors...\n   ...and remember to specify the full package path [uk.ac.rhul.(...).<TargetClass>] ...\n   ...where <TargetClass> is the class simple name without [.java / .class].");
+		
+		return false;
 	}
 }

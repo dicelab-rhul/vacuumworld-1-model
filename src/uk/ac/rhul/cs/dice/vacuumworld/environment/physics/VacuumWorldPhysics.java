@@ -47,11 +47,17 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringUpdateEvent;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldLegacyMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPhysicsInterface {
 	private ConcurrentMap<Long, VacuumWorldCleaningAgent> activeAgents;
+	private ConcurrentMap<Long, VacuumWorldMonitoringAgent> activeMonitoringAgents;
 	private ConcurrentMap<Long, User> activeUsers;
 	private ConcurrentMap<Long, List<String>> sensorsToNotify;
 
@@ -769,6 +775,32 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		if (o instanceof VacuumWorldSpace && arg instanceof Object[]) {
 			manageEnvironmentRequest((Object[]) arg);
 		}
+		else if(o instanceof VacuumWorldMonitoringBridge && arg instanceof Object[]) {
+			long threadId = Thread.currentThread().getId();
+			Result result = manageBridgeRequest((Object[]) arg, threadId);
+			this.activeMonitoringAgents.remove(threadId);
+			this.sensorsToNotify.remove(threadId);
+			notifyObservers(result, VacuumWorldMonitoringBridge.class);
+		}
+	}
+
+	private synchronized Result manageBridgeRequest(Object[] arg, long threadId) {
+		if (arg.length != 2) {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, new IllegalArgumentException(), null);
+		}
+		
+		if(TotalPerceptionAction.class.isAssignableFrom(arg.getClass())) {
+			this.activeMonitoringAgents.putIfAbsent(threadId, (VacuumWorldMonitoringAgent) ((TotalPerceptionAction) arg[0]).getActor());
+			this.sensorsToNotify.putIfAbsent(threadId, Arrays.asList(this.activeMonitoringAgents.get(threadId).getId()));
+			
+			VacuumWorldMonitoringPerception perception = new VacuumWorldMonitoringPerception(((VacuumWorldSpace) arg[1]).getFullGrid(), null);
+			
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, this.activeMonitoringAgents.get(threadId).getId(), this.sensorsToNotify.get(threadId), perception);
+		}
+		
+		else {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, new IllegalArgumentException(), null);
+		}
 	}
 
 	private synchronized void manageEnvironmentRequest(Object[] arg) {
@@ -785,7 +817,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		Result result = event.attempt(this, context);
 		ActionResult code = result.getActionResult();
 		MonitoringUpdateEvent monitoringUpdateEvent = new MonitoringUpdateEvent(event.getAction(), event.getTimestamp(), event.getActor(), code);
-		notifyObservers(monitoringUpdateEvent, VacuumWorldMonitoringContainer.class);
+		notifyObservers(monitoringUpdateEvent, VacuumWorldLegacyMonitoringContainer.class);
 
 		removeCurrentActor();
 		this.sensorsToNotify.remove(Thread.currentThread().getId());

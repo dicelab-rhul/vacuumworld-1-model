@@ -5,7 +5,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringEvent;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldLegacyMonitoringContainer;
 
 /**
  * The Vacuum World implementation of {@link ObserverActuator}. This
@@ -24,7 +24,7 @@ public class VWObserverActuator extends ObserverActuator<VacuumWorldActuatorRole
 	@Override
 	public void updateCon(CustomObservable o, Object arg) {
 		if (o instanceof VWObserverAgent && arg instanceof MonitoringEvent) {
-			notifyObservers(arg, VacuumWorldMonitoringContainer.class);
+			notifyObservers(arg, VacuumWorldLegacyMonitoringContainer.class);
 		}
 	}
 }

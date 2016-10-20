@@ -1,38 +1,67 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.UniverseAppearance;
-import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Body;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Universe;
-import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.physics.VacuumWorldMonitoringPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 
 public class VacuumWorldUniverse extends Universe {
+	private VacuumWorldMonitoringBridge monitoringBridge;
+	private VacuumWorldMonitoringContainer monitoringContainer;
+	private VacuumWorldMonitoringPhysics monitoringPhysics;
 
-  public VacuumWorldUniverse(EnvironmentalSpace state, Set<Class<? extends AbstractAction>> admissibleActions, Set<Body> bodies, Physics physics, UniverseAppearance appearance) {
-		super(state, admissibleActions, bodies, physics, appearance);
+	public VacuumWorldUniverse(EnvironmentalSpace state, VacuumWorldPhysics physics, VacuumWorldMonitoringContainer monitoringContainer, VacuumWorldMonitoringPhysics monitoringPhysics, UniverseAppearance appearance) {
+		super(state, Stream.of(ConfigData.getCleaningAgentActions(), ConfigData.getUserActions(), ConfigData.getMonitoringAgentActions()).flatMap(List::stream).collect(Collectors.toSet()), null, physics, appearance);
 		
-		VacuumWorldMonitoringContainer container = (VacuumWorldMonitoringContainer) this.getState();
-		VacuumWorldMonitoringPhysics monitoringPhysics = container.getPhysics();
+		VacuumWorldSpace space = (VacuumWorldSpace) state;
 		
-		VacuumWorldSpace space = container.getSubContainerSpace();
-		VacuumWorldPhysics vacuumWorldPhysics = (VacuumWorldPhysics) monitoringPhysics.getMonitoredContainerPhysics();
-		
-		makeObservers(container, monitoringPhysics, space, vacuumWorldPhysics);
+		this.monitoringContainer = monitoringContainer;
+		this.monitoringPhysics = monitoringPhysics;
+		this.monitoringBridge = new VacuumWorldMonitoringBridge(this.monitoringContainer.getClass(), this.monitoringPhysics.getClass(), space.getClass(), physics.getClass());
+	
+		makeObservers(space, physics);
 	}
 
-	private void makeObservers(VacuumWorldMonitoringContainer container, VacuumWorldMonitoringPhysics monitoringPhysics, VacuumWorldSpace space, VacuumWorldPhysics vacuumWorldPhysics) {
-		space.addObserver(vacuumWorldPhysics);
-		vacuumWorldPhysics.addObserver(space);
+	private void makeObservers(VacuumWorldSpace monitoredSpace, VacuumWorldPhysics monitoredPhysics) {
+		monitoredSpace.addObserver(monitoredPhysics);
+		monitoredPhysics.addObserver(monitoredSpace);
 		
-		container.addObserver(monitoringPhysics);
-		monitoringPhysics.addObserver(container);
+		this.monitoringBridge.addObserver(this.monitoringPhysics);
+		this.monitoringPhysics.addObserver(this.monitoringBridge);
+		this.monitoringBridge.addObserver(monitoredPhysics);
+		monitoredPhysics.addObserver(this.monitoringBridge);
 		
-		vacuumWorldPhysics.addObserver(container);
+		this.monitoringContainer.addObserver(this.monitoringPhysics);
+		this.monitoringPhysics.addObserver(this.monitoringContainer);
+	}
+
+	public VacuumWorldMonitoringBridge getMonitoringBridge() {
+		return this.monitoringBridge;
+	}
+
+	public VacuumWorldMonitoringContainer getMonitoringContainer() {
+		return this.monitoringContainer;
+	}
+
+	public VacuumWorldMonitoringPhysics getMonitoringPhysics() {
+		return this.monitoringPhysics;
+	}
+	
+	@Override
+	public VacuumWorldSpace getState() {
+		return (VacuumWorldSpace) super.getState();
+	}
+	
+	@Override
+	public VacuumWorldPhysics getPhysics() {
+		return (VacuumWorldPhysics) super.getPhysics();
 	}
 }

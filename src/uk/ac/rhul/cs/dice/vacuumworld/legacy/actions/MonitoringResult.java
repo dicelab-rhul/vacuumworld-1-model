@@ -15,7 +15,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldSpaceReprese
  * monitoring Vacuum World. It contains a {@link VacuumWorldSpaceRepresentation}
  * that is the {@link RefinedPerception} of {@link VacuumWorldSpace}. An
  * instance of this class will always be the result of a
- * {@link TotalPerceptionAction} performed by an {@link ObserverAgent}.
+ * {@link TotalPerceptionActionOld} performed by an {@link ObserverAgent}.
  * 
  * @author Ben Wilkins
  *

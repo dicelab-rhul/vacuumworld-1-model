@@ -18,13 +18,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionAction;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionActionOld;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldLegacyMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 /**
  * The Vacuum World implementation of {@link ObserverAgent}. This {@link Agent}
- * is set up to handle {@link TotalPerceptionAction TotalPerceptionActions} from
+ * is set up to handle {@link TotalPerceptionActionOld TotalPerceptionActions} from
  * {@link VWObserverBrain} and {@link MonitoringResult MonitoringResults} from
  * {@link VWObserverActuator VWObserverActuators}.
  * 
@@ -62,7 +62,7 @@ public class VWObserverAgent extends ObserverAgent<VacuumWorldSensorRole, Vacuum
 
 	@Override
 	public void updateCon(CustomObservable o, Object arg) {
-		if (o instanceof VWObserverBrain && arg instanceof TotalPerceptionAction) {
+		if (o instanceof VWObserverBrain && arg instanceof TotalPerceptionActionOld) {
 			MonitoringEvent event = new MonitoringEvent((EnvironmentalAction) arg, (long) VWUtils.getCycleNumber(), this);
 			event.setActuatorRecipient(((VWObserverActuator) this.getActuators().get(this.getActionActuatorIndex())).getActuatorId());
 			event.setSensorToCallBackId(((VWObserverSensor) this.getSensors().get(this.getActionResultSensorIndex())).getSensorId());
@@ -76,7 +76,7 @@ public class VWObserverAgent extends ObserverAgent<VacuumWorldSensorRole, Vacuum
 	/**
 	 * Returns the default {@link List} index of the {@link Sensor} that will be
 	 * handling {@link MonitoringResult MonitoringResults} from
-	 * {@link VacuumWorldMonitoringContainer}.
+	 * {@link VacuumWorldLegacyMonitoringContainer}.
 	 * 
 	 * @return the index
 	 */

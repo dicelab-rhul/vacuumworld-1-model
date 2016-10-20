@@ -14,7 +14,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.DropDirtAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
@@ -29,6 +28,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class UserMind extends AbstractAgentMind {
@@ -296,11 +296,8 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	public void setVacuumWorldActions(Set<Class<? extends AbstractAction>> actions) {
-		List<Class<? extends AbstractAction>> temp = new ArrayList<>(actions);
-		temp.remove(CleanAction.class);
-		
-		this.actions = new HashSet<>(temp);
+	public void setVacuumWorldUserActions() {
+		this.actions = new HashSet<>(ConfigData.getUserActions());
 	}
 	
 	public Set<Class<? extends AbstractAction>> getVacuumWorldActions() {

@@ -22,14 +22,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.VWObserverAgent;
 
 /**
  * The representation of {@link VacuumWorldSpace} used by
- * {@link VacuumWorldMonitoringContainer}. It representations only the
+ * {@link VacuumWorldLegacyMonitoringContainer}. It representations only the
  * interesting parts of {@link VacuumWorldSpace} - the
  * {@link VacuumWorldLocation VacuumWorldLocations} that contain either
  * {@link VacuumWorldCleaningAgent VacuumWorldCleaningAgents} or {@link Dirt
  * Dirts} or both, also the dimensions of the space. The purpose of the
  * representation is to give a {@link VWObserverAgent} an effective but
  * minimized view of what is happening in the real {@link VacuumWorldSpace}. The
- * representation is kept in sync by {@link VacuumWorldMonitoringContainer}
+ * representation is kept in sync by {@link VacuumWorldLegacyMonitoringContainer}
  * which will use {@link MonitoringUpdateEvent MonitoringUpdateEvents} sent from
  * {@link VacuumWorldPhysics}.
  * 

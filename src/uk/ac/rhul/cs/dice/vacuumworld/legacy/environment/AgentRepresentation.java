@@ -9,7 +9,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.database.AgentDa
 
 /**
  * The representation of a {@link VacuumWorldCleaningAgent} used internally by
- * {@link VacuumWorldMonitoringContainer} to build a useful representation of
+ * {@link VacuumWorldLegacyMonitoringContainer} to build a useful representation of
  * what is happening inside its sub container - {@link VacuumWorldSpace}. </br>
  * See also: {@link AgentDatabaseRepresentation},
  * {@link VacuumWorldSpaceRepresentation}.

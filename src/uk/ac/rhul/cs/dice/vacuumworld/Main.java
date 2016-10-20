@@ -1,11 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld;
 
-import java.io.IOException;
-
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.utils.LegacyUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
-import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 
 public class Main {
   
@@ -56,9 +52,9 @@ public class Main {
 	private static void startModelServer(double delayInSeconds) {
 		try {
 			VacuumWorldServer server = new VacuumWorldServer();
-			server.startServer(new String[]{LegacyUtils.FOO, LegacyUtils.FOO}, delayInSeconds);
+			server.startServer(delayInSeconds);
 		}
-		catch (IOException | HandshakeException e) {
+		catch (Exception e) {
 			VWUtils.log(e);
 		}
 	}

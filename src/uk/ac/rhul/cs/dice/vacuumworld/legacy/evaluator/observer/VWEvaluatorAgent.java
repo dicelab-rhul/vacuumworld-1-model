@@ -15,7 +15,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldAgentInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldLegacyMonitoringContainer;
 
 public class VWEvaluatorAgent extends EvaluatorAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> implements VacuumWorldAgentInterface {
 
@@ -43,7 +43,7 @@ public class VWEvaluatorAgent extends EvaluatorAgent<VacuumWorldSensorRole, Vacu
 	/**
 	 * Returns the default {@link List} index of the {@link Sensor} that will be
 	 * handling {@link MonitoringResult MonitoringResults} from
-	 * {@link VacuumWorldMonitoringContainer}.
+	 * {@link VacuumWorldLegacyMonitoringContainer}.
 	 * 
 	 * @return the index
 	 */

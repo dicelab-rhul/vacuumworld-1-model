@@ -26,6 +26,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldSpace extends EnvironmentalSpace {
@@ -260,9 +261,12 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	public void update(CustomObservable o, Object arg) {
 		if ((o instanceof VacuumWorldDefaultActuator || o instanceof UserActuator) && arg instanceof VacuumWorldEvent) {
 			manageActuatorRequest((VacuumWorldEvent) arg);
-		} 
+		}
 		else if (o instanceof VacuumWorldPhysics) {
 			managePhysicsRequest(arg);
+		}
+		else if(o instanceof VacuumWorldMonitoringBridge) {
+			
 		}
 	}
 

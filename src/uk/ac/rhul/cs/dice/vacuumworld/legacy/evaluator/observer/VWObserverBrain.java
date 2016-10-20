@@ -4,11 +4,11 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Brain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.monitor.agents.ObserverBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringResult;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionAction;
+import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.TotalPerceptionActionOld;
 
 /**
  * The Vacuum World implementation of {@link ObserverBrain}. This {@link Brain}
- * is set up to handle {@link TotalPerceptionAction TotalPerceptionActions} from
+ * is set up to handle {@link TotalPerceptionActionOld TotalPerceptionActions} from
  * the {@link VWObserverMind} and {@link MonitoringResult MonitoringResults}
  * from the {@link VWObserverAgent}.
  * 
@@ -32,7 +32,7 @@ public class VWObserverBrain extends ObserverBrain {
 		if (arg == null) {
 			notifyObservers(this.currentPerception, VWObserverMind.class);
 		}
-		else if (arg instanceof TotalPerceptionAction) {
+		else if (arg instanceof TotalPerceptionActionOld) {
 			notifyObservers(arg, VWObserverAgent.class);
 		}
 	}

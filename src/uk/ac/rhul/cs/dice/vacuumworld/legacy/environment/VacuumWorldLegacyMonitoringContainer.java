@@ -44,7 +44,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.legacy.evaluator.observer.VWObserverAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
+public class VacuumWorldLegacyMonitoringContainer extends EnvironmentalSpace {
 	private List<Agent> monitoringAgents;
 	private VacuumWorldMonitoringPhysics physics;
 	private VacuumWorldSpace subContainerSpace;
@@ -52,7 +52,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 
 	private Logger logger;
 
-	public VacuumWorldMonitoringContainer(VacuumWorldMonitoringPhysics physics, VacuumWorldSpace space) {
+	public VacuumWorldLegacyMonitoringContainer(VacuumWorldMonitoringPhysics physics, VacuumWorldSpace space) {
 		this.physics = physics;
 		this.subContainerSpace = space;
 		this.monitoringAgents = new ArrayList<>();
