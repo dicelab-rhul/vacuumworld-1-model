@@ -22,14 +22,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 	private ManhattanPlan plan;
-	private static final String NAME = "MANHATTAN";
 	
-	public static final String getName() {
-		return NAME;
+	public VacuumWorldManhattanMind(String bodyId) {
+		super(bodyId);
 	}
 	
 	@Override
-	public EnvironmentalAction decide(Object... parameters) {
+	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
 		if(this.plan != null) {
 			return followPlan(parameters);
 		}
@@ -38,7 +37,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction buildNewPlan() {
+	private EnvironmentalAction<VacuumWorldPerception> buildNewPlan() {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": new plan generation: seeking for a target...");
 		VacuumWorldPerception perception = getPerception();
 		
@@ -54,7 +53,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction buildNewPlanHelper(VacuumWorldPerception perception) {
+	private EnvironmentalAction<VacuumWorldPerception> buildNewPlanHelper(VacuumWorldPerception perception) {
 		if(perception.canAgentClean()) {
 			//no need to build a plan, just clean ASAP.
 			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + " is on a location with compatible dirt. The only reasonable plan is to clean now.");
@@ -72,7 +71,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction followPlan(Object... parameters) {
+	private EnvironmentalAction<VacuumWorldPerception> followPlan(Object... parameters) {
 		if(!isPlanStillValid()) {
 			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": plan is no more valid. Trying to build a new one...");
 			this.plan = null;
@@ -80,7 +79,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 			return buildNewPlan();
 		}
 		
-		if(lastActionSucceded()) {			
+		if(lastActionSucceeded()) {			
 			this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
 			this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
 			
@@ -109,7 +108,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		return true;
 	}
 
-	private EnvironmentalAction checkPlanFeasibility(Object... parameters) {
+	private EnvironmentalAction<VacuumWorldPerception> checkPlanFeasibility(Object... parameters) {
 		if(this.plan.getNumberOfConsecutiveFailuresOfTheSameAction() <= 10) {
 			return buildPhysicalAction(this.plan.getLastAction());
 		}
@@ -121,14 +120,14 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction getCloserToDirt(VacuumWorldPerception perception) {
+	private EnvironmentalAction<VacuumWorldPerception> getCloserToDirt(VacuumWorldPerception perception) {
 		List<VacuumWorldLocation> locationsWithCompatibleDirt = perception.getLocationsWithCompatibleDirt();
 		VacuumWorldLocation closest = determineClosestLocationWithCompatibleDirt(locationsWithCompatibleDirt, perception.getActorCoordinates(), perception.getActorCurrentFacingDirection());
 		
 		return buildPlan(perception, closest, perception.getActorCoordinates());
 	}
 
-	private EnvironmentalAction buildPlan(VacuumWorldPerception perception, VacuumWorldLocation closest, VacuumWorldCoordinates agentCoordinates) {
+	private EnvironmentalAction<VacuumWorldPerception> buildPlan(VacuumWorldPerception perception, VacuumWorldLocation closest, VacuumWorldCoordinates agentCoordinates) {
 		int xDifference = closest.getCoordinates().getX() - agentCoordinates.getX();
 		int yDifference = closest.getCoordinates().getY() - agentCoordinates.getY();
 		ActorFacingDirection facingDirection = perception.getActorCurrentFacingDirection();
@@ -145,13 +144,13 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		return buildPlan(xDifference, yDifference, facingDirection);
 	}
 
-	private EnvironmentalAction buildPlan(int xDifference, int yDifference, ActorFacingDirection facingDirection) {
+	private EnvironmentalAction<VacuumWorldPerception> buildPlan(int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		String planCode = this.plan.getPlanCodes().getPlanCodes().get(new Pair<>(Integer.signum(xDifference), Integer.signum(yDifference))).get(facingDirection);
 		
 		return fillPlan(planCode, xDifference, yDifference, facingDirection);
 	}
 	
-	private EnvironmentalAction fillPlan(String planCode, int xDifference, int yDifference, ActorFacingDirection facingDirection) {
+	private EnvironmentalAction<VacuumWorldPerception> fillPlan(String planCode, int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		for(char character : planCode.toCharArray()) {
 			addActionsToPlan(character, xDifference, yDifference, facingDirection);
 		}
@@ -180,13 +179,13 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private void pushAllNecessaryMoveActions(Collection<? extends Class<? extends EnvironmentalAction>> allNecessaryMoveActions) {
-		for(Class<? extends EnvironmentalAction> action : allNecessaryMoveActions) {
+	private void pushAllNecessaryMoveActions(Collection<? extends Class<? extends EnvironmentalAction<VacuumWorldPerception>>> allNecessaryMoveActions) {
+		for(Class<? extends EnvironmentalAction<VacuumWorldPerception>> action : allNecessaryMoveActions) {
 			this.plan.pushActionToPerform(action, getBodyId());
 		}
 	}
 
-	private Collection<? extends Class<? extends EnvironmentalAction>> getAllNecessaryMoveActions(int xDifference, int yDifference, ActorFacingDirection facingDirection) {
+	private Collection<? extends Class<? extends EnvironmentalAction<VacuumWorldPerception>>> getAllNecessaryMoveActions(int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 		switch(facingDirection) {
 			case NORTH:
 			case SOUTH:
@@ -199,8 +198,8 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private Collection<? extends Class<? extends EnvironmentalAction>> addMoveActions(int difference) {
-		List<Class<? extends EnvironmentalAction>> actions = new ArrayList<>();
+	private Collection<? extends Class<? extends EnvironmentalAction<VacuumWorldPerception>>> addMoveActions(int difference) {
+		List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> actions = new ArrayList<>();
 		
 		for(int i=0; i < Math.abs(difference); i++) {
 			actions.add(MoveAction.class);

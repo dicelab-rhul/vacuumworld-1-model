@@ -8,23 +8,35 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import uk.ac.rhul.cs.dice.monitor.agents.DatabaseAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.basicmonitor.VacuumWorldMonitorMind;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentMind;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringActorRunnable;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringThreadStateDecide;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringThreadStateExecute;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringThreadStatePerceive;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 
 public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldClientListener listener;
 	private VacuumWorldSpace state;
-	protected final ThreadState threadStateDecide = new VacuumWorldThreadStateDecide();
-	protected final ThreadState threadStateExecute = new DefaultThreadStateExecute();
-	protected final ThreadState threadStatePerceive = new DefaultThreadStatePerceive();
-	protected boolean simulationStarted = false;
-	protected ExecutorService executor;
-	protected Set<ActorRunnable> cleaningRunnables;
-	protected Set<ActorRunnable> monitorRunnables;
+	private final ThreadState<VacuumWorldPerception> threadStateDecide = new VacuumWorldThreadStateDecide();
+	private final ThreadState<VacuumWorldPerception> threadStateExecute = new VacuumWorldThreadStateExecute();
+	private final ThreadState<VacuumWorldPerception> threadStatePerceive = new VacuumWorldThreadStatePerceive();
+	private final ThreadState<VacuumWorldMonitoringPerception> monitoringThreadStateDecide = new VacuumWorldMonitoringThreadStateDecide();
+	private final ThreadState<VacuumWorldMonitoringPerception> monitoringThreadStateExecute = new VacuumWorldMonitoringThreadStateExecute();
+	private final ThreadState<VacuumWorldMonitoringPerception> monitoringThreadStatePerceive = new VacuumWorldMonitoringThreadStatePerceive();
+	private boolean simulationStarted = false;
+	private ExecutorService executor;
+	private ExecutorService monitoringExecutor;
+	private Set<VacuumWorldActorRunnable> cleaningRunnables;
+	private Set<VacuumWorldMonitoringActorRunnable> monitorRunnables;
+	private VacuumWorldActorRunnable userRunnable;
 	
 	private volatile StopSignal sharedStopSignal;
 
@@ -53,15 +65,14 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		
 		cycle(delayInSeconds);
 	}
-
-	//monitoring is disabled
-	protected void cycle(double delayInSeconds) throws InterruptedException {
+	
+	private void cycle(double delayInSeconds) throws InterruptedException {
 		boolean doPerceive = false;
 		
 		while (this.simulationStarted && !this.sharedStopSignal.mustStop()) {
 			VWUtils.logWithClass(this.getClass().getSimpleName(), "START CYCLE");
 			
-			doCycleStep(this.cleaningRunnables, doPerceive);
+			doCycleStep(doPerceive);
 
 			VWUtils.logWithClass(this.getClass().getSimpleName(), "NEXT CYCLE!!\n\n");
 			doPerceive = true;
@@ -70,22 +81,30 @@ public class VacuumWorldAgentThreadManager extends Observable {
 			VWUtils.doWait((int) Math.max(Math.floor(1000 * delayInSeconds), 200));
 		}
 		
-		this.executor.shutdownNow();
-		this.executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-		
+		shutdownExecutors();
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Agents threads termination complete.");
 	}
 
-	protected void doCycleStep(Set<ActorRunnable> agentsRunnables, boolean... flags) {
+	private void shutdownExecutors() throws InterruptedException {
+		this.executor.shutdownNow();
+		this.monitoringExecutor.shutdownNow();
+		this.executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		this.monitoringExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+	}
+
+	protected void doCycleStep(boolean... flags) {
 		boolean doPerceive = true;
 
 		if (flags.length > 0) {
 			doPerceive = flags[0];
 		}
 
-		doPerceive(agentsRunnables, doPerceive);
-		doDecide(agentsRunnables);
-		doExecute(agentsRunnables);
+		doPerceive(this.cleaningRunnables, this.userRunnable, doPerceive);
+		doMonitoringPerceive(this.monitorRunnables, doPerceive);
+		doDecide(this.cleaningRunnables, this.userRunnable);
+		doMonitoringDecide(this.monitorRunnables);
+		doExecute(this.cleaningRunnables, this.userRunnable);
+		doMonitoringExecute(this.monitorRunnables);
 	}
 
 	@Override
@@ -94,26 +113,40 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		super.notifyObservers();
 	}
 
-	protected void doDecide(Set<ActorRunnable> runnables) {
-		doPhase(this.threadStateDecide, runnables);
+	private void doDecide(Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
+		doPhase(this.threadStateDecide, runnables, user);
 	}
 
-	protected void doExecute(Set<ActorRunnable> runnables) {
-		doPhase(this.threadStateExecute, runnables);
+	private void doExecute(Set<VacuumWorldActorRunnable>runnables, VacuumWorldActorRunnable user) {
+		doPhase(this.threadStateExecute, runnables, user);
 	}
 
-	protected void doPerceive(Set<ActorRunnable> runnables, boolean doPerceive) {
+	private void doPerceive(Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user, boolean doPerceive) {
 		if (doPerceive) {
-			doPhase(this.threadStatePerceive, runnables);
+			doPhase(this.threadStatePerceive, runnables, user);
+		}
+	}
+	
+	private void doMonitoringDecide(Set<VacuumWorldMonitoringActorRunnable> runnables) {
+		doMonitoringPhase(this.monitoringThreadStateDecide, runnables);
+	}
+
+	private void doMonitoringExecute(Set<VacuumWorldMonitoringActorRunnable>runnables) {
+		doMonitoringPhase(this.monitoringThreadStateExecute, runnables);
+	}
+
+	private void doMonitoringPerceive(Set<VacuumWorldMonitoringActorRunnable> runnables, boolean doPerceive) {
+		if (doPerceive) {
+			doMonitoringPhase(this.monitoringThreadStatePerceive, runnables);
 		}
 	}
 
-	protected void doPhase(ThreadState state, Set<ActorRunnable> runnables) {
+	private void doPhase(ThreadState<VacuumWorldPerception> state, Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
 		try {
-			this.executor = Executors.newFixedThreadPool(this.cleaningRunnables.size());
+			this.executor = Executors.newFixedThreadPool(this.cleaningRunnables.size() + (user == null ? 0 : 1));
 			
-			setNextPhase(state, runnables);
-			startThreads(runnables);
+			setNextPhase(state, runnables, user);
+			startThreads(runnables, user);
 			waitForAllThreads();
 			
 			this.executor.shutdown();
@@ -124,34 +157,91 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		}
 	}
 
+	private void doMonitoringPhase(ThreadState<VacuumWorldMonitoringPerception> state, Set<VacuumWorldMonitoringActorRunnable> runnables) {
+		if(!VWUtils.isCollectionNotNullAndNotEmpty(this.monitorRunnables)) {
+			return;
+		}
+		
+		
+		try {
+			this.monitoringExecutor = Executors.newFixedThreadPool(this.monitorRunnables.size());
+			
+			setNextPhaseForMonitoringAgents(state, runnables);
+			startMonitoringThreads(runnables);
+			waitForAllMonitoringThreads();
+			
+			this.monitoringExecutor.shutdown();
+			this.monitoringExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+	
 	private void waitForAllThreads() {
 		while(((ThreadPoolExecutor) this.executor).getActiveCount() != 0) {
 			continue;
 		}
 	}
+	
+	private void waitForAllMonitoringThreads() {
+		while(((ThreadPoolExecutor) this.monitoringExecutor).getActiveCount() != 0) {
+			continue;
+		}
+	}
 
-	private void startThreads(Set<ActorRunnable> runnables) {
-		for(ActorRunnable runnable : runnables) {
+	private void startThreads(Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
+		if(user != null) {
+			this.executor.execute(user);
+		}
+		
+		for(VacuumWorldActorRunnable runnable : runnables) {
+			this.executor.execute(runnable);
+		}
+	}
+	
+	private void startMonitoringThreads(Set<VacuumWorldMonitoringActorRunnable> runnables) {
+		for(VacuumWorldMonitoringActorRunnable runnable : runnables) {
 			this.executor.execute(runnable);
 		}
 	}
 
-	private void setNextPhase(ThreadState state, Set<ActorRunnable> runnables) {
-		for (ActorRunnable runnable : runnables) {
+	private void setNextPhase(ThreadState<VacuumWorldPerception> state, Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
+		if(user != null) {
+			user.setState(state);
+		}
+		
+		for (VacuumWorldActorRunnable runnable : runnables) {
+			runnable.setState(state);
+		}
+	}
+	
+	private void setNextPhaseForMonitoringAgents(ThreadState<VacuumWorldMonitoringPerception> state, Set<VacuumWorldMonitoringActorRunnable> runnables) {
+		for (VacuumWorldMonitoringActorRunnable runnable : runnables) {
 			runnable.setState(state);
 		}
 	}
 
-	public void addActor(ActorRunnable runnable) {
+	public void addActor(VacuumWorldActorRunnable runnable) {
 		if (this.simulationStarted) {
 			throw new IllegalThreadStateException("Cannot add a new agent at runtime.");
 		}
 
-		if (runnable.getActorMind() instanceof DatabaseAgentMind || runnable.getActorMind() instanceof VacuumWorldMonitorMind) {
-			this.monitorRunnables.add(runnable);
-		}
-		else {
+		if (runnable.getActorMind() instanceof VacuumWorldDefaultMind) {
 			this.cleaningRunnables.add(runnable);
+		}
+		else if(runnable.getActorMind() instanceof UserMind) {
+			this.userRunnable = runnable;
+		}
+	}
+	
+	public void addMonitoringAgent(VacuumWorldMonitoringActorRunnable runnable) {
+		if (this.simulationStarted) {
+			throw new IllegalThreadStateException("Cannot add a new agent at runtime.");
+		}
+
+		if (runnable.getActorMind() instanceof VacuumWorldMonitoringAgentMind) {
+			this.monitorRunnables.add(runnable);
 		}
 	}
 }

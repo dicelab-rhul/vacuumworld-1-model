@@ -3,16 +3,12 @@ package uk.ac.rhul.cs.dice.vacuumworld.agents.user;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
-import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.DropDirtAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
@@ -22,28 +18,34 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class UserMind extends AbstractAgentMind {
+public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception> {
 	private DirtType lastDroppedDirt;
-	private Random rng;
-	private String bodyId;
-	private VacuumWorldActionResult lastAttemptedActionResult;
 	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
-	private Set<Class<? extends AbstractAction>> actions;
-	private List<Class<? extends EnvironmentalAction>> availableActions;
-	private EnvironmentalAction nextAction;
 	private UserPlan plan;
 	
-	public UserMind() {
-		this.rng = new Random(System.currentTimeMillis());
+	public UserMind(Random rng, String bodyId) {
+		super(rng, bodyId);
+		
+		super.setPerceptionRange(Integer.MAX_VALUE);
+		super.setCanSeeBehind(true);
+		
+		this.lastCycleIncomingSpeeches = new ArrayList<>();
+		this.lastDroppedDirt = DirtType.GREEN;
+		this.plan = null;
+	}
+	
+	public UserMind(String bodyId) {
+		super(bodyId);
+		
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		this.lastDroppedDirt = DirtType.GREEN;
 		this.plan = null;
@@ -52,11 +54,11 @@ public class UserMind extends AbstractAgentMind {
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, UserBrain.class);
-		setAvailableActions(new ArrayList<>(getVacuumWorldActions()));
+		loadAvailableActionsForThisCycle(new ArrayList<>(getAvailableActionsForThisMind()));
 	}
 
 	@Override
-	public EnvironmentalAction decide(Object... parameters) {
+	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
 		if(this.plan != null) {
 			if(!this.plan.getActionsToPerform().isEmpty()) {
 				return followPlan(false);
@@ -72,7 +74,7 @@ public class UserMind extends AbstractAgentMind {
 		return decideWithPerception();
 	}
 	
-	private EnvironmentalAction decideWithPerception() {
+	private EnvironmentalAction<VacuumWorldPerception> decideWithPerception() {
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception == null) {
@@ -85,8 +87,8 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	private EnvironmentalAction followPlan(boolean specialFlag) {
-		if(lastActionSucceded() || specialFlag) {
+	private EnvironmentalAction<VacuumWorldPerception> followPlan(boolean specialFlag) {
+		if(lastActionSucceeded() || specialFlag) {
 			this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
 			this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
 			
@@ -100,7 +102,7 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	private EnvironmentalAction retryIfPossible() {
+	private EnvironmentalAction<VacuumWorldPerception> retryIfPossible() {
 		if(this.plan.getNumberOfConsecutiveFailuresOfTheSameAction() <= 10) {
 			return buildPhysicalAction(this.plan.getLastAction());
 		}
@@ -111,12 +113,12 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	private EnvironmentalAction decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
-		List<VacuumWorldSpeechActionResult> messages = getReceivedCommunications();
-		EnvironmentalAction toReturn;
+	private EnvironmentalAction<VacuumWorldPerception> decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
+		List<Result<VacuumWorldPerception>> messages = getReceivedCommunications();
+		EnvironmentalAction<VacuumWorldPerception> toReturn;
 		
-		for(VacuumWorldSpeechActionResult result : messages) {
-			toReturn = getNextActionFromMessage(result.getPayload().getPayload(), perception);
+		for(Result<VacuumWorldPerception> result : messages) {
+			toReturn = getNextActionFromMessage(((VacuumWorldSpeechActionResult) result).getPayload().getPayload(), perception);
 			
 			if(toReturn == null) {
 				continue;
@@ -129,7 +131,7 @@ public class UserMind extends AbstractAgentMind {
 		return decideActionRandomly();
 	}
 
-	private EnvironmentalAction getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
+	private EnvironmentalAction<VacuumWorldPerception> getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
 		if(payload.matches("^move[NSWE]$")) {
 			this.plan = buildPlanMaybe(payload, perception);
 			
@@ -145,7 +147,7 @@ public class UserMind extends AbstractAgentMind {
 	}
 
 	private UserPlan buildPlanMaybe(String payload, VacuumWorldPerception perception) {
-		if(this.rng.nextBoolean()) {
+		if(getRNG().nextBoolean()) {
 			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I agree to build a plan...");
 			
 			return buildPlan(payload, perception);
@@ -167,17 +169,16 @@ public class UserMind extends AbstractAgentMind {
 		return new UserPlan(direction.getBestStrategyForMoving(target), getBodyId());
 	}
 
-	protected EnvironmentalAction decideActionRandomly() {		
-		int size = this.getAvailableActions().size();
-		int randomNumber = this.rng.nextInt(size);
-		Class<? extends EnvironmentalAction> actionPrototype = this.getAvailableActions().get(randomNumber);
+	@Override
+	public EnvironmentalAction<VacuumWorldPerception> decideActionRandomly() {
+		Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype = decideActionPrototypeRandomly();
 
 		return buildNewAction(actionPrototype);
 	}
 	
-	protected EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	public EnvironmentalAction<VacuumWorldPerception> buildNewAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
 		if (actionPrototype.equals(SpeechAction.class)) {
-			return buildSpeechAction(this.bodyId, new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
+			return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
 		}
 		else if(actionPrototype.equals(PerceiveAction.class)) {
 			return buildPerceiveAction();
@@ -190,9 +191,9 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	private EnvironmentalAction buildDropDirtAction() {
+	private EnvironmentalAction<VacuumWorldPerception> buildDropDirtAction() {
 		try {
-			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceded() ? DirtType.ORANGE : DirtType.GREEN;
+			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceeded() ? DirtType.ORANGE : DirtType.GREEN;
 			this.lastDroppedDirt = dirtType;
 			
 			return DropDirtAction.class.getConstructor(DirtType.class).newInstance(dirtType);
@@ -204,7 +205,7 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	protected EnvironmentalAction buildPerceiveAction() {
+	protected EnvironmentalAction<VacuumWorldPerception> buildPerceiveAction() {
 		try {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
 		}
@@ -215,7 +216,7 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 
-	protected final EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	public EnvironmentalAction<VacuumWorldPerception> buildPhysicalAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
 		}
@@ -226,7 +227,7 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 	
-	protected SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
+	public SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
 		try {
 			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
 			return constructor.newInstance(senderId, new ArrayList<>(recipientIds), payload);
@@ -256,22 +257,22 @@ public class UserMind extends AbstractAgentMind {
 		}
 	}
 	
-	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
-		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
+	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction<VacuumWorldPerception>> name) {
+		List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> toRemove = new ArrayList<>();
 
-		for (Class<? extends EnvironmentalAction> a : this.getAvailableActions()) {
+		for (Class<? extends EnvironmentalAction<VacuumWorldPerception>> a : this.getAvailableActionsForThisCycle()) {
 			if (a.isAssignableFrom(name)) {
 				VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
 				toRemove.add(name);
 			}
 		}
 		
-		this.getAvailableActions().removeAll(toRemove);
+		this.getAvailableActionsForThisCycle().removeAll(toRemove);
 	}
 
 	@Override
-	public void execute(EnvironmentalAction action) {
-		this.lastAttemptedActionResult = null;
+	public void execute(EnvironmentalAction<VacuumWorldPerception> action) {
+		setLastActionResult(null);
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
@@ -288,73 +289,31 @@ public class UserMind extends AbstractAgentMind {
 	private void manageBrainRequest(List<?> arg) {
 		for (Object result : arg) {
 			if (result instanceof VacuumWorldActionResult) {
-				this.lastAttemptedActionResult = (VacuumWorldActionResult) result;
+				setLastActionResult((VacuumWorldActionResult) result);
 			}
 			else if(result instanceof VacuumWorldSpeechActionResult) {
 				this.lastCycleIncomingSpeeches.add((VacuumWorldSpeechActionResult) result);
 			}
 		}
 	}
-
-	public void setVacuumWorldUserActions() {
-		this.actions = new HashSet<>(ConfigData.getUserActions());
-	}
 	
-	public Set<Class<? extends AbstractAction>> getVacuumWorldActions() {
-		return this.actions;
-	}
-	
-	public EnvironmentalAction getNextAction() {
-		return this.nextAction;
+	@Override
+	public void setCanSeeBehind(boolean canSeeBehind) {
+		throw new UnsupportedOperationException();
 	}
 
-	public void setNextActionForExecution(EnvironmentalAction nextAction) {
-		this.nextAction = nextAction;
+	@Override
+	public void setPerceptionRange(int preceptionRange) {
+		throw new UnsupportedOperationException();
 	}
 
-	public VacuumWorldActionResult getLastActionResult() {
-		return this.lastAttemptedActionResult;
-	}
-	
-	public VacuumWorldPerception getPerception() {
-		if(this.lastAttemptedActionResult == null) {
-			return null;
-		}
-		else {
-			return this.lastAttemptedActionResult.getPerception();
-		}
-	}
-	
-	public List<VacuumWorldSpeechActionResult> getReceivedCommunications() {
-		return this.lastCycleIncomingSpeeches;
-	}
-	
-
-	public List<Class<? extends EnvironmentalAction>> getAvailableActions() {
-		return this.availableActions;
+	@Override
+	public int getPerceptionRange() {
+		return Integer.MAX_VALUE;
 	}
 
-	public void setAvailableActions(List<Class<? extends EnvironmentalAction>> availableActions) {
-		this.availableActions = availableActions;
-	}
-	
-	public boolean lastActionSucceded() {
-		return ActionResult.ACTION_DONE.equals(this.lastAttemptedActionResult.getActionResult());
-	}
-	
-	public boolean wasLastActionImpossible() {
-		return ActionResult.ACTION_IMPOSSIBLE.equals(this.lastAttemptedActionResult.getActionResult());
-	}
-	
-	public boolean lastActionFailed() {
-		return ActionResult.ACTION_FAILED.equals(this.lastAttemptedActionResult.getActionResult());
-	}
-	
-	public String getBodyId() {
-		return this.bodyId;
-	}
-	
-	public void setBodyId(String id) {
-		this.bodyId = id;
+	@Override
+	public boolean canSeeBehind() {
+		return true;
 	}
 }

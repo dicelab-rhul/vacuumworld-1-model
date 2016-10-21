@@ -4,8 +4,9 @@ import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
-public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
+public class VacuumWorldSpeechPerceptionResultWrapper implements Result<VacuumWorldPerception> {
 	private VacuumWorldSpeechActionResult speechResult;
 	private VacuumWorldActionResult perceptionResult;
 
@@ -25,7 +26,6 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 		this.perceptionResult.changeActionResult(newResult);
 	}
 
-	// Unused
 	@Override
 	public Exception getFailureReason() {
 		return this.perceptionResult.getFailureReason();
@@ -62,5 +62,15 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 	@Override
 	public String getActorId() {
 		return this.perceptionResult.getActorId();
+	}
+
+	@Override
+	public VacuumWorldPerception getPerception() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setPerception(VacuumWorldPerception perception) {
+		throw new UnsupportedOperationException();
 	}
 }

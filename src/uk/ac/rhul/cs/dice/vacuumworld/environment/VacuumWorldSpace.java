@@ -25,6 +25,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserSensor;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
@@ -38,7 +39,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	private boolean monitoring;
 
 	public VacuumWorldSpace(int[] dimensions) {
-		super(new HashMap<LocationKey, Location>());
+		super(new HashMap<>());
 		this.dimensions = dimensions;
 		
 		initEmptyMap();
@@ -112,12 +113,12 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		
 		return toReturn;
 	}
-	
+
 	@Override
 	public VacuumWorldLocation getLocation(LocationKey locationKey) {
-		return (VacuumWorldLocation) this.getGrid().get(locationKey);
+		return (VacuumWorldLocation) super.getLocation(locationKey);
 	}
-
+	
 	public VacuumWorldLocation getNorthernLocation(int x, int y) {
 		return this.getLocation(new VacuumWorldCoordinates(x, y - 1));
 	}
@@ -266,13 +267,14 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 			managePhysicsRequest(arg);
 		}
 		else if(o instanceof VacuumWorldMonitoringBridge) {
-			
+			//TODO
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void managePhysicsRequest(Object arg) {
 		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-			managePhysicsRequest((DefaultActionResult) arg);
+			managePhysicsRequest((DefaultActionResult<VacuumWorldPerception>) arg);
 		} 
 		else if (VacuumWorldSpeechPerceptionResultWrapper.class.isAssignableFrom(arg.getClass())) {
 			manageSpeechActionResult((VacuumWorldSpeechPerceptionResultWrapper) arg);
@@ -287,7 +289,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		notifyTargets(recipientActorsIds, wrapper.getSpeechResult());
 	}
 
-	private void notifyActor(List<String> senderSensorIds, DefaultActionResult result) {
+	private void notifyActor(List<String> senderSensorIds, DefaultActionResult<VacuumWorldPerception> result) {
 		notifyObserversIfNeeded(senderSensorIds, result);
 	}
 	
@@ -314,7 +316,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		user.getListeningSensors().forEach((UserSensor sensor) -> sensor.update(this, result));
 	}
 
-	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, DefaultActionResult result) {
+	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, DefaultActionResult<VacuumWorldPerception> result) {
 		List<CustomObserver> recipients = this.getObservers();
 		
 		for(CustomObserver recipient : recipients) {
@@ -327,26 +329,26 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	private void notifyUserSensorIfNeeded(UserSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult result) {
+	private void notifyUserSensorIfNeeded(UserSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult<VacuumWorldPerception> result) {
 		if(sensorsToNotifyIds.contains(recipient.getSensorId())) {
 			recipient.update(this, result);
 		}
 	}
 
-	private void notifyAgentSensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult result) {
+	private void notifyAgentSensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult<VacuumWorldPerception> result) {
 		if(sensorsToNotifyIds.contains(recipient.getSensorId())) {
 			recipient.update(this, result);
 		}
 	}
 
-	private void managePhysicsRequest(DefaultActionResult result) {
+	private void managePhysicsRequest(DefaultActionResult<VacuumWorldPerception> result) {
 		logResult(result);
 		
 		List<String> senderSensorIds = result.getRecipientsIds();
 		notifyActor(senderSensorIds, result);
 	}
 
-	private void logResult(DefaultActionResult result) {
+	private void logResult(DefaultActionResult<VacuumWorldPerception> result) {
 		if(result instanceof VacuumWorldActionResult) {
 			logResult((VacuumWorldActionResult) result); 
 		}

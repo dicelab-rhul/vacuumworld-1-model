@@ -1,25 +1,21 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.UniverseAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Universe;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 
-public class VacuumWorldUniverse extends Universe {
+public class VacuumWorldUniverse extends Universe<VacuumWorldPerception> {
 	private VacuumWorldMonitoringBridge monitoringBridge;
 	private VacuumWorldMonitoringContainer monitoringContainer;
 	private VacuumWorldMonitoringPhysics monitoringPhysics;
 
 	public VacuumWorldUniverse(EnvironmentalSpace state, VacuumWorldPhysics physics, VacuumWorldMonitoringContainer monitoringContainer, VacuumWorldMonitoringPhysics monitoringPhysics, UniverseAppearance appearance) {
-		super(state, Stream.of(ConfigData.getCleaningAgentActions(), ConfigData.getUserActions(), ConfigData.getMonitoringAgentActions()).flatMap(List::stream).collect(Collectors.toSet()), null, physics, appearance);
+		super(state, physics, appearance);
 		
 		VacuumWorldSpace space = (VacuumWorldSpace) state;
 		

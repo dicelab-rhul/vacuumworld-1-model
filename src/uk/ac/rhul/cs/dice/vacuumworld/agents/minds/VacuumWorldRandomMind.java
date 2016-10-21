@@ -5,21 +5,20 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
 public class VacuumWorldRandomMind extends VacuumWorldDefaultMind {
-	private static final String NAME = "RANDOM";
 	
-	public static final String getName() {
-		return NAME;
+	public VacuumWorldRandomMind(String bodyId) {
+		super(bodyId);
 	}
 
 	@Override
-	public EnvironmentalAction decide(Object... parameters) {
+	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception != null) {
 			updateAvailableActions(perception);
 		}
 		
-		this.getAvailableActions().remove(SpeechAction.class);
+		this.getAvailableActionsForThisCycle().remove(SpeechAction.class);
 		
 		return decideActionRandomly();
 	}

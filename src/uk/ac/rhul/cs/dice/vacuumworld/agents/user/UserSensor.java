@@ -15,11 +15,7 @@ public class UserSensor extends AbstractSensor<VacuumWorldSensorRole> {
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if(o instanceof VacuumWorldSpace && arg instanceof DefaultActionResult) {
-			manageEnviromnentRequest((DefaultActionResult) arg);
+			notifyObservers(arg, User.class);
 		}
-	}
-	
-	private void manageEnviromnentRequest(DefaultActionResult result) {
-		notifyObservers(result, User.class);
 	}
 }

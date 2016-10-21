@@ -13,12 +13,8 @@ public class VacuumWorldDefaultSensor extends AbstractSensor<VacuumWorldSensorRo
 	
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldSpace && arg instanceof DefaultActionResult) {
-			manageEnviromnentRequest((DefaultActionResult) arg);
+		if(o instanceof VacuumWorldSpace && DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+			notifyObservers(arg, VacuumWorldCleaningAgent.class);
 		}
-	}
-
-	private void manageEnviromnentRequest(DefaultActionResult result) {
-		notifyObservers(result, VacuumWorldCleaningAgent.class);
 	}
 }

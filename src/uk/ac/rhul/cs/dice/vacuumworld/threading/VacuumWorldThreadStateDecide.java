@@ -2,31 +2,18 @@ package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
-public class VacuumWorldThreadStateDecide extends DefaultThreadStateDecide {
+public class VacuumWorldThreadStateDecide extends AbstractThreadStateDecide<VacuumWorldPerception> {
 	@Override
-	public void run(ActorRunnable runnable) {
+	public void run(AbstractActorRunnable<VacuumWorldPerception> runnable) {
 		if(runnable instanceof VacuumWorldActorRunnable) {
-			EnvironmentalAction nextAction = runnable.getActorMind().decide();
-			Mind mind = ((VacuumWorldActorRunnable) runnable).getActorMind();
-			setNextAction(nextAction, mind);
+			EnvironmentalAction<VacuumWorldPerception> nextAction = runnable.getActorMind().decide();
+			Mind<VacuumWorldPerception> mind = ((VacuumWorldActorRunnable) runnable).getActorMind();
+			mind.setNextActionForExecution(nextAction);
 		}
 		else {
 			super.run(runnable);
-		}
-	}
-
-	private void setNextAction(EnvironmentalAction nextAction, Mind mind) {
-		if(mind instanceof VacuumWorldDefaultMind) {
-			((VacuumWorldDefaultMind) mind).setNextActionForExecution(nextAction);
-		}
-		else if(mind instanceof UserMind) {
-			((UserMind) mind).setNextActionForExecution(nextAction);
-		}
-		else {
-			throw new IllegalArgumentException("Bad mind: " + mind.getClass().getSimpleName());
 		}
 	}
 }

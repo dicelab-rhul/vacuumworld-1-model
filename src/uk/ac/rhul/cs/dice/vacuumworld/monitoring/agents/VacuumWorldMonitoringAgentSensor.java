@@ -15,7 +15,7 @@ public class VacuumWorldMonitoringAgentSensor extends VacuumWorldDefaultSensor {
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if(o instanceof VacuumWorldMonitoringContainer && arg instanceof DefaultActionResult) {
-			notifyObservers((DefaultActionResult) arg, VacuumWorldMonitoringAgent.class);
+			notifyObservers(arg, VacuumWorldMonitoringAgent.class);
 		}
 	}
 }

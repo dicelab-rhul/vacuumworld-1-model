@@ -3,8 +3,6 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
@@ -24,10 +22,11 @@ public class VacuumWorldMonitoringBridge extends CustomObservable implements Mon
 		this.monitoredContainerPhysicsClass = monitoredContainerPhysicsClass;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if(this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-			VacuumWorldMonitoringActionResult result = constructMonitoringResult((DefaultActionResult) arg);
+			VacuumWorldMonitoringActionResult result = constructMonitoringResult((DefaultActionResult<VacuumWorldMonitoringPerception>) arg);
 			notifySuperContainerPhysics(result);
 		}
 		else if(this.monitoringContainerPhysicsClass.isAssignableFrom(o.getClass())) {
@@ -37,28 +36,12 @@ public class VacuumWorldMonitoringBridge extends CustomObservable implements Mon
 		}
 	}
 	
-	private VacuumWorldMonitoringActionResult constructMonitoringResult(DefaultActionResult arg) {
+	private VacuumWorldMonitoringActionResult constructMonitoringResult(DefaultActionResult<VacuumWorldMonitoringPerception> arg) {
 		if(arg instanceof VacuumWorldMonitoringActionResult) {
 			return (VacuumWorldMonitoringActionResult) arg;
 		}
-		else if(arg instanceof VacuumWorldActionResult) {
-			VacuumWorldPerception p = ((VacuumWorldActionResult) arg).getPerception();
-			VacuumWorldMonitoringPerception perception = p == null ? null : new VacuumWorldMonitoringPerception(p.getPerceivedMap(), p.getActorCoordinates());
-			Exception e = ((VacuumWorldActionResult) arg).getFailureReason();
-			
-			return constructMonitoringResult((VacuumWorldActionResult) arg, perception, e);
-		}
 		else {
 			return new VacuumWorldMonitoringActionResult(arg.getActionResult(), arg.getFailureReason(), arg.getRecipientsIds());
-		}
-	}
-	
-	private VacuumWorldMonitoringActionResult constructMonitoringResult(VacuumWorldActionResult r, VacuumWorldMonitoringPerception perception, Exception e) {
-		if(e == null) {
-			return new VacuumWorldMonitoringActionResult(r.getActionResult(), r.getActorId(), r.getRecipientsIds(), perception);
-		}
-		else {
-			return new VacuumWorldMonitoringActionResult(r.getActionResult(), r.getActorId(), e, r.getRecipientsIds());
 		}
 	}
 

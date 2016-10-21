@@ -18,21 +18,19 @@ import java.util.concurrent.TimeUnit;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldUniverse;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentActuator;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldActorRunnable;
+import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeCodes;
@@ -160,9 +158,9 @@ public class VacuumWorldServer implements Observer {
 		agent.getPhysicalActuators().forEach((VacuumWorldMonitoringAgentActuator actuator) -> actuator.addObserver(space));
 		agent.getSpeakingActuators().forEach((VacuumWorldMonitoringAgentActuator actuator) -> actuator.addObserver(space));
 		
-		((VacuumWorldMonitoringAgentMind) agent.getMind()).setVacuumWorldMonitoringAgentActions();
+		agent.getMind().loadAvailableActionsForThisMindFromArbitraryParameters();
 
-		this.threadManager.addActor(new VacuumWorldActorRunnable(agent.getMind()));
+		this.threadManager.addMonitoringAgent(new VacuumWorldMonitoringActorRunnable(agent.getMind()));
 	}
 
 	private void setupUser() {
@@ -181,7 +179,7 @@ public class VacuumWorldServer implements Observer {
 		user.getPhysicalActuators().forEach((UserActuator actuator) -> actuator.addObserver(space));
 		user.getSpeakingActuators().forEach((UserActuator actuator) -> actuator.addObserver(space));
 		
-		((UserMind) user.getMind()).setVacuumWorldUserActions();
+		user.getMind().loadAvailableActionsForThisMindFromArbitraryParameters();
 
 		this.threadManager.addActor(new VacuumWorldActorRunnable(user.getMind()));
 	}
@@ -202,9 +200,9 @@ public class VacuumWorldServer implements Observer {
 		agent.getPhysicalActuators().forEach((VacuumWorldDefaultActuator actuator) -> actuator.addObserver(space));
 		agent.getSpeakingActuators().forEach((VacuumWorldDefaultActuator actuator) -> actuator.addObserver(space));
 		
-		((VacuumWorldDefaultMind) agent.getMind()).setCanSeeBehind(agent.canSeeBehind());
-		((VacuumWorldDefaultMind) agent.getMind()).setPerceptionRange(agent.getPerceptionRange());
-		((VacuumWorldDefaultMind) agent.getMind()).setVacuumWorldCleaningAgentActions();
+		agent.getMind().setCanSeeBehind(agent.canSeeBehind());
+		agent.getMind().setPerceptionRange(agent.getPerceptionRange());
+		agent.getMind().loadAvailableActionsForThisMindFromArbitraryParameters();
 
 		this.threadManager.addActor(new VacuumWorldActorRunnable(agent.getMind()));
 	}
@@ -247,8 +245,6 @@ public class VacuumWorldServer implements Observer {
 		
 		manageViewRequest(code);
 	}
-
-	// ***** SET UP VACUUM WORLD CLEANING AGENT ***** //
 
 	private void manageViewRequest(ViewRequestsEnum code) {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Got " + code + " from view through controller.");

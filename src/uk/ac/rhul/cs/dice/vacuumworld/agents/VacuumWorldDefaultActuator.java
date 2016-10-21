@@ -1,12 +1,12 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractActuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
-public class VacuumWorldDefaultActuator extends AbstractActuator<VacuumWorldActuatorRole> {
+public class VacuumWorldDefaultActuator extends AbstractActuator<VacuumWorldActuatorRole, VacuumWorldPerception> {
 	
 	public VacuumWorldDefaultActuator(String bodyId, VacuumWorldActuatorRole role) {
 		super(bodyId, role);
@@ -27,13 +27,5 @@ public class VacuumWorldDefaultActuator extends AbstractActuator<VacuumWorldActu
 
 	private void executeBodyRequest(VacuumWorldEvent event) {
 		notifyObservers(event, VacuumWorldSpace.class);
-	}
-
-	public boolean canHandle(Class<?> action) {
-		if(AbstractAction.class.isAssignableFrom(action)) {
-			return true;
-		}
-		
-		return false;
 	}
 }

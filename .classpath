@@ -9,6 +9,6 @@
 	<classpathentry kind="lib" path="res/jackson-core-2.7.5.jar"/>
 	<classpathentry kind="lib" path="res/jackson-databind-2.7.5.jar"/>
 	<classpathentry kind="lib" path="res/vwcommon.jar"/>
-	<classpathentry kind="lib" path="res/gawl.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/GenericAgentsWorldLibrary"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

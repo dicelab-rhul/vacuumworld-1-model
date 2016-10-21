@@ -5,11 +5,12 @@ import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class UserPlan {
-	private Queue<Class<? extends EnvironmentalAction>> actionsToPerform;
-	private Class<? extends EnvironmentalAction> lastAction;
+	private Queue<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> actionsToPerform;
+	private Class<? extends EnvironmentalAction<VacuumWorldPerception>> lastAction;
 	private int numberOfConsecutiveFailuresOfTheSameAction;
 	
 	public UserPlan() {
@@ -18,8 +19,8 @@ public class UserPlan {
 		this.lastAction = null;
 	}
 	
-	public UserPlan(List<Class<? extends EnvironmentalAction>> actions, String actorId) {
-		for(Class<? extends EnvironmentalAction> actionToPerform : actions) {
+	public UserPlan(List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> actions, String actorId) {
+		for(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionToPerform : actions) {
 			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + actorId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
 		}
 		
@@ -28,18 +29,18 @@ public class UserPlan {
 		this.lastAction = null;
 	}
 
-	public Queue<Class<? extends EnvironmentalAction>> getActionsToPerform() {
+	public Queue<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> getActionsToPerform() {
 		return this.actionsToPerform;
 	}
 	
-	public Class<? extends EnvironmentalAction> pullActionToPerform(String agentId) {
-		Class<? extends EnvironmentalAction> selected = this.actionsToPerform.poll();
+	public Class<? extends EnvironmentalAction<VacuumWorldPerception>> pullActionToPerform(String agentId) {
+		Class<? extends EnvironmentalAction<VacuumWorldPerception>> selected = this.actionsToPerform.poll();
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + agentId + ": selecting " + selected.getSimpleName() + " from plan...");
 		
 		return selected;
 	}
 
-	public void setActionsToPerform(Queue<Class<? extends EnvironmentalAction>> actionsToPerform) {
+	public void setActionsToPerform(Queue<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> actionsToPerform) {
 		this.actionsToPerform = actionsToPerform;
 	}
 	
@@ -47,16 +48,16 @@ public class UserPlan {
 		this.actionsToPerform.clear();
 	}
 	
-	public void pushActionToPerform(Class<? extends EnvironmentalAction> actionToPerform, String agentId) {
+	public void pushActionToPerform(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionToPerform, String agentId) {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + agentId + ": adding " + actionToPerform.getSimpleName() + " to plan...");
 		this.actionsToPerform.add(actionToPerform);
 	}
 
-	public Class<? extends EnvironmentalAction> getLastAction() {
+	public Class<? extends EnvironmentalAction<VacuumWorldPerception>> getLastAction() {
 		return this.lastAction;
 	}
 
-	public void setLastAction(Class<? extends EnvironmentalAction> lastAction) {
+	public void setLastAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> lastAction) {
 		this.lastAction = lastAction;
 	}
 

@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractEvent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Actor;
@@ -31,7 +31,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPerceptionResultWrapper;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
@@ -46,8 +45,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.actions.MonitoringUpdateEvent;
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.environment.VacuumWorldLegacyMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
@@ -55,7 +52,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAge
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPhysicsInterface {
+public class VacuumWorldPhysics extends AbstractPhysics<VacuumWorldPerception> implements VacuumWorldPhysicsInterface {
 	private ConcurrentMap<Long, VacuumWorldCleaningAgent> activeAgents;
 	private ConcurrentMap<Long, VacuumWorldMonitoringAgent> activeMonitoringAgents;
 	private ConcurrentMap<Long, User> activeUsers;
@@ -68,10 +65,10 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result attempt(Event event, Space context) {
+	public synchronized Result<VacuumWorldPerception> attempt(Event<VacuumWorldPerception> event, Space context) {
 		initMaps(event);
 		
-		Result result = event.getAction().attempt(this, context);
+		Result<VacuumWorldPerception> result = event.getAction().attempt(this, context);
 		
 		if (result instanceof VacuumWorldSpeechPerceptionResultWrapper) {
 			doPerceptionAndSensorIds(((VacuumWorldSpeechPerceptionResultWrapper) result).getPerceptionResult(), context);
@@ -87,7 +84,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		}
 	}
 
-	private String getActorId(Event event) {
+	private String getActorId(Event<VacuumWorldPerception> event) {
 		String actorId = getActorId();
 		
 		if(actorId == null) {
@@ -97,31 +94,31 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return actorId;
 	}
 
-	private String getActorIdFromEvent(Event event) {
-		if(event instanceof AbstractEvent) {
-			Actor actor = ((AbstractEvent) event).getActor();
+	private String getActorIdFromEvent(Event<VacuumWorldPerception> event) {
+		if(event instanceof VacuumWorldEvent) {
+			Actor actor = ((VacuumWorldEvent) event).getActor();
 			
 			if(actor instanceof AbstractAgent) {
-				return ((AbstractAgent<?, ?>) actor).getId().toString();
+				return ((AbstractAgent<?, ?, ?>) actor).getId().toString();
 			}
 		}
 		
 		return null;
 	}
 
-	private VacuumWorldActionResult attempt(Result result, String actorId) {
+	private VacuumWorldActionResult attempt(Result<VacuumWorldPerception> result, String actorId) {
 		if (result instanceof VacuumWorldActionResult) {
 			return (VacuumWorldActionResult) result;
 		}
 		else if (result instanceof DefaultActionResult) {
-			return new VacuumWorldActionResult((DefaultActionResult) result, actorId);
+			return new VacuumWorldActionResult((DefaultActionResult<VacuumWorldPerception>) result, actorId);
 		}
 		else {
 			throw new IllegalArgumentException(VWUtils.ACTOR + actorId + ": unknown result: " + result.getClass().getSimpleName());
 		}
 	}
 
-	private void initMaps(Event event) {
+	private void initMaps(Event<VacuumWorldPerception> event) {
 		Actor actor = event.getActor();
 		
 		if(actor instanceof VacuumWorldCleaningAgent) {
@@ -241,7 +238,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(TurnLeftAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(TurnLeftAction action, Space context) {
 		try {
 			return doTurn((VacuumWorldSpace) context, action, false);
 
@@ -280,7 +277,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(TurnRightAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(TurnRightAction action, Space context) {
 		try {
 			return doTurn((VacuumWorldSpace) context, action, true);
 
@@ -290,7 +287,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		}
 	}
 	
-	private synchronized Result doTurn(VacuumWorldSpace context, TurningAction action, boolean rightOrLeft) throws AlreadyLockedException {
+	private synchronized Result<VacuumWorldPerception> doTurn(VacuumWorldSpace context, TurningAction action, boolean rightOrLeft) throws AlreadyLockedException {
 		VacuumWorldLocation actorLocation = getCurrentActorLocation(context);
 		actorLocation.getExclusiveWriteLock();
 		
@@ -308,7 +305,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		String actorId = getActorId();
 		logTurn(action, actorLocation, actorId);
 		
-		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, (VacuumWorldPerception) null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}
 
 	private void logTurn(TurningAction action, VacuumWorldLocation actorLocation, String actorId) {
@@ -383,7 +380,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(MoveAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(MoveAction action, Space context) {
 		try {
 			return doMove(action, (VacuumWorldSpace) context);
 		}
@@ -392,7 +389,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		}
 	}
 	
-	private Result doMove(MoveAction action, VacuumWorldSpace context) throws AlreadyLockedException {
+	private Result<VacuumWorldPerception> doMove(MoveAction action, VacuumWorldSpace context) throws AlreadyLockedException {
 		long threadId = Thread.currentThread().getId();
 		
 		ActorFacingDirection actorFacingDirection = isCurrentActorAgent() ? this.activeAgents.get(threadId).getFacingDirection() : isCurrentActorUser() ? this.activeUsers.get(threadId).getFacingDirection() : null;
@@ -408,7 +405,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return doMove(actorLocation, targetLocation, originalCooridinates, actorFacingDirection, context, threadId);
 	}
 
-	private Result doMove(VacuumWorldLocation actorLocation, VacuumWorldLocation targetLocation, VacuumWorldCoordinates originalCooridinates, ActorFacingDirection actorFacingDirection, VacuumWorldSpace context, long threadId) {
+	private Result<VacuumWorldPerception> doMove(VacuumWorldLocation actorLocation, VacuumWorldLocation targetLocation, VacuumWorldCoordinates originalCooridinates, ActorFacingDirection actorFacingDirection, VacuumWorldSpace context, long threadId) {
 		if(isCurrentActorAgent()) {
 			context.getLocation(actorLocation.getCoordinates()).removeAgent();
 			targetLocation.addAgent(this.activeAgents.get(threadId));
@@ -428,10 +425,10 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		String actorId = getActorId();
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + actorId + " old position: " + originalCooridinates + ", new position: " + targetLocation.getCoordinates() + ", facing direction: " + actorFacingDirection + ".");
 		
-		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, (VacuumWorldPerception) null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}
 
-	private synchronized Result manageFailedMove(Exception e, VacuumWorldSpace context) {
+	private synchronized Result<VacuumWorldPerception> manageFailedMove(Exception e, VacuumWorldSpace context) {
 		long threadId = Thread.currentThread().getId();
 		ActorFacingDirection actorFacingDirection = null;
 		
@@ -447,13 +444,13 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		return manageFailedAction(false, true, null, Arrays.asList(getCurrentActorLocation(context), context.getFrontLocation(originalCooridinates, actorFacingDirection)), e);
 	}
 	
-	private synchronized Result manageFailedAction(boolean readUnlock, boolean writeUnlock, List<VacuumWorldLocation> readLockedLocations, List<VacuumWorldLocation> writeLockedLocations, Exception e) {
+	private synchronized Result<VacuumWorldPerception> manageFailedAction(boolean readUnlock, boolean writeUnlock, List<VacuumWorldLocation> readLockedLocations, List<VacuumWorldLocation> writeLockedLocations, Exception e) {
 		VWUtils.log(e);
 		String actorId = getActorId();
 		removeCurrentActor();
 		releaseLocksIfNecessary(readUnlock, writeUnlock, readLockedLocations, writeLockedLocations);
 		
-		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, e, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}
 	
 	private synchronized void releaseLocksIfNecessary(boolean read, boolean write, List<VacuumWorldLocation> readLockLocations, List<VacuumWorldLocation> writeLockLocations) {
@@ -517,7 +514,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 
 	private boolean checkCompatibility(VacuumWorldLocation agentLocation) {
 		VacuumWorldCleaningAgent agent = this.activeAgents.get(Thread.currentThread().getId());
-		VacuumWorldAgentType agentType = ((VacuumWorldAgentAppearance) agent.getExternalAppearance()).getType();
+		VacuumWorldAgentType agentType = agent.getExternalAppearance().getType();
 		DirtType dirtType = ((DirtAppearance) agentLocation.getDirt().getExternalAppearance()).getDirtType();
 		
 		return DirtType.agentAndDirtCompatible(dirtType, agentType);
@@ -529,7 +526,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(CleanAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(CleanAction action, Space context) {
 		try {
 			return doClean((VacuumWorldSpace) context);
 		}
@@ -538,7 +535,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		}
 	}
 
-	private Result doClean(VacuumWorldSpace context) throws AlreadyLockedException {
+	private Result<VacuumWorldPerception> doClean(VacuumWorldSpace context) throws AlreadyLockedException {
 		VacuumWorldLocation agentLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 		agentLocation.getExclusiveWriteLock();
 		DirtType dirtType = ((DirtAppearance) agentLocation.getDirt().getExternalAppearance()).getDirtType();
@@ -548,7 +545,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		String actorId = getActorId();
 		VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + actorId + " cleaned a " + dirtType.toString() + " piece of dirt on location " + agentLocation.getCoordinates().toString() + ".");
 		
-		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		return new VacuumWorldActionResult(ActionResult.ACTION_DONE, (VacuumWorldPerception) null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 	}
 
 	@Override
@@ -568,11 +565,11 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(PerceiveAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(PerceiveAction action, Space context) {
 		try {
 			String actorId = getActorId();
 			
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, (VacuumWorldPerception) null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 		catch (Exception e) {
 			return manageFailedAction(false, false, null, null, e);
@@ -643,7 +640,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(SpeechAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(SpeechAction action, Space context) {
 		try {
 			return doSpeech(action, (VacuumWorldSpace) context);
 		} 
@@ -652,10 +649,10 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		}
 	}
 
-	private Result doSpeech(SpeechAction action, VacuumWorldSpace context) {
+	private Result<VacuumWorldPerception> doSpeech(SpeechAction action, VacuumWorldSpace context) {
 		VacuumWorldSpeechActionResult result = createSpeechActionResult(action, context);
 		String actorId = getActorId();
-		VacuumWorldActionResult actionResult = new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+		VacuumWorldActionResult actionResult = new VacuumWorldActionResult(ActionResult.ACTION_DONE, (VacuumWorldPerception) null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		String message = result.getPayload().getPayload();
 		String logMessage = buildSpeechActionLogMessage(actorId, message, result.getRecipientsIds());
 		VWUtils.logWithClass(this.getClass().getSimpleName(), logMessage);
@@ -739,7 +736,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	@Override
-	public synchronized Result perform(DropDirtAction action, Space context) {
+	public synchronized Result<VacuumWorldPerception> perform(DropDirtAction action, Space context) {
 		try {
 			VacuumWorldLocation currentActorLocation = getCurrentActorLocation((VacuumWorldSpace) context);
 			currentActorLocation.getExclusiveWriteLock();
@@ -752,7 +749,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 			String actorId = getActorId();
 			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + actorId + " dropped a " + action.getDirtToDropType().toString() + " piece of dirt on location " + currentActorLocation.getCoordinates().toString() + ".");
 			
-			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
+			return new VacuumWorldActionResult(ActionResult.ACTION_DONE, (VacuumWorldPerception) null, actorId, this.sensorsToNotify.get(Thread.currentThread().getId()));
 		}
 		catch(Exception e) {
 			return manageFailedAction(false, true, null, Arrays.asList(getCurrentActorLocation((VacuumWorldSpace) context)), e);
@@ -777,14 +774,14 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		}
 		else if(o instanceof VacuumWorldMonitoringBridge && arg instanceof Object[]) {
 			long threadId = Thread.currentThread().getId();
-			Result result = manageBridgeRequest((Object[]) arg, threadId);
+			Result<VacuumWorldMonitoringPerception> result = manageBridgeRequest((Object[]) arg, threadId);
 			this.activeMonitoringAgents.remove(threadId);
 			this.sensorsToNotify.remove(threadId);
 			notifyObservers(result, VacuumWorldMonitoringBridge.class);
 		}
 	}
 
-	private synchronized Result manageBridgeRequest(Object[] arg, long threadId) {
+	private synchronized Result<VacuumWorldMonitoringPerception> manageBridgeRequest(Object[] arg, long threadId) {
 		if (arg.length != 2) {
 			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, new IllegalArgumentException(), null);
 		}
@@ -814,10 +811,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	private synchronized void attemptEvent(VacuumWorldEvent event, VacuumWorldSpace context) {
-		Result result = event.attempt(this, context);
-		ActionResult code = result.getActionResult();
-		MonitoringUpdateEvent monitoringUpdateEvent = new MonitoringUpdateEvent(event.getAction(), event.getTimestamp(), event.getActor(), code);
-		notifyObservers(monitoringUpdateEvent, VacuumWorldLegacyMonitoringContainer.class);
+		Result<VacuumWorldPerception> result = event.attempt(this, context);
 
 		removeCurrentActor();
 		this.sensorsToNotify.remove(Thread.currentThread().getId());
@@ -834,5 +828,25 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		else if(isCurrentActorUser()) {
 			this.activeUsers.remove(threadId);
 		}
+	}
+
+	@Override
+	public boolean isPossible(EnvironmentalAction<VacuumWorldPerception> action, Space context) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isNecessary(EnvironmentalAction<VacuumWorldPerception> action, Space context) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Result<VacuumWorldPerception> perform(EnvironmentalAction<VacuumWorldPerception> action, Space context) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean succeeded(EnvironmentalAction<VacuumWorldPerception> action, Space context) {
+		throw new UnsupportedOperationException();
 	}
 }

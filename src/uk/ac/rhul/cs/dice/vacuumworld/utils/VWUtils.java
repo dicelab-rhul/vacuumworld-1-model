@@ -1,11 +1,9 @@
 package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +12,6 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
-import uk.ac.rhul.cs.dice.vacuumworld.legacy.utils.InfoLogFormatter;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
 public class VWUtils {
@@ -35,25 +32,6 @@ public class VWUtils {
 		logger.addHandler(handler);
 		
 		return logger;
-	}
-
-	public static final Logger fileLogger(String file, boolean append) {
-		FileHandler fileHandler = null;
-		Logger logger = null;
-		
-		try {
-			fileHandler = new FileHandler(file, append);
-			logger = Logger.getAnonymousLogger();
-			fileHandler.setFormatter(new InfoLogFormatter());
-			logger.addHandler(fileHandler);
-			logger.setUseParentHandlers(false);
-			
-			return logger;
-		}
-		catch (SecurityException | IOException e) {
-			log(e);
-			return null;
-		}
 	}
 
 	public static int getCycleNumber() {

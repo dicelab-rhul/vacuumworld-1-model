@@ -136,15 +136,15 @@ public class VacuumWorldPerception implements Perception {
 		return locationsWithCompatibleDirt;
 	}
 	
-	public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerception(String actorId) {
-		List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> actors = new ArrayList<>();
+	public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception>> getActorsInPerception(String actorId) {
+		List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception>> actors = new ArrayList<>();
 		
 		this.perception.values().forEach((VacuumWorldLocation location) -> addActorToActorsListIfNecessary(actors, location, actorId));
 		
 		return actors;
 	}
 
-	private void addActorToActorsListIfNecessary(List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> actors, VacuumWorldLocation location, String actorId) {
+	private void addActorToActorsListIfNecessary(List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception>> actors, VacuumWorldLocation location, String actorId) {
 		if(!location.isAnAgentPresent()) {
 			return;
 		}

@@ -9,14 +9,15 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 
-public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements VacuumWorldMonitoringPhysicsInterface {
+public class VacuumWorldMonitoringPhysics extends AbstractPhysics<VacuumWorldMonitoringPerception> implements VacuumWorldMonitoringPhysicsInterface {
 
 	@Override
-	public Result attempt(Event event, Space context) {
-		EnvironmentalAction action = ((VacuumWorldMonitoringEvent) event).getAction();
+	public Result<VacuumWorldMonitoringPerception> attempt(Event<VacuumWorldMonitoringPerception> event, Space context) {
+		EnvironmentalAction<VacuumWorldMonitoringPerception> action = ((VacuumWorldMonitoringEvent) event).getAction();
 		return action.attempt(this, context);
 	}
 
@@ -41,7 +42,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	}
 
 	@Override
-	public Result perform(TotalPerceptionAction action, Space context) {
+	public Result<VacuumWorldMonitoringPerception> perform(TotalPerceptionAction action, Space context) {
 		notifyObservers(action, VacuumWorldMonitoringBridge.class);
 		
 		return null;
@@ -50,5 +51,25 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	@Override
 	public boolean succeeded(TotalPerceptionAction action, Space context) {
 		return true;
+	}
+
+	@Override
+	public boolean isPossible(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isNecessary(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Result<VacuumWorldMonitoringPerception> perform(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean succeeded(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
+		throw new UnsupportedOperationException();
 	}
 }

@@ -1,38 +1,52 @@
 package uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultBrain;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 
-public class VacuumWorldMonitoringAgentBrain extends VacuumWorldDefaultBrain {
-
-	public VacuumWorldMonitoringAgentBrain(Class<? extends VacuumWorldDefaultMind> mindClass) {
-		super(mindClass);
-	}
+public class VacuumWorldMonitoringAgentBrain extends AbstractAgentBrain<VacuumWorldMonitoringPerception> {
 	
+	public VacuumWorldMonitoringAgentBrain() {
+		super(VacuumWorldMonitoringAgentMind.class);
+	}
+
 	@Override
 	public void update(CustomObservable o, Object arg) {
 		if(o instanceof VacuumWorldMonitoringAgentMind) {
 			manageMonitoringMindRequest(arg);
 		}
 		else if(o instanceof VacuumWorldMonitoringAgent && arg instanceof DefaultActionResult) {
-			manageBodyRequest((DefaultActionResult) arg);
+			manageBodyRequest(arg);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void manageBodyRequest(Object arg) {
+		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+			pushReceivedResultToQueue((DefaultActionResult<VacuumWorldMonitoringPerception>) arg);
+			setActionResultReturned(true);
 		}
 	}
 
 	private void manageMonitoringMindRequest(Object arg) {
 		if(arg == null) {
-			manageMindRequest();
+			manageMindPullRequest();
 		}
-		else if(AbstractAction.class.isAssignableFrom(arg.getClass())) {
-			executeAction((AbstractAction) arg);
+		else if(EnvironmentalAction.class.isAssignableFrom(arg.getClass())) {
+			setActionResultReturned(false);
+			notifyObservers(arg, VacuumWorldMonitoringAgent.class);
 		}
 	}
 
-	private void executeAction(AbstractAction action) {
-		this.actionResultReturned = false;
-		notifyObservers(action, VacuumWorldMonitoringAgent.class);
+	@Override
+	public void manageMindPullRequest() {
+		updateResultsToSend();
+		
+		if (isActionResultReturned()) {
+			notifyObservers(getResultsToSend(), getPairedMindClass());
+			clearResultsToSend();
+		}
 	}
 }

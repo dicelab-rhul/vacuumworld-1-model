@@ -12,9 +12,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
 public class VacuumWorldRandomBossMind extends VacuumWorldRandomMind {
+	
+	public VacuumWorldRandomBossMind(String bodyId) {
+		super(bodyId);
+	}
+
 	@Override
-	public EnvironmentalAction decide(Object... parameters) {
-		EnvironmentalAction next = super.decide(parameters);
+	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
+		EnvironmentalAction<VacuumWorldPerception> next = super.decide(parameters);
 		
 		if(next instanceof MoveAction) {
 			return changeIdeaIfNecessary(next);
@@ -24,7 +29,7 @@ public class VacuumWorldRandomBossMind extends VacuumWorldRandomMind {
 		}
 	}
 
-	private EnvironmentalAction changeIdeaIfNecessary(EnvironmentalAction selectedAction) {
+	private EnvironmentalAction<VacuumWorldPerception> changeIdeaIfNecessary(EnvironmentalAction<VacuumWorldPerception> selectedAction) {
 		VacuumWorldPerception perception = getPerception();
 		
 		ActorFacingDirection direction = perception.getActorCurrentFacingDirection();

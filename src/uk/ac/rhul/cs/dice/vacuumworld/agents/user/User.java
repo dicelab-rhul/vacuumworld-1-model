@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
-import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
-import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
@@ -20,13 +18,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
-public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> {
+public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception> {
 	private ActorFacingDirection facingDirection;
 	private VacuumWorldCoordinates currentLocation;
 	
-	public User(UserAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, AbstractAgentMind mind, AbstractAgentBrain brain, ActorFacingDirection facingDirection) {
+	public User(UserAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole, VacuumWorldPerception>> actuators, UserMind mind, UserBrain brain, ActorFacingDirection facingDirection) {
 		super(appearance, sensors, actuators, mind, brain);
 	
 		this.facingDirection = facingDirection;
@@ -63,25 +62,26 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void manageBrainRequest(Object arg) {
-		if (arg instanceof AbstractAction) {
-			manageBrainRequest((AbstractAction) arg);
+		if (arg instanceof EnvironmentalAction<?>) {
+			manageBrainRequest((EnvironmentalAction<VacuumWorldPerception>) arg);
 		}
 	}
 	
-	private void manageBrainRequest(AbstractAction action) {
+	private void manageBrainRequest(EnvironmentalAction<VacuumWorldPerception> action) {
 		VacuumWorldEvent event = new VacuumWorldEvent(action, System.currentTimeMillis(), this);
 
 		String sensorToBeNotifiedBackId = getSeeingSensors().get(0).getSensorId();
 		event.setSensorToCallBackId(sensorToBeNotifiedBackId);
 
 		String actuatorRecipientId = selectActuatorRecipientId(action);
-		event.setActuatorRecipient(actuatorRecipientId);
+		event.setActuatorRecipientId(actuatorRecipientId);
 
 		notifyAgentActuators(event, actuatorRecipientId);
 	}
 	
-	private String selectActuatorRecipientId(AbstractAction action) {
+	private String selectActuatorRecipientId(EnvironmentalAction<VacuumWorldPerception> action) {
 		if(PhysicalAction.class.isAssignableFrom(action.getClass()) || PerceiveAction.class.isAssignableFrom(action.getClass())) {
 			return getPhysicalActuators().get(0).getActuatorId();
 		}
@@ -149,10 +149,10 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 	}
 	
 	private List<UserActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
-		List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
+		List<Actuator<VacuumWorldActuatorRole, VacuumWorldPerception>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole, VacuumWorldPerception> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
 		List<UserActuator> toReturn = new ArrayList<>();
 		
-		for(Actuator<VacuumWorldActuatorRole> actuator : candidates) {
+		for(Actuator<VacuumWorldActuatorRole, VacuumWorldPerception> actuator : candidates) {
 			if(actuator instanceof UserActuator) {
 				toReturn.add((UserActuator) actuator);
 			}
@@ -202,5 +202,15 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 		}
 
 		return this.getId().equals(((User) obj).getId());
+	}
+
+	@Override
+	public int getPerceptionRange() {
+		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public boolean canSeeBehind() {
+		return true;
 	}
 }

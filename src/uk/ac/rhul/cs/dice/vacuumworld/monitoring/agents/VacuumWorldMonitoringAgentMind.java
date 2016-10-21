@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
+import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class VacuumWorldMonitoringAgentMind extends VacuumWorldDefaultMind {
-	public VacuumWorldMonitoringAgentMind() {
+public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind<VacuumWorldMonitoringPerception> {
+	public VacuumWorldMonitoringAgentMind(String bodyId) {
+		super(bodyId);
+		
 		super.setPerceptionRange(Integer.MAX_VALUE);
 		super.setCanSeeBehind(true);
 	}
@@ -20,30 +23,24 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldDefaultMind {
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, VacuumWorldMonitoringAgentBrain.class);
-		setAvailableActions(new ArrayList<>(getVacuumWorldActions()));
+		loadAvailableActionsForThisCycle(new ArrayList<>(getAvailableActionsForThisMind()));
 	}
 	
 	@Override
-	public EnvironmentalAction decide(Object... parameters) {
+	public EnvironmentalAction<VacuumWorldMonitoringPerception> decide(Object... parameters) {
 		return buildPerceiveAction();
 	}
 	
 	@Override
-	public void execute(EnvironmentalAction action) {
-		this.lastAttemptedActionResult = null;
-		this.lastCycleIncomingSpeeches = new ArrayList<>();
+	public void execute(EnvironmentalAction<VacuumWorldMonitoringPerception> action) {
+		setLastActionResult(null);
+		clearReceivedCommunications();
 		
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 		notifyObservers(this.getNextAction(), VacuumWorldMonitoringAgentBrain.class);
 	}
 	
-	@Override
-	public void setVacuumWorldMonitoringAgentActions() {
-		super.setVacuumWorldMonitoringAgentActions();
-	}
-	
-	@Override
-	protected EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	public EnvironmentalAction<VacuumWorldMonitoringPerception> buildNewAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
 		if(TotalPerceptionAction.class.isAssignableFrom(actionPrototype)) {
 			return buildPerceiveAction();
 		}
@@ -52,8 +49,7 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldDefaultMind {
 		}
 	}
 	
-	@Override
-	protected EnvironmentalAction buildPerceiveAction() {
+	public EnvironmentalAction<VacuumWorldMonitoringPerception> buildPerceiveAction() {
 		try {
 			return TotalPerceptionAction.class.newInstance();
 		}
@@ -63,30 +59,34 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldDefaultMind {
 			return new TotalPerceptionAction();
 		}
 	}
-	
+
 	@Override
-	protected SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
-		throw new UnsupportedOperationException();
+	public EnvironmentalAction<VacuumWorldMonitoringPerception> decideActionRandomly() {
+		return buildPerceiveAction();
+	}
+
+	@Override
+	public void update(CustomObservable o, Object arg) {
+		if (o instanceof VacuumWorldMonitoringAgentBrain && arg instanceof List<?>) {
+			manageBrainRequest((List<?>) arg);
+		}
+	}
+	
+	private void manageBrainRequest(List<?> arg) {
+		for (Object result : arg) {
+			if (result instanceof VacuumWorldMonitoringActionResult) {
+				setLastActionResult((VacuumWorldMonitoringActionResult) result);
+			}
+		}
 	}
 	
 	@Override
-	protected EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	public void setCanSeeBehind(boolean canSeeBehind) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
-	protected void updateAvailableActions(VacuumWorldPerception perception) {
-		throw new UnsupportedOperationException();
-	}
-	
-	
-	@Override
-	protected void updateCleaningActionIfNecessary(VacuumWorldPerception perception) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	protected void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
+	public void setPerceptionRange(int preceptionRange) {
 		throw new UnsupportedOperationException();
 	}
 }
