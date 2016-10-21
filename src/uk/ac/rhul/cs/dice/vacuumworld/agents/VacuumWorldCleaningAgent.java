@@ -142,6 +142,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	}
 
 	private void manageBrainRequest(EnvironmentalAction<VacuumWorldPerception> action) {
+		action.setActor(this);
 		VacuumWorldEvent event = new VacuumWorldEvent(action, System.currentTimeMillis(), this);
 
 		String sensorToBeNotifiedBackId = selectSensorToBeNotifiedBackId(action);

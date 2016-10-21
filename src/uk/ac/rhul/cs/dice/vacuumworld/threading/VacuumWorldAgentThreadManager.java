@@ -87,9 +87,16 @@ public class VacuumWorldAgentThreadManager extends Observable {
 
 	private void shutdownExecutors() throws InterruptedException {
 		this.executor.shutdownNow();
-		this.monitoringExecutor.shutdownNow();
+		
+		if(this.monitoringExecutor != null) {
+			this.monitoringExecutor.shutdownNow();
+		}
+		
 		this.executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-		this.monitoringExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		
+		if(this.monitoringExecutor != null) {
+			this.monitoringExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		}
 	}
 
 	protected void doCycleStep(boolean... flags) {

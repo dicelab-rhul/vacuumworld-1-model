@@ -70,6 +70,7 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 	}
 	
 	private void manageBrainRequest(EnvironmentalAction<VacuumWorldPerception> action) {
+		action.setActor(this);
 		VacuumWorldEvent event = new VacuumWorldEvent(action, System.currentTimeMillis(), this);
 
 		String sensorToBeNotifiedBackId = getSeeingSensors().get(0).getSensorId();

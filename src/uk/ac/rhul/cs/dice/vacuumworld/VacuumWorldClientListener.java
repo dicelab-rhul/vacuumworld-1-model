@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld;
 
+import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.concurrent.Semaphore;
@@ -40,7 +41,7 @@ public class VacuumWorldClientListener implements Runnable {
 			runListener();
 		}
 		catch(InterruptedException e) {
-			VWUtils.log(e);
+			VWUtils.fakeLog(e);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -68,6 +69,10 @@ public class VacuumWorldClientListener implements Runnable {
 			}
 			
 			return true;
+		}
+		catch (EOFException e) {
+			VWUtils.fakeLog(e);
+			return false;
 		}
 		catch (Exception e) {
 			VWUtils.log(e);

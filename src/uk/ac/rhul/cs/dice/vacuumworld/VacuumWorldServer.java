@@ -282,10 +282,10 @@ public class VacuumWorldServer implements Observer {
 			
 			this.server.close();
 		}
-		catch(IOException e) {
+		catch(Exception e) {
 			VWUtils.log(e);
 		}
-		finally {
+		finally {			
 			this.sharedStopSignal.stop();
 			killThreads();
 		}
@@ -299,6 +299,9 @@ public class VacuumWorldServer implements Observer {
 		}
 		catch(InterruptedException e) {
 			Thread.currentThread().interrupt();
+		}
+		catch(Exception e) {
+			VWUtils.log(e);
 		}
 	}
 
