@@ -1,11 +1,10 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
-public class VacuumWorldActorRunnable extends AbstractActorRunnable<VacuumWorldPerception> {
+public class VacuumWorldActorRunnable extends AbstractActorRunnable {
 
-	public VacuumWorldActorRunnable(Mind<VacuumWorldPerception> mind) {
+	public VacuumWorldActorRunnable(Mind mind) {
 		super(mind);
 	}
 	

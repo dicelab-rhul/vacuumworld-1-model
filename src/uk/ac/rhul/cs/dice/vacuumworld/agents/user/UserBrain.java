@@ -5,15 +5,14 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 
-public class UserBrain extends AbstractAgentBrain<VacuumWorldPerception> {
-	private ConcurrentLinkedQueue<DefaultActionResult<VacuumWorldPerception>> receivedResults;
-	private List<DefaultActionResult<VacuumWorldPerception>> resultsToSend;
+public class UserBrain extends AbstractAgentBrain {
+	private ConcurrentLinkedQueue<VacuumWorldActionResult> receivedResults;
+	private List<VacuumWorldActionResult> resultsToSend;
 	private boolean actionResultReturned;
 	
 	public UserBrain() {
@@ -34,10 +33,9 @@ public class UserBrain extends AbstractAgentBrain<VacuumWorldPerception> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void manageUserBodyRequest(Object arg) {
-		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-			this.receivedResults.add((DefaultActionResult<VacuumWorldPerception>) arg);
+		if (VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
+			this.receivedResults.add((VacuumWorldActionResult) arg);
 			this.actionResultReturned = true;
 		}
 	}

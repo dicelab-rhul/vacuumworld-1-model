@@ -1,11 +1,9 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
-
-public abstract class AbstractThreadStatePerceive<P extends Perception> implements ThreadState<P> {
+public abstract class AbstractThreadStatePerceive implements ThreadState {
 
 	@Override
-	public void run(AbstractActorRunnable<P> runnable) {
+	public void run(AbstractActorRunnable runnable) {
 		runnable.getActorMind().perceive(null);
 	}
 

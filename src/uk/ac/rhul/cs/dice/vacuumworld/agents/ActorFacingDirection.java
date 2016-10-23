@@ -10,13 +10,13 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.Pair;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
 public enum ActorFacingDirection {
 	NORTH, SOUTH, WEST, EAST;
 	
-	private static final Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>>> bestStrategies = getBestStrategy();
+	private static final Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction>>> bestStrategies = getBestStrategy();
 	
 	public static ActorFacingDirection fromString(String value) {
 		switch(value) {
@@ -33,8 +33,8 @@ public enum ActorFacingDirection {
 		}
 	}
 	
-	private static Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>>> getBestStrategy() {
-		Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>>> strategies = new HashMap<>();
+	private static Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction>>> getBestStrategy() {
+		Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction>>> strategies = new HashMap<>();
 		
 		strategies.put(new Pair<>(ActorFacingDirection.NORTH, ActorFacingDirection.NORTH), Arrays.asList(MoveAction.class));
 		strategies.put(new Pair<>(ActorFacingDirection.NORTH, ActorFacingDirection.SOUTH), Arrays.asList(TurnRightAction.class, TurnRightAction.class, MoveAction.class));
@@ -74,8 +74,19 @@ public enum ActorFacingDirection {
 		}
 	}
 	
-	public List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> getBestStrategyForMoving(ActorFacingDirection targetposition) {
+	public List<Class<? extends EnvironmentalAction>> getBestStrategyForMoving(ActorFacingDirection targetposition) {
 		return ActorFacingDirection.bestStrategies.get(new Pair<ActorFacingDirection>(ActorFacingDirection.this, targetposition));
+	}
+	
+	public ActorFacingDirection getSideDirection(TurningDirection turningDirection) {
+		switch(turningDirection) {
+		case LEFT:
+			return getLeftDirection();
+		case RIGHT:
+			return getRightDirection();
+		default:
+			throw new IllegalArgumentException("Bad turning direction: " + turningDirection + ".");
+		}
 	}
 	
 	public ActorFacingDirection getLeftDirection() {
@@ -89,7 +100,7 @@ public enum ActorFacingDirection {
 		case EAST:
 			return NORTH;
 		default:
-			throw new IllegalArgumentException("Bad facing position: " + this);
+			throw new IllegalArgumentException("Bad facing position: " + this + ".");
 		}
 	}
 	
@@ -104,7 +115,7 @@ public enum ActorFacingDirection {
 		case EAST:
 			return SOUTH;
 		default:
-			throw new IllegalArgumentException("Bad facing position: " + this);
+			throw new IllegalArgumentException("Bad facing position: " + this + ".");
 		}
 	}
 	

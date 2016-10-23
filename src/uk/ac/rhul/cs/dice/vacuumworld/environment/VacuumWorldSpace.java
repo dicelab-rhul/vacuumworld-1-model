@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
@@ -25,9 +24,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserSensor;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWPair;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldSpace extends EnvironmentalSpace {
@@ -266,15 +264,11 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		else if (o instanceof VacuumWorldPhysics) {
 			managePhysicsRequest(arg);
 		}
-		else if(o instanceof VacuumWorldMonitoringBridge) {
-			//TODO
-		}
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	private void managePhysicsRequest(Object arg) {
-		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-			managePhysicsRequest((DefaultActionResult<VacuumWorldPerception>) arg);
+		if (VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
+			managePhysicsRequest((VacuumWorldActionResult) arg);
 		} 
 		else if (VacuumWorldSpeechPerceptionResultWrapper.class.isAssignableFrom(arg.getClass())) {
 			manageSpeechActionResult((VacuumWorldSpeechPerceptionResultWrapper) arg);
@@ -289,7 +283,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		notifyTargets(recipientActorsIds, wrapper.getSpeechResult());
 	}
 
-	private void notifyActor(List<String> senderSensorIds, DefaultActionResult<VacuumWorldPerception> result) {
+	private void notifyActor(List<String> senderSensorIds, VacuumWorldActionResult result) {
 		notifyObserversIfNeeded(senderSensorIds, result);
 	}
 	
@@ -316,7 +310,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		user.getListeningSensors().forEach((UserSensor sensor) -> sensor.update(this, result));
 	}
 
-	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, DefaultActionResult<VacuumWorldPerception> result) {
+	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, VacuumWorldActionResult result) {
 		List<CustomObserver> recipients = this.getObservers();
 		
 		for(CustomObserver recipient : recipients) {
@@ -329,29 +323,23 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 	}
 
-	private void notifyUserSensorIfNeeded(UserSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult<VacuumWorldPerception> result) {
+	private void notifyUserSensorIfNeeded(UserSensor recipient, List<String> sensorsToNotifyIds, VacuumWorldActionResult result) {
 		if(sensorsToNotifyIds.contains(recipient.getSensorId())) {
 			recipient.update(this, result);
 		}
 	}
 
-	private void notifyAgentSensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> sensorsToNotifyIds, DefaultActionResult<VacuumWorldPerception> result) {
+	private void notifyAgentSensorIfNeeded(VacuumWorldDefaultSensor recipient, List<String> sensorsToNotifyIds, VacuumWorldActionResult result) {
 		if(sensorsToNotifyIds.contains(recipient.getSensorId())) {
 			recipient.update(this, result);
 		}
 	}
 
-	private void managePhysicsRequest(DefaultActionResult<VacuumWorldPerception> result) {
+	private void managePhysicsRequest(VacuumWorldActionResult result) {
 		logResult(result);
 		
 		List<String> senderSensorIds = result.getRecipientsIds();
 		notifyActor(senderSensorIds, result);
-	}
-
-	private void logResult(DefaultActionResult<VacuumWorldPerception> result) {
-		if(result instanceof VacuumWorldActionResult) {
-			logResult((VacuumWorldActionResult) result); 
-		}
 	}
 	
 	private void logResult(VacuumWorldActionResult result) {
@@ -371,6 +359,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	private void manageActuatorRequest(VacuumWorldEvent event) {
-		notifyObservers(new Object[] { event, this }, VacuumWorldPhysics.class);
+		notifyObservers(new VWPair<VacuumWorldEvent, VacuumWorldSpace>(event, this), VacuumWorldPhysics.class);
 	}
 }

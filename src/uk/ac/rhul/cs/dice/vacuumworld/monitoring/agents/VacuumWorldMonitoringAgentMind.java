@@ -6,13 +6,12 @@ import java.util.List;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractAgentMind;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind<VacuumWorldMonitoringPerception> {
+public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind {
 	public VacuumWorldMonitoringAgentMind(String bodyId) {
 		super(bodyId);
 		
@@ -27,12 +26,12 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind
 	}
 	
 	@Override
-	public EnvironmentalAction<VacuumWorldMonitoringPerception> decide(Object... parameters) {
+	public EnvironmentalAction decide(Object... parameters) {
 		return buildPerceiveAction();
 	}
 	
 	@Override
-	public void execute(EnvironmentalAction<VacuumWorldMonitoringPerception> action) {
+	public void execute(EnvironmentalAction action) {
 		setLastActionResult(null);
 		clearReceivedCommunications();
 		
@@ -40,7 +39,7 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind
 		notifyObservers(this.getNextAction(), VacuumWorldMonitoringAgentBrain.class);
 	}
 	
-	public EnvironmentalAction<VacuumWorldMonitoringPerception> buildNewAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
+	public EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		if(TotalPerceptionAction.class.isAssignableFrom(actionPrototype)) {
 			return buildPerceiveAction();
 		}
@@ -49,7 +48,7 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind
 		}
 	}
 	
-	public EnvironmentalAction<VacuumWorldMonitoringPerception> buildPerceiveAction() {
+	public EnvironmentalAction buildPerceiveAction() {
 		try {
 			return TotalPerceptionAction.class.newInstance();
 		}
@@ -61,7 +60,7 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind
 	}
 
 	@Override
-	public EnvironmentalAction<VacuumWorldMonitoringPerception> decideActionRandomly() {
+	public EnvironmentalAction decideActionRandomly() {
 		return buildPerceiveAction();
 	}
 
@@ -88,5 +87,10 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind
 	@Override
 	public void setPerceptionRange(int preceptionRange) {
 		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public VacuumWorldMonitoringPerception getPerception() {
+		return (VacuumWorldMonitoringPerception) super.getPerception();
 	}
 }

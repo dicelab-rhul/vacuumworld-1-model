@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
@@ -14,19 +13,20 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
-public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception> {
+public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> {
 	private static final int PERCEPTION_RANGE = 2;
 	private static final boolean CAN_SEE_BEHIND = false;
 
 	private VacuumWorldCoordinates currentLocation;
 	private ActorFacingDirection facingDirection;
 
-	public VacuumWorldCleaningAgent(VacuumWorldAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole, VacuumWorldPerception>> actuators, VacuumWorldDefaultMind mind, VacuumWorldDefaultBrain brain, ActorFacingDirection facingDirection) {
+	public VacuumWorldCleaningAgent(VacuumWorldAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, VacuumWorldDefaultMind mind, VacuumWorldDefaultBrain brain, ActorFacingDirection facingDirection) {
 		super(appearance, sensors, actuators, mind, brain);
 
 		this.facingDirection = facingDirection;
@@ -91,10 +91,10 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	}
 	
 	private List<VacuumWorldDefaultActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
-		List<Actuator<VacuumWorldActuatorRole, VacuumWorldPerception>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole, VacuumWorldPerception> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
+		List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
 		List<VacuumWorldDefaultActuator> toReturn = new ArrayList<>();
 		
-		for(Actuator<VacuumWorldActuatorRole, VacuumWorldPerception> actuator : candidates) {
+		for(Actuator<VacuumWorldActuatorRole> actuator : candidates) {
 			if(actuator instanceof VacuumWorldDefaultActuator) {
 				toReturn.add((VacuumWorldDefaultActuator) actuator);
 			}
@@ -129,19 +129,18 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	}
 
 	private void manageSensorRequest(Object arg) {
-		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+		if (VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
 			notifyObservers(arg, VacuumWorldDefaultBrain.class);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void manageBrainRequest(Object arg) {
-		if (arg instanceof EnvironmentalAction<?>) {
-			manageBrainRequest((EnvironmentalAction<VacuumWorldPerception>) arg);
+		if (arg instanceof EnvironmentalAction) {
+			manageBrainRequest((EnvironmentalAction) arg);
 		}
 	}
 
-	private void manageBrainRequest(EnvironmentalAction<VacuumWorldPerception> action) {
+	private void manageBrainRequest(EnvironmentalAction action) {
 		action.setActor(this);
 		VacuumWorldEvent event = new VacuumWorldEvent(action, System.currentTimeMillis(), this);
 
@@ -183,7 +182,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 		return null;
 	}
 
-	private String selectSensorToBeNotifiedBackId(EnvironmentalAction<VacuumWorldPerception> action) {
+	private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
 		if (EnvironmentalAction.class.isAssignableFrom(action.getClass())) {
 			return getSeeingSensors().get(0).getSensorId();
 		}
@@ -203,12 +202,16 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 		return this.facingDirection;
 	}
 
-	public void turn(boolean right) {
-		if(right) {
-			turnRight();
-		}
-		else {
+	public void turn(TurningDirection turningDirection) {
+		switch(turningDirection) {
+		case LEFT:
 			turnLeft();
+			break;
+		case RIGHT:
+			turnRight();
+			break;
+		default:
+			break;
 		}
 	}
 	

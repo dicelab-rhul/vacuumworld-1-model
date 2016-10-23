@@ -4,12 +4,11 @@ import java.util.function.Function;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
-public class SpeechResultToSenderId implements Function<Result<VacuumWorldPerception>, String> {
+public class SpeechResultToSenderId implements Function<Result, String> {
 
 	@Override
-	public String apply(Result<VacuumWorldPerception> result) {
+	public String apply(Result result) {
 		if(result == null) {
 			return null;
 		}

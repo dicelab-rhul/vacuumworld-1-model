@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.SensingAction;
@@ -16,12 +15,12 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 
-public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldMonitoringPerception> {
+public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> {
 
-	public VacuumWorldMonitoringAgent(VacuumWorldMonitoringAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole, VacuumWorldMonitoringPerception>> actuators, VacuumWorldMonitoringAgentMind mind, VacuumWorldMonitoringAgentBrain brain) {
+	public VacuumWorldMonitoringAgent(VacuumWorldMonitoringAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, VacuumWorldMonitoringAgentMind mind, VacuumWorldMonitoringAgentBrain brain) {
 		super(appearance, sensors, actuators, mind, brain);
 	}
 
@@ -73,10 +72,10 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 	}
 	
 	private List<VacuumWorldMonitoringAgentActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
-		List<Actuator<VacuumWorldActuatorRole, VacuumWorldMonitoringPerception>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole, VacuumWorldMonitoringPerception> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
+		List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
 		List<VacuumWorldMonitoringAgentActuator> toReturn = new ArrayList<>();
 		
-		for(Actuator<VacuumWorldActuatorRole, VacuumWorldMonitoringPerception> actuator : candidates) {
+		for(Actuator<VacuumWorldActuatorRole> actuator : candidates) {
 			if(actuator instanceof VacuumWorldMonitoringAgentActuator) {
 				toReturn.add((VacuumWorldMonitoringAgentActuator) actuator);
 			}
@@ -85,18 +84,17 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 		return toReturn;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldMonitoringAgentBrain && arg instanceof EnvironmentalAction<?>) {
-			manageBrainRequest((EnvironmentalAction<VacuumWorldMonitoringPerception>) arg);
+		if(o instanceof VacuumWorldMonitoringAgentBrain && arg instanceof EnvironmentalAction) {
+			manageBrainRequest((EnvironmentalAction) arg);
 		}
-		else if(o instanceof VacuumWorldMonitoringAgentSensor && DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+		else if(o instanceof VacuumWorldMonitoringAgentSensor && VacuumWorldMonitoringActionResult.class.isAssignableFrom(arg.getClass())) {
 			notifyObservers(arg, VacuumWorldMonitoringAgentBrain.class);
 		}
 	}
 
-	private void manageBrainRequest(EnvironmentalAction<VacuumWorldMonitoringPerception> action) {
+	private void manageBrainRequest(EnvironmentalAction action) {
 		action.setActor(this);
 		VacuumWorldMonitoringEvent event = new VacuumWorldMonitoringEvent(action, System.currentTimeMillis(), this);
 
@@ -127,7 +125,7 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 		}
 	}
 
-	private String selectActuatorRecipientId(EnvironmentalAction<VacuumWorldMonitoringPerception> action) {
+	private String selectActuatorRecipientId(EnvironmentalAction action) {
 		if (PhysicalAction.class.isAssignableFrom(action.getClass()) || SensingAction.class.isAssignableFrom(action.getClass())) {
 			return getPhysicalActuators().get(0).getActuatorId();
 		}
@@ -138,7 +136,7 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 		return null;
 	}
 
-	private String selectSensorToBeNotifiedBackId(EnvironmentalAction<VacuumWorldMonitoringPerception> action) {
+	private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
 		if (PhysicalAction.class.isAssignableFrom(action.getClass()) || SensingAction.class.isAssignableFrom(action.getClass())) {
 			return getSeeingSensors().get(0).getSensorId();
 		}

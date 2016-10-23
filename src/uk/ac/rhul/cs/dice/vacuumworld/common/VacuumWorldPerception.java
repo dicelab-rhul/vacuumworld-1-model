@@ -9,7 +9,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
@@ -72,7 +71,7 @@ public class VacuumWorldPerception implements Perception {
 			return null;
 		}
 		
-		return ((VacuumWorldAgentAppearance) getActorCurentLocation().getAgent().getExternalAppearance()).getType();
+		return getActorCurentLocation().getAgent().getExternalAppearance().getType();
 	}
 	
 	public boolean canAgentClean() {
@@ -136,15 +135,15 @@ public class VacuumWorldPerception implements Perception {
 		return locationsWithCompatibleDirt;
 	}
 	
-	public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception>> getActorsInPerception(String actorId) {
-		List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception>> actors = new ArrayList<>();
+	public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerception(String actorId) {
+		List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> actors = new ArrayList<>();
 		
 		this.perception.values().forEach((VacuumWorldLocation location) -> addActorToActorsListIfNecessary(actors, location, actorId));
 		
 		return actors;
 	}
 
-	private void addActorToActorsListIfNecessary(List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole, VacuumWorldPerception>> actors, VacuumWorldLocation location, String actorId) {
+	private void addActorToActorsListIfNecessary(List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> actors, VacuumWorldLocation location, String actorId) {
 		if(!location.isAnAgentPresent()) {
 			return;
 		}

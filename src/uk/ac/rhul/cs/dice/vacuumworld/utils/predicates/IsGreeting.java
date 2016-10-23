@@ -4,13 +4,12 @@ import java.util.function.Predicate;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class IsGreeting implements Predicate<Result<VacuumWorldPerception>> {
+public class IsGreeting implements Predicate<Result> {
 
 	@Override
-	public boolean test(Result<VacuumWorldPerception> result) {
+	public boolean test(Result result) {
 		if(!(result instanceof VacuumWorldSpeechActionResult)) {
 			return false;
 		}

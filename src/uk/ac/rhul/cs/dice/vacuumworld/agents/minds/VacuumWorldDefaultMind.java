@@ -26,7 +26,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception> {
+public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMind {
 	
 	public VacuumWorldDefaultMind(String bodyId) {
 		super(new Random(System.currentTimeMillis()), bodyId);
@@ -46,7 +46,7 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 	}
 	
 	@Override
-	public void execute(EnvironmentalAction<VacuumWorldPerception> action) {
+	public void execute(EnvironmentalAction action) {
 		setLastActionResult(null);
 		clearReceivedCommunications();
 		
@@ -66,13 +66,13 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 	}
 	
 	@Override
-	public EnvironmentalAction<VacuumWorldPerception> decideActionRandomly() {
-		Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype = super.decideActionPrototypeRandomly();
+	public EnvironmentalAction decideActionRandomly() {
+		Class<? extends EnvironmentalAction> actionPrototype = super.decideActionPrototypeRandomly();
 
 		return buildNewAction(actionPrototype);
 	}
 
-	public EnvironmentalAction<VacuumWorldPerception> buildNewAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
+	public EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		if (actionPrototype.equals(SpeechAction.class)) {
 			return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
 		}
@@ -84,7 +84,7 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 		}
 	}
 
-	public EnvironmentalAction<VacuumWorldPerception> buildPerceiveAction() {
+	public EnvironmentalAction buildPerceiveAction() {
 		try {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(getPerceptionRange(), canSeeBehind());
 		}
@@ -95,7 +95,7 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 		}
 	}
 
-	public EnvironmentalAction<VacuumWorldPerception> buildPhysicalAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
+	public EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
 		}
@@ -132,10 +132,10 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 		}
 	}
 	
-	private void removeActionIfNecessary(Class<? extends EnvironmentalAction<VacuumWorldPerception>> name) {
-		List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> toRemove = new ArrayList<>();
+	private void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
+		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
 
-		for (Class<? extends EnvironmentalAction<VacuumWorldPerception>> a : this.getAvailableActionsForThisCycle()) {
+		for (Class<? extends EnvironmentalAction> a : this.getAvailableActionsForThisCycle()) {
 			if (a.isAssignableFrom(name)) {
 				VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
 				toRemove.add(name);
@@ -157,5 +157,10 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 				removeActionIfNecessary(MoveAction.class);
 			}
 		}
+	}
+	
+	@Override
+	public VacuumWorldPerception getPerception() {
+		return (VacuumWorldPerception) super.getPerception();
 	}
 }

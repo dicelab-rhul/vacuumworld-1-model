@@ -1,8 +1,8 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractSensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
 public class VacuumWorldDefaultSensor extends AbstractSensor<VacuumWorldSensorRole> {
@@ -13,7 +13,7 @@ public class VacuumWorldDefaultSensor extends AbstractSensor<VacuumWorldSensorRo
 	
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldSpace && DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
+		if(o instanceof VacuumWorldSpace && VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
 			notifyObservers(arg, VacuumWorldCleaningAgent.class);
 		}
 	}

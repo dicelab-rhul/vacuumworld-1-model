@@ -43,9 +43,9 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	 * select a random action [END]
 	 */
 	@Override
-	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
+	public EnvironmentalAction decide(Object... parameters) {
 		VacuumWorldPerception perception = getPerception();
-		List<Result<VacuumWorldPerception>> receivedCommunications = getReceivedCommunications();
+		List<Result> receivedCommunications = getReceivedCommunications();
 		
 		if(perception == null) {
 			return buildPerceiveAction();
@@ -59,7 +59,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> decideWithPerception(VacuumWorldPerception perception, List<Result<VacuumWorldPerception>> receivedCommunications) {		
+	private EnvironmentalAction decideWithPerception(VacuumWorldPerception perception, List<Result> receivedCommunications) {		
 		if(someoneJustGreetedMe(receivedCommunications)) {
 			
 			/* 
@@ -120,7 +120,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		return decideWithPerception(perception);
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> decideWithPerception(VacuumWorldPerception perception) {
+	private EnvironmentalAction decideWithPerception(VacuumWorldPerception perception) {
 		/*
 		 * From perception I get all the agents within it whose ID is different from this agent's ID,
 		 * then I create a Stream from those,
@@ -159,7 +159,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> decideWithAgentsToGreetOnThisCycle() {
+	private EnvironmentalAction decideWithAgentsToGreetOnThisCycle() {
 		if(VWUtils.isCollectionNotNullAndNotEmpty(this.agentsToGreetOnThisCycle)) {
 			return greetAgents();
 		}
@@ -192,7 +192,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> greetAgents() {
+	private EnvironmentalAction greetAgents() {
 		return buildSpeechAction(getBodyId(), this.agentsToGreetOnThisCycle, new VacuumWorldSpeechPayload("Hello, nice to meet you!!!", true));
 	}
 
@@ -204,11 +204,11 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		this.agentsToGreetOnThisCycle.clear();
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> greetBack() {
+	private EnvironmentalAction greetBack() {
 		return buildSpeechAction(getBodyId(), this.agentsToGreetOnThisCycle, new VacuumWorldSpeechPayload("Nice to meet you too!!!", true));
 	}
 
-	private boolean someoneJustGreetedMe(List<Result<VacuumWorldPerception>> receivedCommunications) {
+	private boolean someoneJustGreetedMe(List<Result> receivedCommunications) {
 		
 		/*
 		 * From receivedCommunications I create a Stream,
@@ -221,7 +221,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	}
 
 	private List<String> getAgentsIJustGreeted() {
-		EnvironmentalAction<VacuumWorldPerception> lastAction = getNextAction();
+		EnvironmentalAction lastAction = getNextAction();
 		
 		if(lastAction instanceof SpeechAction) {
 			return ((SpeechAction) lastAction).getRecipientsIds();
@@ -232,7 +232,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	}
 
 	private boolean didIGreetAnyoneInThePastCycle() {
-		EnvironmentalAction<VacuumWorldPerception> lastAction = getNextAction();
+		EnvironmentalAction lastAction = getNextAction();
 		
 		if(lastAction instanceof SpeechAction) {
 			

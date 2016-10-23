@@ -13,6 +13,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAge
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWPair;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 	private Map<String, VacuumWorldMonitoringAgent> monitoringAgents;
@@ -37,7 +38,7 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 			manageMonitoringBridgeRequest((VacuumWorldMonitoringActionResult) arg);
 		}
 		else if(o instanceof VacuumWorldMonitoringAgentActuator && arg instanceof VacuumWorldMonitoringEvent) {
-			notifyObservers(new Object[] { (VacuumWorldMonitoringEvent) arg, this }, VacuumWorldMonitoringPhysics.class);
+			notifyObservers(new VWPair<VacuumWorldMonitoringEvent, VacuumWorldMonitoringContainer>((VacuumWorldMonitoringEvent) arg, this), VacuumWorldMonitoringPhysics.class);
 		}
 	}
 	

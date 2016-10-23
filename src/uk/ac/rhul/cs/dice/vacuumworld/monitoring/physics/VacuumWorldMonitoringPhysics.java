@@ -1,75 +1,105 @@
 package uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.AbstractPhysics;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWPair;
 
-public class VacuumWorldMonitoringPhysics extends AbstractPhysics<VacuumWorldMonitoringPerception> implements VacuumWorldMonitoringPhysicsInterface {
-
-	@Override
-	public Result<VacuumWorldMonitoringPerception> attempt(Event<VacuumWorldMonitoringPerception> event, Space context) {
-		EnvironmentalAction<VacuumWorldMonitoringPerception> action = ((VacuumWorldMonitoringEvent) event).getAction();
-		return action.attempt(this, context);
-	}
+public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements VacuumWorldMonitoringPhysicsInterface {
 
 	@Override
-	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldMonitoringContainer && arg instanceof VacuumWorldMonitoringEvent) {
-			((VacuumWorldMonitoringEvent) arg).attempt(this, (VacuumWorldMonitoringContainer) o);
+	public synchronized void update(CustomObservable o, Object arg) {
+		if(o instanceof VacuumWorldMonitoringContainer && arg instanceof VWPair<?, ?>) {
+			manageMonitoringContainerRequest((VWPair<?, ?>) arg);
 		}
 		else if(o instanceof VacuumWorldMonitoringBridge && arg instanceof VacuumWorldMonitoringActionResult) {
 			notifyObservers((VacuumWorldMonitoringActionResult) arg, VacuumWorldMonitoringContainer.class);
 		}
 	}
 
+	private void manageMonitoringContainerRequest(VWPair<?, ?> arg) {
+		if(arg.checkClasses(VacuumWorldMonitoringEvent.class, VacuumWorldMonitoringContainer.class)) {
+			((VacuumWorldMonitoringEvent) arg.getFirst()).attempt(this, (VacuumWorldMonitoringContainer) arg.getSecond());
+		}
+	}
+
 	@Override
-	public boolean isPossible(TotalPerceptionAction action, Space context) {
+	public synchronized boolean isPossible(TotalPerceptionAction action, Space context) {
 		return true;
 	}
 
 	@Override
-	public boolean isNecessary(TotalPerceptionAction action, Space context) {
+	public synchronized boolean isNecessary(TotalPerceptionAction action, Space context) {
 		return false;
 	}
 
 	@Override
-	public Result<VacuumWorldMonitoringPerception> perform(TotalPerceptionAction action, Space context) {
-		notifyObservers(action, VacuumWorldMonitoringBridge.class);
+	public synchronized Result perform(TotalPerceptionAction action, Space context) {
+		Event totalPerceptionEvent = new VacuumWorldEvent(action, System.currentTimeMillis(), action.getActor());
+		notifyObservers(totalPerceptionEvent, VacuumWorldMonitoringBridge.class);
 		
-		return null;
+		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId().toString(), new ArrayList<>(), null);
 	}
 
 	@Override
-	public boolean succeeded(TotalPerceptionAction action, Space context) {
+	public synchronized boolean succeeded(TotalPerceptionAction action, Space context) {
 		return true;
 	}
 
 	@Override
-	public boolean isPossible(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
-		throw new UnsupportedOperationException();
+	public boolean isPossible(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
+		return event.getAction().isPossible(this, context);
 	}
 
 	@Override
-	public boolean isNecessary(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
-		throw new UnsupportedOperationException();
+	public boolean isNecessary(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
+		return event.getAction().isNecessary(this, context);
 	}
 
 	@Override
-	public Result<VacuumWorldMonitoringPerception> perform(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
-		throw new UnsupportedOperationException();
+	public synchronized Result attempt(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
+		if(event.isPossible(this, context)) {
+			Result result = event.perform(this, context);
+			
+			if(!event.succeeded(this, context)) {
+				return editResultIfnecessary(event, result);
+			}
+			else {
+				return result;
+			}
+		}
+		else {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_IMPOSSIBLE, null, Arrays.asList(event.getSensorToCallBackId()));
+		}
 	}
 
 	@Override
-	public boolean succeeded(EnvironmentalAction<VacuumWorldMonitoringPerception> action, Space context) {
-		throw new UnsupportedOperationException();
+	public synchronized Result perform(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
+		return event.getAction().perform(this, context);
+	}
+
+	@Override
+	public synchronized boolean succeeded(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
+		return event.getAction().succeeded(this, context);
+	}
+	
+	private Result editResultIfnecessary(VacuumWorldMonitoringEvent event, Result result) {
+		if(ActionResult.ACTION_FAILED.equals(result.getActionResult())) {
+			return result;
+		}
+		
+		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), result.getFailureReason(), Arrays.asList(event.getSensorToCallBackId()));
 	}
 }

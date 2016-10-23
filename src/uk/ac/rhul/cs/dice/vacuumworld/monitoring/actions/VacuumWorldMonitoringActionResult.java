@@ -3,9 +3,9 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions;
 import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractActionResult;
 
-public class VacuumWorldMonitoringActionResult extends DefaultActionResult<VacuumWorldMonitoringPerception> {	
+public class VacuumWorldMonitoringActionResult extends AbstractActionResult {	
 	public VacuumWorldMonitoringActionResult(ActionResult result, List<String> recipientsIds, VacuumWorldMonitoringPerception perception) {
 		super(result, recipientsIds, perception);
 	}

@@ -1,10 +1,9 @@
 package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractActionResult;
 
-public class VacuumWorldSpeechActionResult extends DefaultActionResult<VacuumWorldPerception> {
+public class VacuumWorldSpeechActionResult extends AbstractActionResult {
 	private String sender;
 	private VacuumWorldSpeechPayload payload;
 

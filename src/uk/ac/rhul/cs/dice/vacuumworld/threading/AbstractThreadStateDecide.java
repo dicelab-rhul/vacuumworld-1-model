@@ -1,13 +1,12 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
-import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 
-public abstract class AbstractThreadStateDecide<P extends Perception> implements ThreadState<P> {
+public abstract class AbstractThreadStateDecide implements ThreadState {
 
 	@Override
-	public void run(AbstractActorRunnable<P> runnable) {
-		EnvironmentalAction<P> action = runnable.getActorMind().decide();
+	public void run(AbstractActorRunnable runnable) {
+		EnvironmentalAction action = runnable.getActorMind().decide();
 		runnable.getActorMind().setNextActionForExecution(action);
 	}
 

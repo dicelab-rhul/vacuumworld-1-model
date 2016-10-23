@@ -1,7 +1,13 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment.physics;
 
+import java.util.ArrayList;
+
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
+import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.DropDirtAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
@@ -9,41 +15,106 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnLeftAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 
-public interface VacuumWorldPhysicsInterface {
-	public boolean isPossible(TurnLeftAction action, Space context);
-	public boolean isNecessary(TurnLeftAction action, Space context);
-	public Result<VacuumWorldPerception> perform(TurnLeftAction action, Space context);
-	public boolean succeeded(TurnLeftAction action, Space context);
+public interface VacuumWorldPhysicsInterface extends Physics {
 	
-	public boolean isPossible(TurnRightAction action, Space context);
-	public boolean isNecessary(TurnRightAction action, Space context);
-	public Result<VacuumWorldPerception> perform(TurnRightAction action, Space context);
-	public boolean succeeded(TurnRightAction action, Space context);
+	@Override
+	public default boolean isPossible(EnvironmentalAction action, Space context) {
+		return false;
+	}
 	
-	public boolean isPossible(MoveAction action, Space context);
-	public boolean isNecessary(MoveAction action, Space context);
-	public Result<VacuumWorldPerception> perform(MoveAction action, Space context);
-	public boolean succeeded(MoveAction action, Space context);
+	@Override
+	public default boolean isNecessary(EnvironmentalAction action, Space context) {
+		return false;
+	}
 	
-	public boolean isPossible(CleanAction action, Space context);
-	public boolean isNecessary(CleanAction action, Space context);
-	public Result<VacuumWorldPerception> perform(CleanAction action, Space context);
-	public boolean succeeded(CleanAction action, Space context);
+	@Override
+	public default Result attempt(EnvironmentalAction action, Space context) {
+		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, action.getActor().getId().toString(), new UnsupportedOperationException(), new ArrayList<>());
+	}
 	
-	public boolean isPossible(PerceiveAction action, Space context);
-	public boolean isNecessary(PerceiveAction action, Space context);
-	public Result<VacuumWorldPerception> perform(PerceiveAction action, Space context);
-	public boolean succeeded(PerceiveAction action, Space context);
+	@Override
+	public default Result perform(EnvironmentalAction action, Space context) {
+		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, action.getActor().getId().toString(), new UnsupportedOperationException(), new ArrayList<>());
+	}
 	
-	public boolean isPossible(SpeechAction action, Space context);
-	public boolean isNecessary(SpeechAction action, Space context);
-	public Result<VacuumWorldPerception> perform(SpeechAction action, Space context);
-	public boolean succeeded(SpeechAction action, Space context);
+	@Override
+	public default boolean succeeded(EnvironmentalAction action, Space context) {
+		return false;
+	}
 	
-	public boolean isPossible(DropDirtAction action, Space context);
-	public boolean isNecessary(DropDirtAction action, Space context);
-	public Result<VacuumWorldPerception> perform(DropDirtAction action, Space context);
-	public boolean succeeded(DropDirtAction action, Space context);
+	@Override
+	public default boolean isPossible(Event event, Space context) {
+		return false;
+	}
+	
+	@Override
+	public default boolean isNecessary(Event event, Space context) {
+		return false;
+	}
+	
+	@Override
+	public default Result attempt(Event event, Space context) {
+		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), new UnsupportedOperationException(), new ArrayList<>());
+	}
+	
+	@Override
+	public default Result perform(Event event, Space context) {
+		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), new UnsupportedOperationException(), new ArrayList<>());
+	}
+	
+	@Override
+	public default boolean succeeded(Event event, Space context) {
+		return false;
+	}
+	
+	public abstract boolean isPossible(TurnLeftAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(TurnLeftAction action, VacuumWorldSpace context);
+	public abstract Result perform(TurnLeftAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(TurnLeftAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(TurnRightAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(TurnRightAction action, VacuumWorldSpace context);
+	public abstract Result perform(TurnRightAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(TurnRightAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(MoveAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(MoveAction action, VacuumWorldSpace context);
+	public abstract Result perform(MoveAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(MoveAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(CleanAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(CleanAction action, VacuumWorldSpace context);
+	public abstract Result perform(CleanAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(CleanAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(PerceiveAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(PerceiveAction action, VacuumWorldSpace context);
+	public abstract Result perform(PerceiveAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(PerceiveAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(SpeechAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(SpeechAction action, VacuumWorldSpace context);
+	public abstract Result perform(SpeechAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(SpeechAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(DropDirtAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(DropDirtAction action, VacuumWorldSpace context);
+	public abstract Result perform(DropDirtAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(DropDirtAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(TotalPerceptionAction action, VacuumWorldSpace context);
+	public abstract boolean isNecessary(TotalPerceptionAction action, VacuumWorldSpace context);
+	public abstract Result perform(TotalPerceptionAction action, VacuumWorldSpace context);
+	public abstract boolean succeeded(TotalPerceptionAction action, VacuumWorldSpace context);
+	
+	public abstract boolean isPossible(VacuumWorldEvent event, VacuumWorldSpace context);
+	public abstract boolean isNecessary(VacuumWorldEvent event, VacuumWorldSpace context);
+	public abstract Result attempt(VacuumWorldEvent event, VacuumWorldSpace context);
+	public abstract Result perform(VacuumWorldEvent event, VacuumWorldSpace context);
+	public abstract boolean succeeded(VacuumWorldEvent event, VacuumWorldSpace context);
 }

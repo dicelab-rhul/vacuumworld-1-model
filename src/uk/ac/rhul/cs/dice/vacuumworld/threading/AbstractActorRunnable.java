@@ -1,29 +1,28 @@
 package uk.ac.rhul.cs.dice.vacuumworld.threading;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Mind;
-import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 
-public abstract class AbstractActorRunnable<P extends Perception> implements Runnable {
-	private Mind<P> agentMind;
-	private ThreadState<P> state;
+public abstract class AbstractActorRunnable implements Runnable {
+	private Mind agentMind;
+	private ThreadState state;
 
-	public AbstractActorRunnable(Mind<P> agentMind) {
+	public AbstractActorRunnable(Mind agentMind) {
 		this.agentMind = agentMind;
 	}
 
-	public ThreadState<P> getState() {
+	public ThreadState getState() {
 		return this.state;
 	}
 
-	public void setState(ThreadState<P> state) {
+	public void setState(ThreadState state) {
 		this.state = state;
 	}
 
-	public void setAgentMind(Mind<P> agentMind) {
+	public void setAgentMind(Mind agentMind) {
 		this.agentMind = agentMind;
 	}
 
-	public Mind<P> getActorMind() {
+	public Mind getActorMind() {
 		return this.agentMind;
 	}
 }

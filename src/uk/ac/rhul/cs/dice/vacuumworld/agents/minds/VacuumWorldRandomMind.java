@@ -11,7 +11,7 @@ public class VacuumWorldRandomMind extends VacuumWorldDefaultMind {
 	}
 
 	@Override
-	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
+	public EnvironmentalAction decide(Object... parameters) {
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception != null) {

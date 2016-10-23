@@ -2,9 +2,8 @@ package uk.ac.rhul.cs.dice.vacuumworld.actions;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
-public abstract class TurningAction extends PhysicalAction<VacuumWorldPerception> {
+public abstract class TurningAction extends PhysicalAction {
 	private ActorFacingDirection actorOldFacingDirection;
 
 	public ActorFacingDirection getActorOldFacingDirection() {

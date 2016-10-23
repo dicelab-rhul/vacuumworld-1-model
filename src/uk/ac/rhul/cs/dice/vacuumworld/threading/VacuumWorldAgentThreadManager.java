@@ -11,9 +11,7 @@ import java.util.concurrent.TimeUnit;
 import uk.ac.rhul.cs.dice.vacuumworld.VacuumWorldClientListener;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringThreadStateDecide;
@@ -25,12 +23,12 @@ import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldClientListener listener;
 	private VacuumWorldSpace state;
-	private final ThreadState<VacuumWorldPerception> threadStateDecide = new VacuumWorldThreadStateDecide();
-	private final ThreadState<VacuumWorldPerception> threadStateExecute = new VacuumWorldThreadStateExecute();
-	private final ThreadState<VacuumWorldPerception> threadStatePerceive = new VacuumWorldThreadStatePerceive();
-	private final ThreadState<VacuumWorldMonitoringPerception> monitoringThreadStateDecide = new VacuumWorldMonitoringThreadStateDecide();
-	private final ThreadState<VacuumWorldMonitoringPerception> monitoringThreadStateExecute = new VacuumWorldMonitoringThreadStateExecute();
-	private final ThreadState<VacuumWorldMonitoringPerception> monitoringThreadStatePerceive = new VacuumWorldMonitoringThreadStatePerceive();
+	private final ThreadState threadStateDecide = new VacuumWorldThreadStateDecide();
+	private final ThreadState threadStateExecute = new VacuumWorldThreadStateExecute();
+	private final ThreadState threadStatePerceive = new VacuumWorldThreadStatePerceive();
+	private final ThreadState monitoringThreadStateDecide = new VacuumWorldMonitoringThreadStateDecide();
+	private final ThreadState monitoringThreadStateExecute = new VacuumWorldMonitoringThreadStateExecute();
+	private final ThreadState monitoringThreadStatePerceive = new VacuumWorldMonitoringThreadStatePerceive();
 	private boolean simulationStarted = false;
 	private ExecutorService executor;
 	private ExecutorService monitoringExecutor;
@@ -148,7 +146,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		}
 	}
 
-	private void doPhase(ThreadState<VacuumWorldPerception> state, Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
+	private void doPhase(ThreadState state, Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
 		try {
 			this.executor = Executors.newFixedThreadPool(this.cleaningRunnables.size() + (user == null ? 0 : 1));
 			
@@ -164,7 +162,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		}
 	}
 
-	private void doMonitoringPhase(ThreadState<VacuumWorldMonitoringPerception> state, Set<VacuumWorldMonitoringActorRunnable> runnables) {
+	private void doMonitoringPhase(ThreadState state, Set<VacuumWorldMonitoringActorRunnable> runnables) {
 		if(!VWUtils.isCollectionNotNullAndNotEmpty(this.monitorRunnables)) {
 			return;
 		}
@@ -213,7 +211,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		}
 	}
 
-	private void setNextPhase(ThreadState<VacuumWorldPerception> state, Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
+	private void setNextPhase(ThreadState state, Set<VacuumWorldActorRunnable> runnables, VacuumWorldActorRunnable user) {
 		if(user != null) {
 			user.setState(state);
 		}
@@ -223,7 +221,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		}
 	}
 	
-	private void setNextPhaseForMonitoringAgents(ThreadState<VacuumWorldMonitoringPerception> state, Set<VacuumWorldMonitoringActorRunnable> runnables) {
+	private void setNextPhaseForMonitoringAgents(ThreadState state, Set<VacuumWorldMonitoringActorRunnable> runnables) {
 		for (VacuumWorldMonitoringActorRunnable runnable : runnables) {
 			runnable.setState(state);
 		}

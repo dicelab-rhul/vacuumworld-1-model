@@ -1,13 +1,12 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.DefaultActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
-public class VacuumWorldDefaultBrain extends AbstractAgentBrain<VacuumWorldPerception> {
+public class VacuumWorldDefaultBrain extends AbstractAgentBrain {
 	
 	public VacuumWorldDefaultBrain(Class<? extends VacuumWorldDefaultMind> mindClass) {
 		super(mindClass);
@@ -23,10 +22,9 @@ public class VacuumWorldDefaultBrain extends AbstractAgentBrain<VacuumWorldPerce
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void manageBodyRequest(Object arg) {
-		if (DefaultActionResult.class.isAssignableFrom(arg.getClass())) {
-			pushReceivedResultToQueue((DefaultActionResult<VacuumWorldPerception>) arg);
+		if (VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
+			pushReceivedResultToQueue((VacuumWorldActionResult) arg);
 			setActionResultReturned(true);
 		}
 	}

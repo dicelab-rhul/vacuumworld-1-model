@@ -27,7 +27,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception> {
+public class UserMind extends VacuumWorldAbstractAgentMind {
 	private DirtType lastDroppedDirt;
 	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
 	private UserPlan plan;
@@ -58,7 +58,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 	}
 
 	@Override
-	public EnvironmentalAction<VacuumWorldPerception> decide(Object... parameters) {
+	public EnvironmentalAction decide(Object... parameters) {
 		if(this.plan != null) {
 			if(!this.plan.getActionsToPerform().isEmpty()) {
 				return followPlan(false);
@@ -74,7 +74,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		return decideWithPerception();
 	}
 	
-	private EnvironmentalAction<VacuumWorldPerception> decideWithPerception() {
+	private EnvironmentalAction decideWithPerception() {
 		VacuumWorldPerception perception = getPerception();
 		
 		if(perception == null) {
@@ -87,7 +87,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> followPlan(boolean specialFlag) {
+	private EnvironmentalAction followPlan(boolean specialFlag) {
 		if(lastActionSucceeded() || specialFlag) {
 			this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
 			this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
@@ -102,7 +102,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> retryIfPossible() {
+	private EnvironmentalAction retryIfPossible() {
 		if(this.plan.getNumberOfConsecutiveFailuresOfTheSameAction() <= 10) {
 			return buildPhysicalAction(this.plan.getLastAction());
 		}
@@ -113,11 +113,11 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
-		List<Result<VacuumWorldPerception>> messages = getReceivedCommunications();
-		EnvironmentalAction<VacuumWorldPerception> toReturn;
+	private EnvironmentalAction decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
+		List<Result> messages = getReceivedCommunications();
+		EnvironmentalAction toReturn;
 		
-		for(Result<VacuumWorldPerception> result : messages) {
+		for(Result result : messages) {
 			toReturn = getNextActionFromMessage(((VacuumWorldSpeechActionResult) result).getPayload().getPayload(), perception);
 			
 			if(toReturn == null) {
@@ -131,7 +131,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		return decideActionRandomly();
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
+	private EnvironmentalAction getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
 		if(payload.matches("^move[NSWE]$")) {
 			this.plan = buildPlanMaybe(payload, perception);
 			
@@ -170,13 +170,13 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 	}
 
 	@Override
-	public EnvironmentalAction<VacuumWorldPerception> decideActionRandomly() {
-		Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype = decideActionPrototypeRandomly();
+	public EnvironmentalAction decideActionRandomly() {
+		Class<? extends EnvironmentalAction> actionPrototype = decideActionPrototypeRandomly();
 
 		return buildNewAction(actionPrototype);
 	}
 	
-	public EnvironmentalAction<VacuumWorldPerception> buildNewAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
+	public EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		if (actionPrototype.equals(SpeechAction.class)) {
 			return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
 		}
@@ -191,7 +191,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 
-	private EnvironmentalAction<VacuumWorldPerception> buildDropDirtAction() {
+	private EnvironmentalAction buildDropDirtAction() {
 		try {
 			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceeded() ? DirtType.ORANGE : DirtType.GREEN;
 			this.lastDroppedDirt = dirtType;
@@ -205,7 +205,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 
-	protected EnvironmentalAction<VacuumWorldPerception> buildPerceiveAction() {
+	protected EnvironmentalAction buildPerceiveAction() {
 		try {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
 		}
@@ -216,7 +216,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 
-	public EnvironmentalAction<VacuumWorldPerception> buildPhysicalAction(Class<? extends EnvironmentalAction<VacuumWorldPerception>> actionPrototype) {
+	public EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
 		}
@@ -257,10 +257,10 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 		}
 	}
 	
-	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction<VacuumWorldPerception>> name) {
-		List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> toRemove = new ArrayList<>();
+	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
+		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
 
-		for (Class<? extends EnvironmentalAction<VacuumWorldPerception>> a : this.getAvailableActionsForThisCycle()) {
+		for (Class<? extends EnvironmentalAction> a : this.getAvailableActionsForThisCycle()) {
 			if (a.isAssignableFrom(name)) {
 				VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
 				toRemove.add(name);
@@ -271,7 +271,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 	}
 
 	@Override
-	public void execute(EnvironmentalAction<VacuumWorldPerception> action) {
+	public void execute(EnvironmentalAction action) {
 		setLastActionResult(null);
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		
@@ -315,5 +315,10 @@ public class UserMind extends VacuumWorldAbstractAgentMind<VacuumWorldPerception
 	@Override
 	public boolean canSeeBehind() {
 		return true;
+	}
+	
+	@Override
+	public VacuumWorldPerception getPerception() {
+		return (VacuumWorldPerception) super.getPerception();
 	}
 }

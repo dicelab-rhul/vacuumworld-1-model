@@ -16,8 +16,6 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.manhattan.VacuumWorldManhattanMind;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 
 public class ConfigData {	
 	private static int modelPort;
@@ -33,9 +31,9 @@ public class ConfigData {
 	
 	private static Map<String, String> colorToMindMap;
 	private static Map<String, Class<? extends VacuumWorldDefaultMind>> admissibleMindTypes;
-	private static List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> cleaningAgentActions;
-	private static List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> userActions;
-	private static List<Class<? extends EnvironmentalAction<VacuumWorldMonitoringPerception>>> monitoringAgentActions;
+	private static List<Class<? extends EnvironmentalAction>> cleaningAgentActions;
+	private static List<Class<? extends EnvironmentalAction>> userActions;
+	private static List<Class<? extends EnvironmentalAction>> monitoringAgentActions;
 
 	private static String dbName;
 	private static String dbHostname;
@@ -102,15 +100,15 @@ public class ConfigData {
 		}
 	}
 	
-	public static List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> getCleaningAgentActions() {
+	public static List<Class<? extends EnvironmentalAction>> getCleaningAgentActions() {
 		return ConfigData.cleaningAgentActions;
 	}
 	
-	public static List<Class<? extends EnvironmentalAction<VacuumWorldPerception>>> getUserActions() {
+	public static List<Class<? extends EnvironmentalAction>> getUserActions() {
 		return ConfigData.userActions;
 	}
 	
-	public static List<Class<? extends EnvironmentalAction<VacuumWorldMonitoringPerception>>> getMonitoringAgentActions() {
+	public static List<Class<? extends EnvironmentalAction>> getMonitoringAgentActions() {
 		return ConfigData.monitoringAgentActions;
 	}
 	
@@ -185,7 +183,7 @@ public class ConfigData {
 				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
 				
 				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
-					ConfigData.userActions.add((Class<EnvironmentalAction<VacuumWorldPerception>>) temp);
+					ConfigData.userActions.add((Class<EnvironmentalAction>) temp);
 				}
 			}
 			
@@ -206,7 +204,7 @@ public class ConfigData {
 				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
 				
 				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
-					ConfigData.monitoringAgentActions.add((Class<EnvironmentalAction<VacuumWorldMonitoringPerception>>) temp);
+					ConfigData.monitoringAgentActions.add((Class<EnvironmentalAction>) temp);
 				}
 			}
 			
@@ -227,7 +225,7 @@ public class ConfigData {
 				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
 				
 				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
-					ConfigData.cleaningAgentActions.add((Class<EnvironmentalAction<VacuumWorldPerception>>) temp);
+					ConfigData.cleaningAgentActions.add((Class<EnvironmentalAction>) temp);
 				}
 			}
 			
