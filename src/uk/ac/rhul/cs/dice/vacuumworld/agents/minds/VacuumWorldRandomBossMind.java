@@ -11,7 +11,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
-public class VacuumWorldRandomBossMind extends VacuumWorldRandomMind {
+public class VacuumWorldRandomBossMind extends VacuumWorldDefaultMind {
 	
 	public VacuumWorldRandomBossMind(String bodyId) {
 		super(bodyId);
@@ -19,7 +19,7 @@ public class VacuumWorldRandomBossMind extends VacuumWorldRandomMind {
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		EnvironmentalAction next = super.decide(parameters);
+		EnvironmentalAction next = decideActionRandomly();
 		
 		if(next instanceof MoveAction) {
 			return changeIdeaIfNecessary(next);

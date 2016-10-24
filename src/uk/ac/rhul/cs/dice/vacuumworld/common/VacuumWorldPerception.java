@@ -12,7 +12,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
-import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
@@ -79,7 +78,7 @@ public class VacuumWorldPerception implements Perception {
 			return false;
 		}
 		
-		DirtType dirtType = ((DirtAppearance) getActorCurentLocation().getDirt().getExternalAppearance()).getDirtType();
+		DirtType dirtType = getActorCurentLocation().getDirt().getExternalAppearance().getDirtType();
 		
 		return DirtType.agentAndDirtCompatible(dirtType, getAgentType());
 	}
@@ -115,7 +114,7 @@ public class VacuumWorldPerception implements Perception {
 			return false;
 		}
 		
-		DirtType dirtType = ((DirtAppearance) dirt.getExternalAppearance()).getDirtType();
+		DirtType dirtType = dirt.getExternalAppearance().getDirtType();
 		
 		return DirtType.agentAndDirtCompatible(dirtType, getAgentType());
 	}

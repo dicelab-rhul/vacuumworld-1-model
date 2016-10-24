@@ -9,7 +9,6 @@ import java.util.Map;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Actor;
-import uk.ac.rhul.cs.dice.gawl.interfaces.entities.Agent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.AbstractPhysics;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
@@ -330,7 +329,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 
 	@Override
 	public Result perform(TotalPerceptionAction action, VacuumWorldSpace context) {
-		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId().toString(), new ArrayList<>(), null);
+		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId(), new ArrayList<>(), null);
 	}
 
 	@Override
@@ -399,6 +398,15 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	private void addPerceptionToResult(Actor actor, Result result, VacuumWorldSpace context) {
+		if(result instanceof VacuumWorldSpeechPerceptionResultWrapper) {
+			addPerceptionToResultHelper(actor, ((VacuumWorldSpeechPerceptionResultWrapper) result).getPerceptionResult(), context);
+		}
+		else {
+			addPerceptionToResultHelper(actor, result, context);
+		}
+	}
+	
+	private void addPerceptionToResultHelper(Actor actor, Result result, VacuumWorldSpace context) {
 		if(actor instanceof VacuumWorldMonitoringAgent) {
 			result.setPerception(new VacuumWorldMonitoringPerception(context.getFullGrid(), null));
 		}
@@ -526,7 +534,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 
 	private boolean isCurrentActorAgent(Actor actor) {
-		return Agent.class.isAssignableFrom(actor.getClass());
+		return VacuumWorldCleaningAgent.class.isAssignableFrom(actor.getClass());
 	}
 	
 	private boolean isCurrentActorUser(Actor actor) {

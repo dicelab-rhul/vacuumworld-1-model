@@ -50,7 +50,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 		Event totalPerceptionEvent = new VacuumWorldEvent(action, System.currentTimeMillis(), action.getActor());
 		notifyObservers(totalPerceptionEvent, VacuumWorldMonitoringBridge.class);
 		
-		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId().toString(), new ArrayList<>(), null);
+		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId(), new ArrayList<>(), null);
 	}
 
 	@Override
