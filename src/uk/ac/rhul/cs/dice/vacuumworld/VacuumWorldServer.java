@@ -60,34 +60,171 @@ public class VacuumWorldServer implements Observer {
 	public void startServer(double delayInSeconds) {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting server...");
 		this.threadManager = new VacuumWorldAgentThreadManager(this.sharedStopSignal);
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server started.");
 		
+		doHandshakePhase();
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server connected with " + this.clientSocket.getInetAddress().getHostAddress());
+		
+		startManagingRequests(delayInSeconds);
+	}
+	
+	private void doHandshakePhase() {
 		try {
 			doHandshake();
-			manageRequests(delayInSeconds);
 		}
-		catch(InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		catch (Exception e) {
-			manageExceptionInStartup(e);
+		catch(Exception e) {
+			manageExceptionInHandshake(e);
 		}
 	}
 	
+	private void manageExceptionInHandshake(Exception e) {
+		VWUtils.log(e);
+		VWUtils.logWithClass(getClass().getSimpleName(), "Error in handshake.");
+		stopModelServer();
+	}
+	
+	private void startManagingRequests(double delayInSeconds) {
+		try {
+			manageRequests(delayInSeconds);
+		}
+		catch(Exception e) {
+			manageExceptionInExecution(e);
+		}
+	}
+
+	private void manageExceptionInExecution(Exception e) {
+		if(VWUtils.isInitialStateInvalid(e)) {
+			manageInvalidInitialState();
+		}
+		else {
+			sendStopSignalToController(ModelMessagesEnum.STOP_FORWARD);
+			stopModelServer();
+		}
+	}
+
+	private void manageInvalidInitialState() {
+		VWUtils.logWithClass(getClass().getSimpleName(), "Bad initial state. Forwarding error to View...");
+		sendInitialStateErrorToView();
+		stopModelServer();
+	}
+	
+	private void stopModelServer() {
+		VWUtils.logWithClass(getClass().getSimpleName(), "Attempt to shutdown the model in a clean way...");
+		this.sharedStopSignal.stop();
+		
+		shutdownClientListenerIfNecessary();
+		waitForActorsThreadsManagerTerminationIfNecessary();
+		closeSocketsIfNecessary();
+		
+		VWUtils.logWithClass(getClass().getSimpleName(), "Done.");
+	}
+
+	private void shutdownClientListenerIfNecessary() {
+		VWUtils.logWithClass(getClass().getSimpleName(), "Attempt to shutdown Controller Listener in a clean way...");
+		
+		if(this.executor == null) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Controller Listener does not exist: no need for termination.");
+			
+			return;
+		}
+		if(this.executor.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Controller Listener was already terminated.");
+			
+			return;
+		}
+		
+		shutdownClientListener();
+	}
+
+	private void shutdownClientListener() {
+		try {
+			this.executor.shutdownNow();
+			this.executor.awaitTermination(2, TimeUnit.SECONDS);
+			checkClisternerTermination();
+		}
+		catch(InterruptedException e) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Controller Listener was not correctly terminated. A forcefully JVM termination will be needed.");
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void checkClisternerTermination() {
+		if(this.executor.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Controller Listener correctly terminated.");
+		}
+		else {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Controller Listener was not correctly terminated. A forcefully JVM termination will be needed.");
+		}
+	}
+
+	private void waitForActorsThreadsManagerTerminationIfNecessary() {
+		VWUtils.logWithClass(getClass().getSimpleName(), "Attempt to shutdown actors threads in a clean way...");
+		
+		if(this.threadManager == null) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager does not exists: no actors threads to terminate.");
+		}
+		if(this.threadManager.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager was already terminated: no actors threads to terminate.");
+		}
+		
+		waitForActorsThreadsManagerTermination();
+	}
+
+	private void waitForActorsThreadsManagerTermination() {
+		int counter = 0;
+		
+		while(counter < 10) {
+			if(!this.threadManager.isTerminated()) {
+				VWUtils.doWait(1000);
+				counter++;
+			}
+			else {
+				VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager correctly terminated: assuming all the actors threads have been terminated in a clean way.");
+				break;
+			}
+		}
+		
+		VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager is still pending. A forcefully JVM termination will be needed.");
+	}
+
+	private void closeSocketsIfNecessary() {
+		VWUtils.logWithClass(getClass().getSimpleName(), "Attempting to close the socket with the Controller....");
+		closeClientSocket();
+		VWUtils.logWithClass(getClass().getSimpleName(), "Attempting to close the server socket...");
+		closeServerSocket();
+	}
+	
+	private void closeClientSocket() {
+		try {
+			if (!this.clientSocket.isClosed()) {
+				this.clientSocket.close();
+				VWUtils.logWithClass(getClass().getSimpleName(), "Socket with Controller correctly closed.");
+			}
+		}
+		catch(Exception e) {
+			VWUtils.fakeLog(e);
+			VWUtils.logWithClass(getClass().getSimpleName(), "Socket with Controller was already closed.");
+		}
+	}
+
+	private void closeServerSocket() {
+		try {
+			if (!this.server.isClosed()) {
+				this.server.close();
+				VWUtils.logWithClass(getClass().getSimpleName(), "Server socket correctly closed.");
+			}
+		}
+		catch(Exception e) {
+			VWUtils.fakeLog(e);
+			VWUtils.logWithClass(getClass().getSimpleName(), "Server socket was already closed.");
+		}
+	}
+
 	public boolean isStopSignalOn() {
 		return this.sharedStopSignal.mustStop();
 	}
 
-	private void manageExceptionInStartup(Exception e) {
-		if(VWUtils.INVALID_INITIAL_STATE.equals(e.getMessage())) {
-			sendErrorToView();
-		}
-		else {
-			VWUtils.log(e);
-			stopServer();
-		}
-	}
-
-	private void sendErrorToView() {
+	private void sendInitialStateErrorToView() {
 		try {
 			ModelUpdate update = new ModelUpdate(ModelMessagesEnum.BAD_INITIAL_STATE, null);
 			this.output.writeObject(update);
@@ -95,10 +232,25 @@ public class VacuumWorldServer implements Observer {
 		}
 		catch(IOException e) {
 			VWUtils.log(e);
-			stopSystem(ModelMessagesEnum.STOP_FORWARD);
+		}
+		finally {
+			sendStopSignalToController(ModelMessagesEnum.STOP_FORWARD);
 		}
 	}
 
+	private void sendStopSignalToController(ModelMessagesEnum code) {
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Sending a stop request to the controller for him to shutdown...");
+		
+		try {
+			ModelUpdate update = new ModelUpdate(code, null);
+			this.threadManager.getClientListener().getOutputStream().writeObject(update);
+			this.threadManager.getClientListener().getOutputStream().flush();
+		}
+		catch(Exception e) {
+			VWUtils.log(e);
+		}
+	}
+	
 	private void doHandshake() throws IOException, ClassNotFoundException, HandshakeException {
 		Socket candidate = this.server.accept();
 		ObjectOutputStream o = new ObjectOutputStream(candidate.getOutputStream());
@@ -107,10 +259,17 @@ public class VacuumWorldServer implements Observer {
 		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) i.readObject());
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");  //CHCM
 		
+		finalizeHandshake(o, i, codeFromController, candidate);
+	}
+
+	private void finalizeHandshake(ObjectOutputStream o, ObjectInputStream i, HandshakeCodes codeFromController, Socket candidate) throws HandshakeException {
 		if(Handshake.attemptHanshakeWithController(o, i, codeFromController)) {
 			this.clientSocket = candidate;
 			this.output = o;
 			this.input = i;
+		}
+		else {
+			throw new HandshakeException("Failed handshake.");
 		}
 	}
 
@@ -139,7 +298,6 @@ public class VacuumWorldServer implements Observer {
 		setupMonitoringAgents();
 		startListeningService();
 		
-		// START!
 		this.threadManager.addObserver(this);
 		this.threadManager.start(delayInSeconds);
 	}
@@ -217,10 +375,6 @@ public class VacuumWorldServer implements Observer {
 		this.executor.execute(this.threadManager.getClientListener());
 	}
 
-	/**
-	 * Called from notify in the {@link VacuumWorldThreadManager} showing that a
-	 * cycle has ended and that the view should be updated.
-	 */
 	@Override
 	public void update(Observable arg0, Object arg1) {
 		VWUtils.increaseCycleNumber();
@@ -254,7 +408,8 @@ public class VacuumWorldServer implements Observer {
 			sendUpdate();
 			break;
 		case STOP_FORWARD:
-			stopSystem(ModelMessagesEnum.STOP_CONTROLLER);
+			sendStopSignalToController(ModelMessagesEnum.STOP_CONTROLLER);
+			stopModelServer();
 			break;
 		default:
 			break;	
@@ -272,39 +427,6 @@ public class VacuumWorldServer implements Observer {
 		}
 	}
 
-	private void stopSystem(ModelMessagesEnum code) {
-		VWUtils.logWithClass(this.getClass().getSimpleName(), "Stopping the system and forwarding the stop request to the controller for him to shutdown...");
-		
-		try {
-			ModelUpdate update = new ModelUpdate(code, null);
-			this.threadManager.getClientListener().getOutputStream().writeObject(update);
-			this.threadManager.getClientListener().getOutputStream().flush();
-			
-			this.server.close();
-		}
-		catch(Exception e) {
-			VWUtils.log(e);
-		}
-		finally {			
-			this.sharedStopSignal.stop();
-			killThreads();
-		}
-	}
-
-	private void killThreads() {
-		try {
-			this.executor.shutdownNow();
-			this.executor.awaitTermination(2, TimeUnit.SECONDS);
-			VWUtils.logWithClass(this.getClass().getSimpleName(), "Requests listener termination complete.");
-		}
-		catch(InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		catch(Exception e) {
-			VWUtils.log(e);
-		}
-	}
-
 	private Map<SpaceCoordinates, Double[]> createDimensionsMap(int[] dimensions) {
 		Map<SpaceCoordinates, Double[]> dimensionsMap = new EnumMap<>(SpaceCoordinates.class);
 
@@ -316,31 +438,8 @@ public class VacuumWorldServer implements Observer {
 		return dimensionsMap;
 	}
 
-	private void stopServer() {
-		try {
-			closeClientSocket();
-			closeServerSocket();
-		}
-		catch (Exception e) {
-			VWUtils.log(e);
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	private void closeClientSocket() throws IOException {
-		if (!this.clientSocket.isClosed()) {
-			this.clientSocket.close();
-		}
-	}
-
-	private void closeServerSocket() throws IOException {
-		if (!this.server.isClosed()) {
-			this.server.close();
-		}
-	}
-
 	public void printState() {
-		((VacuumWorldAppearance) this.universe.getAppearance()).updateRepresentation(this.universe.getState());
+		this.universe.getAppearance().updateRepresentation(this.universe.getState());
 		VWUtils.logState(this.universe.getAppearance().represent());
 	}
 }

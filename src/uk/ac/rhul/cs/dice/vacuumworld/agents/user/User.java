@@ -111,6 +111,21 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 		}
 	}
 
+	@Override
+	public UserMind getMind() {
+		return (UserMind) super.getMind();
+	}
+	
+	@Override
+	public UserBrain getBrain() {
+		return (UserBrain) super.getBrain();
+	}
+	
+	@Override
+	public UserAppearance getExternalAppearance() {
+		return (UserAppearance) super.getExternalAppearance();
+	}	
+	
 	public List<UserSensor> getSeeingSensors() {
 		return getSpecificSensors(VacuumWorldSensorRole.SEEING_SENSOR);
 	}

@@ -1,7 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents.minds;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,7 +16,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractAgentMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultBrain;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
@@ -26,7 +25,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMind {
+public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMind {
 	
 	public VacuumWorldDefaultMind(String bodyId) {
 		super(new Random(System.currentTimeMillis()), bodyId);
@@ -88,7 +87,7 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractAgentMin
 		try {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(getPerceptionRange(), canSeeBehind());
 		}
-		catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+		catch(Exception e) {
 			VWUtils.fakeLog(e);
 			
 			return new PerceiveAction();

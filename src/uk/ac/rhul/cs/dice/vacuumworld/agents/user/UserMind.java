@@ -1,7 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents.user;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,8 +17,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractAgentMind;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
@@ -27,7 +25,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class UserMind extends VacuumWorldAbstractAgentMind {
+public class UserMind extends VacuumWorldAbstractActorMind {
 	private DirtType lastDroppedDirt;
 	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
 	private UserPlan plan;
@@ -209,7 +207,7 @@ public class UserMind extends VacuumWorldAbstractAgentMind {
 		try {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
 		}
-		catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+		catch(Exception e) {
 			VWUtils.fakeLog(e);
 			
 			return new PerceiveAction();
@@ -239,25 +237,25 @@ public class UserMind extends VacuumWorldAbstractAgentMind {
 		}
 	}
 	
-	protected void updateAvailableActions(VacuumWorldPerception perception) {
+	private void updateAvailableActions(VacuumWorldPerception perception) {
 		updateMoveActionIfNecessary(perception);
 	}
 	
-	protected void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
-		VacuumWorldCoordinates agentCoordinates = perception.getActorCoordinates();
-		VacuumWorldLocation agentLocation = perception.getPerceivedMap().get(agentCoordinates);
-		VacuumWorldCleaningAgent agent = agentLocation.getAgent();
+	private void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
+		VacuumWorldCoordinates userCoordinates = perception.getActorCoordinates();
+		VacuumWorldLocation userLocation = perception.getPerceivedMap().get(userCoordinates);
+		User user= userLocation.getUser();
 
-		if (agent != null) {
-			ActorFacingDirection facingDirection = agent.getFacingDirection();
+		if (user != null) {
+			ActorFacingDirection facingDirection = user.getFacingDirection();
 
-			if (agentLocation.getNeighborLocationType(facingDirection) == VacuumWorldLocationType.WALL) {
+			if (userLocation.getNeighborLocationType(facingDirection) == VacuumWorldLocationType.WALL) {
 				removeActionIfNecessary(MoveAction.class);
 			}
 		}
 	}
 	
-	protected void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
+	private void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
 		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
 
 		for (Class<? extends EnvironmentalAction> a : this.getAvailableActionsForThisCycle()) {

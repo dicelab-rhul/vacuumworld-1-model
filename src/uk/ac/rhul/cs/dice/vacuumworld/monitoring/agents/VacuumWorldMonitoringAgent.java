@@ -30,6 +30,21 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 	}
 	
 	@Override
+	public VacuumWorldMonitoringAgentMind getMind() {
+		return (VacuumWorldMonitoringAgentMind) super.getMind();
+	}
+	
+	@Override
+	public VacuumWorldMonitoringAgentBrain getBrain() {
+		return (VacuumWorldMonitoringAgentBrain) super.getBrain();
+	}
+	
+	@Override
+	public VacuumWorldMonitoringAgentAppearance getExternalAppearance() {
+		return (VacuumWorldMonitoringAgentAppearance) super.getExternalAppearance();
+	}
+	
+	@Override
 	public Object simulate() {
 		return null;
 	}

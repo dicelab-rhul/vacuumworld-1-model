@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,8 +44,8 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		initEmptyMap();
 	}
 	
-	public VacuumWorldSpace(int[] dimensions, Map<LocationKey, Location> grid, User user, boolean monitoring) {
-		super(grid);
+	public VacuumWorldSpace(int[] dimensions, Map<VacuumWorldCoordinates, VacuumWorldLocation> grid, User user, boolean monitoring) {
+		super(checkedCast(grid));
 		
 		this.user = user;
 		this.monitoring = monitoring;
@@ -52,6 +53,17 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		this.agents = new HashMap<>();
 		
 		fillAgentsMap();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static Map<LocationKey, Location> checkedCast(Map<? extends LocationKey, ? extends Location> grid) {
+		for(Entry<? extends LocationKey, ? extends Location> entry : grid.entrySet()) {
+			if(!LocationKey.class.isAssignableFrom(entry.getKey().getClass()) || !Location.class.isAssignableFrom(entry.getValue().getClass())) {
+				return new HashMap<>();
+			}
+		}
+		
+		return (Map<LocationKey, Location>) grid;
 	}
 
 	private void initEmptyMap() {
@@ -64,9 +76,9 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	private void fillAgentsMap() {
-		for (Location location : getLocations()) {
-			if (((VacuumWorldLocation) location).isAnAgentPresent()) {
-				VacuumWorldCleaningAgent a = ((VacuumWorldLocation) location).getAgent();
+		for (VacuumWorldLocation location : getAllLocations()) {
+			if (location.isAnAgentPresent()) {
+				VacuumWorldCleaningAgent a = location.getAgent();
 				this.agents.put(a.getId(), a);
 			}
 		}
@@ -110,6 +122,10 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		}
 		
 		return toReturn;
+	}
+	
+	public Collection<VacuumWorldLocation> getAllLocations() {
+		return getFullGrid().values();
 	}
 
 	@Override

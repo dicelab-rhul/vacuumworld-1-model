@@ -138,4 +138,8 @@ public class VWUtils {
 		
 		return true;
 	}
+	
+	public static boolean isInitialStateInvalid(Exception e) {
+		return VWUtils.INVALID_INITIAL_STATE.equals(e.getMessage());
+	}
 }

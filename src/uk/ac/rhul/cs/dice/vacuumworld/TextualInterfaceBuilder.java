@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.PhysicalBody;
-import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
@@ -32,40 +31,38 @@ public class TextualInterfaceBuilder {
 		return representation;
 	}
 
-	private static String representLocation(Location location) {
-		VacuumWorldLocation loc = (VacuumWorldLocation) location;
-
-		if (isOverlapping(loc)) {
-			return getOverlappingSymbol(loc);
+	private static String representLocation(VacuumWorldLocation location) {
+		if (isOverlapping(location)) {
+			return getOverlappingSymbol(location);
 		}
-		else if (loc.isAnAgentPresent()) {
-			return loc.getAgent().getExternalAppearance().represent();
+		else if (location.isAnAgentPresent()) {
+			return location.getAgent().getExternalAppearance().represent();
 		}
-		else if (loc.isAUserPresent()) {
-			return loc.getUser().getExternalAppearance().represent();
+		else if (location.isAUserPresent()) {
+			return location.getUser().getExternalAppearance().represent();
 		}
-		else if (loc.isDirtPresent()) {
-			return loc.getDirt().getExternalAppearance().represent();
+		else if (location.isDirtPresent()) {
+			return location.getDirt().getExternalAppearance().represent();
 		}
 		else {
 			return "#";
 		}
 	}
 
-	private static String getOverlappingSymbol(VacuumWorldLocation loc) {
-		if(loc.isAnAgentPresent()) {
-			return getOverlappingSymbol(loc.getAgent(), loc.getDirt());
+	private static String getOverlappingSymbol(VacuumWorldLocation location) {
+		if(location.isAnAgentPresent()) {
+			return getOverlappingSymbol(location.getAgent(), location.getDirt());
 		}
-		else if(loc.isAUserPresent()) {
-			return getOverlappingSymbol(loc.getUser(), loc.getDirt());
+		else if(location.isAUserPresent()) {
+			return getOverlappingSymbol(location.getUser(), location.getDirt());
 		}
 		else {
 			return null;
 		}
 	}
 
-	private static boolean isOverlapping(VacuumWorldLocation loc) {
-		return loc.isDirtPresent() && (loc.isAnAgentPresent() || loc.isAUserPresent());
+	private static boolean isOverlapping(VacuumWorldLocation location) {
+		return location.isDirtPresent() && (location.isAnAgentPresent() || location.isAUserPresent());
 	}
 
 	private static String getOverlappingSymbol(PhysicalBody actor, Dirt dirt) {

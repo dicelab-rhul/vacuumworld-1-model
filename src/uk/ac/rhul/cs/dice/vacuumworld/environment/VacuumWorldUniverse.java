@@ -1,7 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.environment;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.UniverseAppearance;
-import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Universe;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
@@ -13,16 +11,14 @@ public class VacuumWorldUniverse extends Universe {
 	private VacuumWorldMonitoringContainer monitoringContainer;
 	private VacuumWorldMonitoringPhysics monitoringPhysics;
 
-	public VacuumWorldUniverse(EnvironmentalSpace state, VacuumWorldPhysics physics, VacuumWorldMonitoringContainer monitoringContainer, VacuumWorldMonitoringPhysics monitoringPhysics, UniverseAppearance appearance) {
+	public VacuumWorldUniverse(VacuumWorldSpace state, VacuumWorldPhysics physics, VacuumWorldMonitoringContainer monitoringContainer, VacuumWorldMonitoringPhysics monitoringPhysics, VacuumWorldAppearance appearance) {
 		super(state, physics, appearance);
-		
-		VacuumWorldSpace space = (VacuumWorldSpace) state;
 		
 		this.monitoringContainer = monitoringContainer;
 		this.monitoringPhysics = monitoringPhysics;
-		this.monitoringBridge = new VacuumWorldMonitoringBridge(this.monitoringContainer.getClass(), this.monitoringPhysics.getClass(), space.getClass(), physics.getClass());
+		this.monitoringBridge = new VacuumWorldMonitoringBridge(this.monitoringContainer.getClass(), this.monitoringPhysics.getClass(), state.getClass(), physics.getClass());
 	
-		makeObservers(space, physics);
+		makeObservers(state, physics);
 	}
 
 	private void makeObservers(VacuumWorldSpace monitoredSpace, VacuumWorldPhysics monitoredPhysics) {
@@ -58,5 +54,10 @@ public class VacuumWorldUniverse extends Universe {
 	@Override
 	public VacuumWorldPhysics getPhysics() {
 		return (VacuumWorldPhysics) super.getPhysics();
+	}
+	
+	@Override
+	public VacuumWorldAppearance getAppearance() {
+		return (VacuumWorldAppearance) super.getAppearance();
 	}
 }

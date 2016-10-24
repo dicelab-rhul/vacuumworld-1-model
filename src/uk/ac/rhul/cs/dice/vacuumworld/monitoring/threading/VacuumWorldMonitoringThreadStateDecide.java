@@ -10,7 +10,7 @@ public class VacuumWorldMonitoringThreadStateDecide extends AbstractThreadStateD
 	public void run(AbstractActorRunnable runnable) {
 		if(runnable instanceof VacuumWorldMonitoringActorRunnable) {
 			EnvironmentalAction nextAction = runnable.getActorMind().decide();
-			Mind mind = ((VacuumWorldMonitoringActorRunnable) runnable).getActorMind();
+			Mind mind = runnable.getActorMind();
 			mind.setNextActionForExecution(nextAction);
 		}
 		else {

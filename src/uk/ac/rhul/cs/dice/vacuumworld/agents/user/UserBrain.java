@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentBrain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
@@ -44,7 +44,7 @@ public class UserBrain extends AbstractAgentBrain {
 		if (arg == null) {
 			manageMindPullRequest();
 		}
-		else if (AbstractAction.class.isAssignableFrom(arg.getClass()) && !CleanAction.class.isAssignableFrom(arg.getClass())){
+		else if (EnvironmentalAction.class.isAssignableFrom(arg.getClass()) && !CleanAction.class.isAssignableFrom(arg.getClass())){
 			this.actionResultReturned = false;
 			notifyObservers(arg, User.class);
 		}

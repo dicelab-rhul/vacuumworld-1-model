@@ -13,7 +13,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.TurnRightAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
-import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
@@ -97,7 +96,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 			return false;
 		}
 		
-		if(!this.plan.getTargetDirtType().equals(((DirtAppearance) this.plan.getTargetLocation().getDirt().getExternalAppearance()).getDirtType())) {
+		if(!this.plan.getTargetDirtType().equals(this.plan.getTargetLocation().getDirt().getExternalAppearance().getDirtType())) {
 			return false;
 		}
 		
@@ -136,7 +135,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
 		
 		this.plan = new ManhattanPlan();
 		this.plan.setCurrentAgentType(perception.getAgentType());
-		this.plan.setTargetDirtType(((DirtAppearance) closest.getDirt().getExternalAppearance()).getDirtType());
+		this.plan.setTargetDirtType(closest.getDirt().getExternalAppearance().getDirtType());
 		this.plan.setTargetLocation(closest);
 		
 		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": target: " + this.plan.getTargetDirtType().toString() + " dirt on " + closest.getCoordinates().toString() + ".");

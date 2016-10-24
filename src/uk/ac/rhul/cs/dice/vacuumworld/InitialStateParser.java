@@ -23,8 +23,6 @@ import javax.json.JsonValue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
-import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
-import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentAppearance;
@@ -114,7 +112,7 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldSpace createInitialState(List<VacuumWorldLocation> notableLocations, int width, int height, boolean user, boolean monitoring) {
-		Map<LocationKey, Location> spaceMap = new HashMap<>();
+		Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap = new HashMap<>();
 
 		for (VacuumWorldLocation location : notableLocations) {
 			spaceMap.put(location.getCoordinates(), location);
@@ -123,7 +121,7 @@ public class InitialStateParser {
 		return fillState(spaceMap, width, height, user, monitoring);
 	}
 
-	private static VacuumWorldSpace fillState(Map<LocationKey, Location> spaceMap, int width, int height, boolean user, boolean monitoring) {
+	private static VacuumWorldSpace fillState(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int width, int height, boolean user, boolean monitoring) {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				putNewLocationIfNecessary(spaceMap, i, j, width, height);
@@ -132,25 +130,25 @@ public class InitialStateParser {
 		return packState(spaceMap, width, height, user, monitoring);
 	}
 
-	private static VacuumWorldSpace packState(Map<LocationKey, Location> spaceMap, int width, int height, boolean userPresent, boolean monitoring) {
+	private static VacuumWorldSpace packState(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int width, int height, boolean userPresent, boolean monitoring) {
 		int[] dimensions = new int[] {width, height};
 		User user = createAndInitUser(userPresent, spaceMap);
 		
 		return new VacuumWorldSpace(dimensions, spaceMap, user, monitoring);
 	}
 
-	private static User createAndInitUser(boolean userPreent, Map<LocationKey, Location> spaceMap) {
+	private static User createAndInitUser(boolean userPreent, Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap) {
 		User user = createUser(userPreent);
 		
 		return user == null ? null : setupUser(user, spaceMap);
 	}
 
-	private static User setupUser(User user, Map<LocationKey, Location> spaceMap) {
+	private static User setupUser(User user, Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap) {
 		VacuumWorldCoordinates coordinates = getRandomFreeCoordinates(spaceMap);
 		
 		if(coordinates != null) {
 			user.setCurrentLocation(coordinates);
-			((VacuumWorldLocation) spaceMap.get(coordinates)).addUser(user);
+			spaceMap.get(coordinates).addUser(user);
 			
 			return user;
 		}
@@ -159,8 +157,8 @@ public class InitialStateParser {
 		}
 	}
 
-	private static VacuumWorldCoordinates getRandomFreeCoordinates(Map<LocationKey, Location> spaceMap) {
-		List<VacuumWorldCoordinates> coordinatesList = spaceMap.values().stream().map((Location location) -> (VacuumWorldLocation) location).filter(VacuumWorldLocation::isFree).map(VacuumWorldLocation::getCoordinates).collect(Collectors.toList());
+	private static VacuumWorldCoordinates getRandomFreeCoordinates(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap) {
+		List<VacuumWorldCoordinates> coordinatesList = spaceMap.values().stream().filter(VacuumWorldLocation::isFree).map(VacuumWorldLocation::getCoordinates).collect(Collectors.toList());
 		Collections.shuffle(coordinatesList);
 		
 		try {
@@ -193,7 +191,7 @@ public class InitialStateParser {
 		return user;
 	}
 
-	private static void putNewLocationIfNecessary(Map<LocationKey, Location> spaceMap, int i, int j, int width, int height) {
+	private static void putNewLocationIfNecessary(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int i, int j, int width, int height) {
 		VacuumWorldCoordinates coordinates = new VacuumWorldCoordinates(i, j);
 
 		if (!spaceMap.containsKey(coordinates)) {
@@ -305,7 +303,7 @@ public class InitialStateParser {
 
 	private static VacuumWorldCleaningAgent createAgent(String id, String name, String color, int sensorsNumber, int actuatorsNumber, Double[] dimensions, ActorFacingDirection agentFacingDirection) {
 		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(sensorsNumber, id, VacuumWorldDefaultSensor.class);
-		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(actuatorsNumber, id);
+		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(actuatorsNumber, id, VacuumWorldDefaultActuator.class);
 
 		VacuumWorldAgentType type = VacuumWorldAgentType.fromString(color);
 		VacuumWorldAgentAppearance appearance = new VacuumWorldAgentAppearance(name, dimensions, type);
@@ -330,7 +328,7 @@ public class InitialStateParser {
 		}
 	}
 
-	private static List<Actuator<VacuumWorldActuatorRole>> createActuators(int actuatorsNumber, String bodyId) {
+	private static List<Actuator<VacuumWorldActuatorRole>> createActuators(int actuatorsNumber, String bodyId, Class<? extends Actuator<VacuumWorldActuatorRole>> classToUse) {
 		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
 
 		if (actuatorsNumber <= 0) {
@@ -339,15 +337,15 @@ public class InitialStateParser {
 		
 		try {
 			if(actuatorsNumber >= 1) {
-				actuators.add(new VacuumWorldDefaultActuator(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
+				actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
 			}
 			
 			if(actuatorsNumber >= 2) {
-				actuators.add(new VacuumWorldDefaultActuator(bodyId, VacuumWorldActuatorRole.SPEAKING_ACTUATOR));
+				actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.SPEAKING_ACTUATOR));
 			}
 			
 			if(actuatorsNumber >= 3) {
-				addOtherActuators(actuatorsNumber, bodyId, actuators);
+				addOtherActuators(actuatorsNumber, bodyId, actuators, classToUse);
 			}
 		}
 		catch(Exception e) {
@@ -357,42 +355,9 @@ public class InitialStateParser {
 		return actuators;
 	}
 
-	private static void addOtherActuators(int actuatorsNumber, String bodyId, List<Actuator<VacuumWorldActuatorRole>> actuators) {
+	private static void addOtherActuators(int actuatorsNumber, String bodyId, List<Actuator<VacuumWorldActuatorRole>> actuators, Class<? extends Actuator<VacuumWorldActuatorRole>> classToUse) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		for (int i = 0; i < actuatorsNumber - 2; i++) {
-			actuators.add(new VacuumWorldDefaultActuator(bodyId, VacuumWorldActuatorRole.UNDEFINED));
-		}
-	}
-	
-	private static List<Actuator<VacuumWorldActuatorRole>> createMonitoringActuators(int actuatorsNumber, String bodyId) {
-		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
-
-		if (actuatorsNumber <= 0) {
-			return actuators;
-		}
-		
-		try {
-			if(actuatorsNumber >= 1) {
-				actuators.add(new VacuumWorldMonitoringAgentActuator(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
-			}
-			
-			if(actuatorsNumber >= 2) {
-				actuators.add(new VacuumWorldMonitoringAgentActuator(bodyId, VacuumWorldActuatorRole.SPEAKING_ACTUATOR));
-			}
-			
-			if(actuatorsNumber >= 3) {
-				addOtherMonitoringActuators(actuatorsNumber, bodyId, actuators);
-			}
-		}
-		catch(Exception e) {
-			VWUtils.fakeLog(e);
-		}
-
-		return actuators;
-	}
-
-	private static void addOtherMonitoringActuators(int actuatorsNumber, String bodyId, List<Actuator<VacuumWorldActuatorRole>> actuators) {
-		for (int i = 0; i < actuatorsNumber - 2; i++) {
-			actuators.add(new VacuumWorldMonitoringAgentActuator(bodyId, VacuumWorldActuatorRole.UNDEFINED));
+			actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.UNDEFINED));
 		}
 	}
 
@@ -489,7 +454,7 @@ public class InitialStateParser {
 		VacuumWorldMonitoringAgentMind mind = new VacuumWorldMonitoringAgentMind(bodyId);
 		VacuumWorldMonitoringAgentBrain brain = new VacuumWorldMonitoringAgentBrain();
 		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(2, bodyId, VacuumWorldMonitoringAgentSensor.class);
-		List<Actuator<VacuumWorldActuatorRole>> actuators = createMonitoringActuators(2, bodyId);
+		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(2, bodyId, VacuumWorldMonitoringAgentActuator.class);
 		Double[] dimensions = new Double[] {(double) 1, (double) 1};
 		VacuumWorldMonitoringAgentAppearance appearance = new VacuumWorldMonitoringAgentAppearance(bodyId, dimensions);
 		

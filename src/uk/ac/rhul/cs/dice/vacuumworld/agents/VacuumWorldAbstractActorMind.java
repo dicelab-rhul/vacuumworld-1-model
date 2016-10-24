@@ -10,15 +10,15 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 
-public abstract class VacuumWorldAbstractAgentMind extends AbstractAgentMind {
+public abstract class VacuumWorldAbstractActorMind extends AbstractAgentMind {
 	private int perceptionRange;
 	private boolean canSeeBehind;
 	
-	public VacuumWorldAbstractAgentMind(Random rng, String bodyId) {
+	public VacuumWorldAbstractActorMind(Random rng, String bodyId) {
 		super(rng, bodyId);
 	}
 	
-	public VacuumWorldAbstractAgentMind(String bodyId) {
+	public VacuumWorldAbstractActorMind(String bodyId) {
 		super(new Random(System.currentTimeMillis()), bodyId);
 	}
 

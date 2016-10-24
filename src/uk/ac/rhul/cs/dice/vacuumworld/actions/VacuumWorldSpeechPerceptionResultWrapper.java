@@ -21,7 +21,6 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 		return this.perceptionResult.getActionResult();
 	}
 
-	// Unused
 	@Override
 	public void changeActionResult(ActionResult newResult) {
 		this.perceptionResult.changeActionResult(newResult);
@@ -32,16 +31,29 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 		return this.perceptionResult.getFailureReason();
 	}
 
-	// Unused
 	@Override
 	public List<String> getRecipientsIds() {
 		return this.perceptionResult.getRecipientsIds();
 	}
 
-	// Unused
 	@Override
 	public void setRecipientsIds(List<String> recipientsIds) {
 		this.perceptionResult.setRecipientsIds(recipientsIds);
+	}
+	
+	@Override
+	public String getActorId() {
+		return this.perceptionResult.getActorId();
+	}
+
+	@Override
+	public VacuumWorldPerception getPerception() {
+		return (VacuumWorldPerception) this.perceptionResult.getPerception();
+	}
+
+	@Override
+	public void setPerception(Perception perception) {
+		this.perceptionResult.setPerception(perception);
 	}
 
 	public VacuumWorldSpeechActionResult getSpeechResult() {
@@ -58,20 +70,5 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 
 	public void setPerceptionResult(VacuumWorldActionResult perceptionResult) {
 		this.perceptionResult = perceptionResult;
-	}
-
-	@Override
-	public String getActorId() {
-		return this.perceptionResult.getActorId();
-	}
-
-	@Override
-	public VacuumWorldPerception getPerception() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setPerception(Perception perception) {
-		throw new UnsupportedOperationException();
 	}
 }

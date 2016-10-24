@@ -5,13 +5,13 @@ import java.util.List;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractAgentMind;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
-public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractAgentMind {
+public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind {
 	public VacuumWorldMonitoringAgentMind(String bodyId) {
 		super(bodyId);
 		

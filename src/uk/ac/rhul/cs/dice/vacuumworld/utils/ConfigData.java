@@ -12,7 +12,6 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.AbstractAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.manhattan.VacuumWorldManhattanMind;
@@ -182,7 +181,7 @@ public class ConfigData {
 			for(Entry<String, JsonValue> entry : userActions.entrySet()) {
 				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
 				
-				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
+				if(Class.forName(EnvironmentalAction.class.getCanonicalName()).isAssignableFrom(temp)) {
 					ConfigData.userActions.add((Class<EnvironmentalAction>) temp);
 				}
 			}
@@ -203,7 +202,7 @@ public class ConfigData {
 			for(Entry<String, JsonValue> entry : monitoringAgentActions.entrySet()) {
 				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
 				
-				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
+				if(Class.forName(EnvironmentalAction.class.getCanonicalName()).isAssignableFrom(temp)) {
 					ConfigData.monitoringAgentActions.add((Class<EnvironmentalAction>) temp);
 				}
 			}
@@ -224,7 +223,7 @@ public class ConfigData {
 			for(Entry<String, JsonValue> entry : cleaningAgentActions.entrySet()) {
 				Class<?> temp = Class.forName(entry.getValue().toString().replaceAll("\"", ""));
 				
-				if(Class.forName(AbstractAction.class.getCanonicalName()).isAssignableFrom(temp)) {
+				if(Class.forName(EnvironmentalAction.class.getCanonicalName()).isAssignableFrom(temp)) {
 					ConfigData.cleaningAgentActions.add((Class<EnvironmentalAction>) temp);
 				}
 			}

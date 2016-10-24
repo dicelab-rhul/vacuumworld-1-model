@@ -15,6 +15,6 @@ public class VacuumWorldBroadcastingMind extends VacuumWorldDefaultMind {
 	public EnvironmentalAction decide(Object... parameters) {
 		String[] choices = new String[]{"N", "S", "W", "E"};
 		
-		return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("move" + choices[getRNG().nextInt()%choices.length], false));
+		return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("move" + choices[getRNG().nextInt() % choices.length], false));
 	}
 }

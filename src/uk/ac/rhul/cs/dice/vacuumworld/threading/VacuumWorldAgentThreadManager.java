@@ -37,15 +37,21 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	private VacuumWorldActorRunnable userRunnable;
 	
 	private volatile StopSignal sharedStopSignal;
+	private volatile boolean threadManagerTerminated;
 
 	public VacuumWorldAgentThreadManager(StopSignal sharedStopSignal) {
 		this.cleaningRunnables = new HashSet<>();
 		this.monitorRunnables = new HashSet<>();
 		this.sharedStopSignal = sharedStopSignal;
+		this.threadManagerTerminated = false;
 	}
 
 	public VacuumWorldClientListener getClientListener() {
 		return this.listener;
+	}
+	
+	public boolean isTerminated() {
+		return this.threadManagerTerminated;
 	}
 	
 	public VacuumWorldSpace getState() {
@@ -62,6 +68,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Thread manager correctly started.");
 		
 		cycle(delayInSeconds);
+		this.threadManagerTerminated = true;
 	}
 	
 	private void cycle(double delayInSeconds) throws InterruptedException {
@@ -84,16 +91,83 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	}
 
 	private void shutdownExecutors() throws InterruptedException {
-		this.executor.shutdownNow();
+		shutdownCleaningAgentsThreadsExecutorIfNeeded();
+		shutdownMonitoringingAgentsThreadsExecutorIfNeeded();
 		
-		if(this.monitoringExecutor != null) {
-			this.monitoringExecutor.shutdownNow();
+		
+	}
+
+	private void shutdownCleaningAgentsThreadsExecutorIfNeeded() {
+		if(this.executor == null) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Cleaning agents threads executor does not exist. No termination needed.");
+			
+			return;
 		}
 		
-		this.executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		if(this.executor.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Cleaning agents threads executor was already terminated.");
+			
+			return;
+		}
 		
-		if(this.monitoringExecutor != null) {
-			this.monitoringExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		shutdownCleaningAgentsThreadsExecutor();
+	}
+
+	private void shutdownMonitoringingAgentsThreadsExecutorIfNeeded() {
+		if(this.monitoringExecutor == null) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Monitoring agents threads executor does not exist. No termination needed.");
+			
+			return;
+		}
+		
+		if(this.monitoringExecutor.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Monitoring agents threads executor was already terminated.");
+			
+			return;
+		}
+		
+		shutdownMonitoringAgentsThreadsExecutor();
+	}
+
+	private void shutdownCleaningAgentsThreadsExecutor() {
+		try {
+			this.executor.shutdownNow();
+			this.executor.awaitTermination(5, TimeUnit.SECONDS);
+			checkCleaningAgentsThreadsExecutorTermination();
+		}
+		catch(InterruptedException e) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Cleaning agents threads executor was not correctly terminated. A forcefully JVM termination will be needed.");
+			Thread.currentThread().interrupt();
+		}
+	}
+	
+	private void checkCleaningAgentsThreadsExecutorTermination() {
+		if(this.executor.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Cleaning agents threads executor correctly terminated.");
+		}
+		else {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Cleaning agents threads executor was not correctly terminated. A forcefully JVM termination will be needed.");
+		}
+	}
+
+	private void shutdownMonitoringAgentsThreadsExecutor() {
+		try {
+			this.monitoringExecutor.shutdownNow();
+			this.monitoringExecutor.awaitTermination(5, TimeUnit.SECONDS);
+			checkMonitoringAgentsThreadsExecutorTermination();
+		}
+		catch(InterruptedException e) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Monitoring agents threads executor was not correctly terminated. A forcefully JVM termination will be needed.");
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void checkMonitoringAgentsThreadsExecutorTermination() {
+		if(this.executor.isTerminated()) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Monitoring agents threads executor correctly terminated.");
+		}
+		else {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Monitoring agents threads executor was not correctly terminated. A forcefully JVM termination will be needed.");
 		}
 	}
 
