@@ -5,6 +5,7 @@
 	<classpathentry kind="lib" path="res/javax.json-1.0.4.jar"/>
 	<classpathentry kind="lib" path="res/mongo-java-driver-3.2.2.jar"/>
 	<classpathentry kind="lib" path="res/vwcommon.jar"/>
+	<classpathentry kind="lib" path="res/mongodb-driver-3.4.0-rc1-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GenericAgentsWorldLibrary"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

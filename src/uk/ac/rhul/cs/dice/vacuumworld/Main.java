@@ -17,7 +17,7 @@ public class Main {
 			tryToStart(configFilePath, delay);
 			VWUtils.logWithClass(Main.class.getSimpleName(), "Bye!!!");
 			
-			System.exit(0);
+			System.exit(0); //this is to terminate threads which could not be stopped in a clean way.
 		}
 	}
 

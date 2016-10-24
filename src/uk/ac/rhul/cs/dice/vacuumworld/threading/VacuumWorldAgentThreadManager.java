@@ -68,7 +68,6 @@ public class VacuumWorldAgentThreadManager extends Observable {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Thread manager correctly started.");
 		
 		cycle(delayInSeconds);
-		this.threadManagerTerminated = true;
 	}
 	
 	private void cycle(double delayInSeconds) throws InterruptedException {
@@ -85,16 +84,14 @@ public class VacuumWorldAgentThreadManager extends Observable {
 			
 			VWUtils.doWait((int) Math.max(Math.floor(1000 * delayInSeconds), 200));
 		}
-		
-		shutdownExecutors();
-		VWUtils.logWithClass(this.getClass().getSimpleName(), "Agents threads termination complete.");
 	}
 
-	private void shutdownExecutors() throws InterruptedException {
+	public void shutdownExecutors() throws InterruptedException {
 		shutdownCleaningAgentsThreadsExecutorIfNeeded();
 		shutdownMonitoringingAgentsThreadsExecutorIfNeeded();
 		
-		
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Agents threads termination complete.");
+		this.threadManagerTerminated = true;
 	}
 
 	private void shutdownCleaningAgentsThreadsExecutorIfNeeded() {

@@ -6,17 +6,27 @@ import java.util.List;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateAgentsHistoriesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInteractions;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind {
+	private int monitoringCounter;
+	private List<VacuumWorldMonitoringActionResult> pastPerceptions;
+	private boolean monitor;
+	
 	public VacuumWorldMonitoringAgentMind(String bodyId) {
 		super(bodyId);
 		
 		super.setPerceptionRange(Integer.MAX_VALUE);
 		super.setCanSeeBehind(true);
+		
+		this.monitoringCounter = 0;
+		this.pastPerceptions = new ArrayList<>();
+		this.monitor = false;
 	}
 	
 	@Override
@@ -27,9 +37,42 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		return buildPerceiveAction();
+		updateMonitoringVariables();
+		
+		if(this.monitor) {
+			EnvironmentalAction action = buildSystemMonitoringAction();
+			this.pastPerceptions.clear();
+			
+			return action;
+		}
+		else {
+			this.pastPerceptions.add(getLastActionResult());
+			
+			return buildPerceiveAction();
+		}
 	}
 	
+	@Override
+	public VacuumWorldMonitoringActionResult getLastActionResult() {
+		return (VacuumWorldMonitoringActionResult) super.getLastActionResult();
+	}
+	
+	private EnvironmentalAction buildSystemMonitoringAction() {
+		return new DatabaseUpdateAgentsHistoriesAction(VacuumWorldDatabaseInteractions.UPDATE_AGENTS_HISTORIES, this.pastPerceptions);
+	}
+
+	private void updateMonitoringVariables() {
+		this.monitoringCounter++;
+		
+		if(this.monitoringCounter == 5) {
+			this.monitor = true;
+			this.monitoringCounter = 0;
+		}
+		else {
+			this.monitor = false;
+		}
+	}
+
 	@Override
 	public void execute(EnvironmentalAction action) {
 		setLastActionResult(null);

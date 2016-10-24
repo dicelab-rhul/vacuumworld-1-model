@@ -36,7 +36,7 @@ public class ConfigData {
 
 	private static String dbName;
 	private static String dbHostname;
-	private static String dbPort;
+	private static int dbPort;
 	private static String agentsCollection;
 	private static String dirtsCollection;
 	
@@ -123,7 +123,7 @@ public class ConfigData {
 		return ConfigData.dbHostname;
 	}
 
-	public static String getDbPort() {
+	public static int getDbPort() {
 		return ConfigData.dbPort;
 	}
 
@@ -280,7 +280,7 @@ public class ConfigData {
 		
 		ConfigData.dbName = db.getString("name");
 		ConfigData.dbHostname = db.getString("hostname");
-		ConfigData.dbPort = db.getString("port");
+		ConfigData.dbPort = Integer.valueOf(db.getString("port"));
 		ConfigData.agentsCollection = db.getString("agents_collection");
 		ConfigData.dirtsCollection = db.getString("dirts_collection");
 		

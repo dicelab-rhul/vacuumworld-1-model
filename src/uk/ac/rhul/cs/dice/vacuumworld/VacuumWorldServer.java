@@ -167,24 +167,36 @@ public class VacuumWorldServer implements Observer {
 			VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager was already terminated: no actors threads to terminate.");
 		}
 		
+		terminateActorsThreads();
 		waitForActorsThreadsManagerTermination();
 	}
 
+	private void terminateActorsThreads() {
+		try {
+			this.threadManager.shutdownExecutors();
+		}
+		catch(InterruptedException e) {
+			VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager is still pending. A forcefully JVM termination will be needed.");
+			Thread.currentThread().interrupt();
+		}
+	}
+
 	private void waitForActorsThreadsManagerTermination() {
-		int counter = 0;
+		long time = System.currentTimeMillis();
 		
-		while(counter < 10) {
-			if(!this.threadManager.isTerminated()) {
-				VWUtils.doWait(1000);
-				counter++;
+		while(true) {
+			if(System.currentTimeMillis() - time > 10000) {
+				VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager is still pending. A forcefully JVM termination will be needed.");
+				
+				return;
 			}
-			else {
+			
+			if(this.threadManager.isTerminated()) {
 				VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager correctly terminated: assuming all the actors threads have been terminated in a clean way.");
-				break;
+				
+				return;
 			}
 		}
-		
-		VWUtils.logWithClass(getClass().getSimpleName(), "Thread Manager is still pending. A forcefully JVM termination will be needed.");
 	}
 
 	private void closeSocketsIfNecessary() {

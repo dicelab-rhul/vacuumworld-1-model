@@ -57,7 +57,7 @@ public class TotalPerceptionAction extends SensingAction {
 			return ((VacuumWorldPhysics)physics).succeeded(this, (VacuumWorldSpace) context);
 		}
 		else if(physics instanceof VacuumWorldMonitoringPhysics) {
-			return ((VacuumWorldMonitoringPhysics)physics).isPossible(this, (VacuumWorldMonitoringContainer) context);
+			return ((VacuumWorldMonitoringPhysics)physics).succeeded(this, (VacuumWorldMonitoringContainer) context);
 		}
 		else {
 			return physics.succeeded(this, context);
