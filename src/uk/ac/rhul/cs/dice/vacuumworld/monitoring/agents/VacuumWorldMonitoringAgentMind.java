@@ -7,6 +7,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateAgentsHistoriesAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateDirtsHistoriesAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateUserHistoryAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
@@ -16,7 +18,10 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind {
 	private int monitoringCounter;
 	private List<VacuumWorldMonitoringActionResult> pastPerceptions;
-	private boolean monitor;
+	private List<VacuumWorldMonitoringActionResult> perceptionsToUseInMonitoring;
+	private boolean updateAgentsCollection;
+	private boolean updateDirtsCollection;
+	private boolean updateUserCollection;
 	
 	public VacuumWorldMonitoringAgentMind(String bodyId) {
 		super(bodyId);
@@ -26,7 +31,9 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 		
 		this.monitoringCounter = 0;
 		this.pastPerceptions = new ArrayList<>();
-		this.monitor = false;
+		this.updateAgentsCollection = false;
+		this.updateDirtsCollection = false;
+		this.updateUserCollection = false;
 	}
 	
 	@Override
@@ -38,18 +45,9 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		updateMonitoringVariables();
+		this.pastPerceptions.add(getLastActionResult());
 		
-		if(this.monitor) {
-			EnvironmentalAction action = buildSystemMonitoringAction();
-			this.pastPerceptions.clear();
-			
-			return action;
-		}
-		else {
-			this.pastPerceptions.add(getLastActionResult());
-			
-			return buildPerceiveAction();
-		}
+		return buildSystemMonitoringAction();
 	}
 	
 	@Override
@@ -58,19 +56,37 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	}
 	
 	private EnvironmentalAction buildSystemMonitoringAction() {
-		return new DatabaseUpdateAgentsHistoriesAction(VacuumWorldDatabaseInteractions.UPDATE_AGENTS_HISTORIES, this.pastPerceptions);
+		if(this.updateAgentsCollection) {
+			return new DatabaseUpdateAgentsHistoriesAction(VacuumWorldDatabaseInteractions.UPDATE_AGENTS_HISTORIES, this.perceptionsToUseInMonitoring);
+		}
+		else if(this.updateDirtsCollection) {
+			return new DatabaseUpdateDirtsHistoriesAction(VacuumWorldDatabaseInteractions.UPDATE_AGENTS_HISTORIES, this.perceptionsToUseInMonitoring);
+		}
+		else if(this.updateUserCollection) {
+			return new DatabaseUpdateUserHistoryAction(VacuumWorldDatabaseInteractions.UPDATE_AGENTS_HISTORIES, this.perceptionsToUseInMonitoring);
+		}
+		else {
+			return new TotalPerceptionAction();
+		}
 	}
 
 	private void updateMonitoringVariables() {
-		this.monitoringCounter++;
-		
 		if(this.monitoringCounter == 5) {
-			this.monitor = true;
+			this.perceptionsToUseInMonitoring = new ArrayList<>(this.pastPerceptions);
+			this.updateAgentsCollection = true;
+			this.updateUserCollection = false;
 			this.monitoringCounter = 0;
 		}
-		else {
-			this.monitor = false;
+		else if(this.monitoringCounter == 1) {
+			this.updateDirtsCollection = this.updateAgentsCollection ? true : false;
+			this.updateAgentsCollection = false;
 		}
+		else if(this.monitoringCounter == 2) {
+			this.updateUserCollection = this.updateDirtsCollection ? true : false;
+			this.updateDirtsCollection = false;
+		}
+		
+		this.monitoringCounter++;
 	}
 
 	@Override
