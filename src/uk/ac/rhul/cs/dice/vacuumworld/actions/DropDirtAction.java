@@ -12,7 +12,7 @@ public class DropDirtAction extends PhysicalAction {
 	private DirtType dirtType;
 	private int dropCycle;
 	
-	public DropDirtAction(DirtType dirtType, int dropCycle) {
+	public DropDirtAction(DirtType dirtType, Integer dropCycle) {
 		this.dirtType = dirtType;
 		this.dropCycle = dropCycle;
 	}

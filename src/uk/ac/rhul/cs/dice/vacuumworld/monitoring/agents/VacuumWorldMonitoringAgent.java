@@ -15,6 +15,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
 
@@ -57,6 +58,10 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 		return getSpecificSensors(VacuumWorldSensorRole.LISTENING_SENSOR);
 	}
 	
+	public List<VacuumWorldMonitoringAgentSensor> getDatabaseSensors() {
+		return getSpecificSensors(VacuumWorldSensorRole.DATABASE_SENSOR);
+	}
+	
 	public List<VacuumWorldMonitoringAgentSensor> getUndefinedSensors() {
 		return getSpecificSensors(VacuumWorldSensorRole.UNDEFINED);
 	}
@@ -80,6 +85,10 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 	
 	public List<VacuumWorldMonitoringAgentActuator> getSpeakingActuators() {
 		return getSpecificActuators(VacuumWorldActuatorRole.SPEAKING_ACTUATOR);
+	}
+	
+	public List<VacuumWorldMonitoringAgentActuator> getDatabaseActuators() {
+		return getSpecificActuators(VacuumWorldActuatorRole.DATABASE_ACTUATOR);
 	}
 	
 	public List<VacuumWorldMonitoringAgentActuator> getundefinedActuators() {
@@ -147,6 +156,9 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 		else if(SpeechAction.class.isAssignableFrom(action.getClass())) {
 			return getSpeakingActuators().get(0).getActuatorId();
 		}
+		else if(DatabaseAction.class.isAssignableFrom(action.getClass())) {
+			return getDatabaseActuators().get(0).getActuatorId();
+		}
 
 		return null;
 	}
@@ -154,6 +166,9 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
 	private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
 		if (PhysicalAction.class.isAssignableFrom(action.getClass()) || SensingAction.class.isAssignableFrom(action.getClass())) {
 			return getSeeingSensors().get(0).getSensorId();
+		}
+		else if(DatabaseAction.class.isAssignableFrom(action.getClass())) {
+			return getDatabaseSensors().get(0).getSensorId();
 		}
 
 		return null;

@@ -4,7 +4,7 @@ public class Dirt extends Obstacle {
 	private boolean inInitialState;
 	private int dropCycle;
 	
-	public Dirt(DirtAppearance appearance, boolean inInitialState, int dropCycle) {
+	public Dirt(DirtAppearance appearance, boolean inInitialState, Integer dropCycle) {
 		super(appearance);
 		
 		this.inInitialState = inInitialState;

@@ -278,7 +278,7 @@ public class VacuumWorldAgentThreadManager extends Observable {
 	
 	private void startMonitoringThreads(Set<VacuumWorldMonitoringActorRunnable> runnables) {
 		for(VacuumWorldMonitoringActorRunnable runnable : runnables) {
-			this.executor.execute(runnable);
+			this.monitoringExecutor.execute(runnable);
 		}
 	}
 

@@ -43,11 +43,15 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	}
 	
 	private void storeUpdateForDatabaseInMemory() {
+		if(this.updateDatabase) {
+			this.states.clear();
+		}
+		
 		if(this.cycleCounter == 0) {
 			return;
 		}
 		else {
-			this.states.add(StateRepresentationBuilder.buildStateRepresentation(getPerception() == null ? new HashMap<>() : getPerception().getPerceivedMap()));
+			this.states.add(StateRepresentationBuilder.buildCompactStateRepresentation(getPerception() == null ? new HashMap<>() : getPerception().getPerceivedMap(), this.cycleCounter));
 		}
 	}
 

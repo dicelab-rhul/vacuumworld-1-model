@@ -331,20 +331,19 @@ public class InitialStateParser {
 	private static List<Actuator<VacuumWorldActuatorRole>> createActuators(int actuatorsNumber, String bodyId, Class<? extends Actuator<VacuumWorldActuatorRole>> classToUse) {
 		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
 
-		if (actuatorsNumber <= 0) {
+		if (actuatorsNumber < 2) {
 			return actuators;
 		}
 		
 		try {
-			if(actuatorsNumber >= 1) {
-				actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
+			actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
+			actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.SPEAKING_ACTUATOR));
+			
+			if(actuatorsNumber > 2) {
+				actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.DATABASE_ACTUATOR));
 			}
 			
-			if(actuatorsNumber >= 2) {
-				actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.SPEAKING_ACTUATOR));
-			}
-			
-			if(actuatorsNumber >= 3) {
+			if(actuatorsNumber > 3) {
 				addOtherActuators(actuatorsNumber, bodyId, actuators, classToUse);
 			}
 		}
@@ -356,7 +355,7 @@ public class InitialStateParser {
 	}
 
 	private static void addOtherActuators(int actuatorsNumber, String bodyId, List<Actuator<VacuumWorldActuatorRole>> actuators, Class<? extends Actuator<VacuumWorldActuatorRole>> classToUse) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		for (int i = 0; i < actuatorsNumber - 2; i++) {
+		for (int i = 0; i < actuatorsNumber - 3; i++) {
 			actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.UNDEFINED));
 		}
 	}
@@ -364,20 +363,19 @@ public class InitialStateParser {
 	private static List<Sensor<VacuumWorldSensorRole>> createSensors(int sensorsNumber, String bodyId, Class<? extends Sensor<VacuumWorldSensorRole>> realClass) {
 		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
 
-		if (sensorsNumber <= 0) {
+		if (sensorsNumber < 2) {
 			return sensors;
 		}
 		
 		try {
-			if(sensorsNumber >= 1) {
-				sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.SEEING_SENSOR));
+			sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.SEEING_SENSOR));
+			sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.LISTENING_SENSOR));
+			
+			if(sensorsNumber > 2) {
+				sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.DATABASE_SENSOR));
 			}
 			
-			if(sensorsNumber >= 2) {
-				sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.LISTENING_SENSOR));
-			}
-			
-			if(sensorsNumber >= 3) {
+			if(sensorsNumber > 3) {
 				addOtherSensors(sensorsNumber, bodyId, sensors, realClass);
 			}
 		}
@@ -389,7 +387,7 @@ public class InitialStateParser {
 	}
 
 	private static void addOtherSensors(int sensorsNumber, String bodyId, List<Sensor<VacuumWorldSensorRole>> sensors, Class<? extends Sensor<VacuumWorldSensorRole>> realClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		for (int i = 0; i < sensorsNumber - 2; i++) {
+		for (int i = 0; i < sensorsNumber - 3; i++) {
 			sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.UNDEFINED));
 		}
 	}
@@ -453,8 +451,8 @@ public class InitialStateParser {
 		String bodyId = "Monitor-" + UUID.randomUUID().toString();
 		VacuumWorldMonitoringAgentMind mind = new VacuumWorldMonitoringAgentMind(bodyId, initialStateRepresentation);
 		VacuumWorldMonitoringAgentBrain brain = new VacuumWorldMonitoringAgentBrain();
-		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(2, bodyId, VacuumWorldMonitoringAgentSensor.class);
-		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(2, bodyId, VacuumWorldMonitoringAgentActuator.class);
+		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(3, bodyId, VacuumWorldMonitoringAgentSensor.class);
+		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(3, bodyId, VacuumWorldMonitoringAgentActuator.class);
 		Double[] dimensions = new Double[] {(double) 1, (double) 1};
 		VacuumWorldMonitoringAgentAppearance appearance = new VacuumWorldMonitoringAgentAppearance(bodyId, dimensions);
 		

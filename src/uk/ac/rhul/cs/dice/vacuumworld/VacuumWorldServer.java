@@ -19,15 +19,12 @@ import javax.json.JsonObject;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldAppearance;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldUniverse;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentActuator;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.threading.VacuumWorldMonitoringActorRunnable;
@@ -298,7 +295,7 @@ public class VacuumWorldServer implements Observer {
 		int[] dimensions = initialState.getDimensions();
 		Map<SpaceCoordinates, Double[]> dimensionsMap = createDimensionsMap(dimensions);
 		VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld", dimensionsMap, initialState);
-		JsonObject initialStateRepresentation = StateRepresentationBuilder.buildStateRepresentation(initialState.getFullGrid());
+		JsonObject initialStateRepresentation = StateRepresentationBuilder.buildCompactStateRepresentation(initialState.getFullGrid(), 0);
 		VacuumWorldMonitoringContainer monitoringContainer = InitialStateParser.createMonitoringContainer(initialStateRepresentation);
 		VacuumWorldMonitoringPhysics monitoringPhysics = new VacuumWorldMonitoringPhysics();
 		
@@ -324,12 +321,15 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	private void setUpVacuumWorldMonitoringAgent(VacuumWorldMonitoringAgent agent) {
-		VacuumWorldSpace space = this.universe.getState();
+		VacuumWorldMonitoringContainer monitoringSpace = this.universe.getMonitoringContainer();
 		
-		agent.getSeeingSensors().forEach(space::addObserver);
-		agent.getListeningSensors().forEach(space::addObserver);
-		agent.getPhysicalActuators().forEach((VacuumWorldMonitoringAgentActuator actuator) -> actuator.addObserver(space));
-		agent.getSpeakingActuators().forEach((VacuumWorldMonitoringAgentActuator actuator) -> actuator.addObserver(space));
+		agent.getSeeingSensors().forEach(monitoringSpace::addObserver);
+		agent.getListeningSensors().forEach(monitoringSpace::addObserver);
+		agent.getDatabaseSensors().forEach(monitoringSpace::addObserver);
+		
+		agent.getPhysicalActuators().forEach(actuator -> actuator.addObserver(monitoringSpace));
+		agent.getSpeakingActuators().forEach(actuator -> actuator.addObserver(monitoringSpace));
+		agent.getDatabaseActuators().forEach(actuator -> actuator.addObserver(monitoringSpace));
 		
 		agent.getMind().loadAvailableActionsForThisMindFromArbitraryParameters();
 
@@ -349,8 +349,8 @@ public class VacuumWorldServer implements Observer {
 		
 		user.getSeeingSensors().forEach(space::addObserver);
 		user.getListeningSensors().forEach(space::addObserver);
-		user.getPhysicalActuators().forEach((UserActuator actuator) -> actuator.addObserver(space));
-		user.getSpeakingActuators().forEach((UserActuator actuator) -> actuator.addObserver(space));
+		user.getPhysicalActuators().forEach(actuator -> actuator.addObserver(space));
+		user.getSpeakingActuators().forEach(actuator -> actuator.addObserver(space));
 		
 		user.getMind().loadAvailableActionsForThisMindFromArbitraryParameters();
 
@@ -370,8 +370,8 @@ public class VacuumWorldServer implements Observer {
 		
 		agent.getSeeingSensors().forEach(space::addObserver);
 		agent.getListeningSensors().forEach(space::addObserver);
-		agent.getPhysicalActuators().forEach((VacuumWorldDefaultActuator actuator) -> actuator.addObserver(space));
-		agent.getSpeakingActuators().forEach((VacuumWorldDefaultActuator actuator) -> actuator.addObserver(space));
+		agent.getPhysicalActuators().forEach(actuator -> actuator.addObserver(space));
+		agent.getSpeakingActuators().forEach(actuator -> actuator.addObserver(space));
 		
 		agent.getMind().setCanSeeBehind(agent.canSeeBehind());
 		agent.getMind().setPerceptionRange(agent.getPerceptionRange());

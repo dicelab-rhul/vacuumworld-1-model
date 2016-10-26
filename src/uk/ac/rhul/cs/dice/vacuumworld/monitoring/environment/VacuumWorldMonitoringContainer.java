@@ -14,6 +14,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAge
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAgentSensor;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWPair;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 	private Map<String, VacuumWorldMonitoringAgent> monitoringAgents;
@@ -34,17 +35,35 @@ public class VacuumWorldMonitoringContainer extends EnvironmentalSpace {
 	
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldMonitoringBridge && arg instanceof VacuumWorldMonitoringActionResult) {
-			manageMonitoringBridgeRequest((VacuumWorldMonitoringActionResult) arg);
+		if(o instanceof VacuumWorldMonitoringPhysics && arg instanceof VacuumWorldMonitoringActionResult) {
+			manageMonitoringPhysicsRequest((VacuumWorldMonitoringActionResult) arg);
 		}
 		else if(o instanceof VacuumWorldMonitoringAgentActuator && arg instanceof VacuumWorldMonitoringEvent) {
 			notifyObservers(new VWPair<VacuumWorldMonitoringEvent, VacuumWorldMonitoringContainer>((VacuumWorldMonitoringEvent) arg, this), VacuumWorldMonitoringPhysics.class);
 		}
 	}
 	
-	private void manageMonitoringBridgeRequest(VacuumWorldMonitoringActionResult result) {
+	private void manageMonitoringPhysicsRequest(VacuumWorldMonitoringActionResult result) {
+		logResult(result);
+		
 		List<String> senderSensorIds = result.getRecipientsIds();
 		notifyActor(senderSensorIds, result);
+	}
+	
+	private void logResult(VacuumWorldMonitoringActionResult result) {
+		switch(result.getActionResult()) {
+		case ACTION_DONE:
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + result.getActorId() + ": the action was successful!");
+			break;
+		case ACTION_FAILED:
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + result.getActorId() + ": the action was recognized as possible, but it failed during the execution!");
+			break;
+		case ACTION_IMPOSSIBLE:
+			VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + result.getActorId() + ": the action was recognized as impossible and it was not performed!");
+			break;
+		default:
+			throw new IllegalArgumentException(VWUtils.ACTOR + result.getActorId() + ": unknown result: " + result.getActionResult());
+		}
 	}
 
 	private void notifyActor(List<String> senderSensorIds, VacuumWorldMonitoringActionResult result) {

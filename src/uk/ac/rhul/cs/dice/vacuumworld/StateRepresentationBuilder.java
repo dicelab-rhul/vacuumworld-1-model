@@ -24,9 +24,10 @@ public class StateRepresentationBuilder {
 	
 	private StateRepresentationBuilder(){}
 	
-	public static JsonObject buildStateRepresentation(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid) {
+	public static JsonObject buildStateRepresentation(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid, int cycleNumber) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		
+		builder.add("cycle", cycleNumber);
 		builder.add("size", getSize(grid));
 		builder.add("user", isUserPresent(grid));
 		builder.add("locations", representLocations(grid));
@@ -100,7 +101,16 @@ public class StateRepresentationBuilder {
 		return builder.build();
 	}
 
-	private static JsonArray buildSensors(List<Sensor<VacuumWorldSensorRole>> sensors) {
+	private static JsonObject buildSensors(List<Sensor<VacuumWorldSensorRole>> sensors) {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		
+		builder.add("number", sensors.size());
+		builder.add("sensors_list", buildSensorsArray(sensors));
+		
+		return builder.build();
+	}
+	
+	private static JsonArray buildSensorsArray(List<Sensor<VacuumWorldSensorRole>> sensors) {
 		JsonArrayBuilder builder = Json.createArrayBuilder();
 		
 		for(Sensor<VacuumWorldSensorRole> sensor : sensors) {
@@ -112,12 +122,23 @@ public class StateRepresentationBuilder {
 
 	private static JsonObject buildSensor(Sensor<VacuumWorldSensorRole> sensor) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
+		
+		builder.add("id", sensor.getSensorId().toString());
 		builder.add("purpose", sensor.getRole().toString());
 		
 		return builder.build();
 	}
 
-	private static JsonArray buildActuators(List<Actuator<VacuumWorldActuatorRole>> actuators) {
+	private static JsonObject buildActuators(List<Actuator<VacuumWorldActuatorRole>> actuators) {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		
+		builder.add("number", actuators.size());
+		builder.add("actuators_list", buildActuatorsArray(actuators));
+		
+		return builder.build();
+	}
+	
+	private static JsonArray buildActuatorsArray(List<Actuator<VacuumWorldActuatorRole>> actuators) {
 		JsonArrayBuilder builder = Json.createArrayBuilder();
 		
 		for(Actuator<VacuumWorldActuatorRole> actuator : actuators) {
@@ -129,6 +150,8 @@ public class StateRepresentationBuilder {
 
 	private static JsonObject buildActuator(Actuator<VacuumWorldActuatorRole> actuator) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
+		
+		builder.add("id", actuator.getActuatorId().toString());
 		builder.add("purpose", actuator.getRole().toString());
 		
 		return builder.build();
@@ -145,7 +168,7 @@ public class StateRepresentationBuilder {
 	}
 
 	private static boolean isUserPresent(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid) {
-		return grid.values().stream().filter((VacuumWorldLocation location) -> location.isAUserPresent()).findAny().isPresent();
+		return grid.values().stream().filter(location -> location.isAUserPresent()).findAny().isPresent();
 	}
 
 	private static int getSize(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid) {
@@ -169,12 +192,13 @@ public class StateRepresentationBuilder {
 			}
 		}
 		
-		return maxValue; //need to add 1?
+		return maxValue + 1;
 	}
 
-	public static JsonObject buildCompactStateRepresentation(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid) {
+	public static JsonObject buildCompactStateRepresentation(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid, int cycleNumber) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		
+		builder.add("cycle", cycleNumber);
 		builder.add("size", getSize(grid));
 		builder.add("user", isUserPresent(grid));
 		builder.add("locations", representNonEmptyLocations(grid));

@@ -2,6 +2,9 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import javax.json.JsonObject;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
@@ -50,9 +53,12 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 			notifyObservers((VacuumWorldMonitoringActionResult) result, VacuumWorldMonitoringContainer.class);
 		}
 		else {
+			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + event.getActor().getId() + ": forwarded a total perception request to the bridge...");
+			
 			TotalPerceptionAction action = event.getAction() instanceof TotalPerceptionAction ? (TotalPerceptionAction) event.getAction() : new TotalPerceptionAction();
 			action.setActor(event.getAction().getActor());
 			Event totalPerceptionEvent = new VacuumWorldEvent(action, System.currentTimeMillis(), action.getActor());
+			totalPerceptionEvent.setSensorToCallBackId(event.getSensorToCallBackId());
 			notifyObservers(totalPerceptionEvent, VacuumWorldMonitoringBridge.class);
 		}
 	}
@@ -101,8 +107,7 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 
 	@Override
 	public boolean succeeded(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -117,14 +122,20 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 
 	@Override
 	public Result perform(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
+		MongoConnector connector = new MongoConnector();
+		List<JsonObject> states = connector.getStates();
+		
+		if(states.isEmpty()) {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId().toString(), new ArrayList<>(), null);
+		}
+		else {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, action.getActor().getId().toString(), null, new ArrayList<>());
+		}
 	}
 
 	@Override
 	public boolean succeeded(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	@Override

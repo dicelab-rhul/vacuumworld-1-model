@@ -53,6 +53,9 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		if (o instanceof VacuumWorldSpace && arg instanceof VWPair<?, ?>) {
 			manageEnvironmentRequest((VWPair<?, ?>) arg);
 		}
+		else if(o instanceof VacuumWorldMonitoringBridge && arg instanceof VWPair<?, ?>) {
+			manageSuperEnvironmentRequest((VWPair<?, ?>) arg);
+		}
 	}
 
 	@Override
@@ -329,6 +332,8 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 
 	@Override
 	public Result perform(TotalPerceptionAction action, VacuumWorldSpace context) {
+		VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + action.getActor().getId() + " requested a perception of the whole grid" + ".");
+		
 		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId(), new ArrayList<>(), null);
 	}
 
@@ -373,6 +378,10 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	@Override
 	public synchronized boolean succeeded(VacuumWorldEvent event, VacuumWorldSpace context) {
 		return event.getAction().succeeded(this, context);
+	}
+	
+	private void manageSuperEnvironmentRequest(VWPair<?, ?> arg) {
+		manageEnvironmentRequest(arg);
 	}
 	
 	private void manageEnvironmentRequest(VWPair<?, ?> pair) {
