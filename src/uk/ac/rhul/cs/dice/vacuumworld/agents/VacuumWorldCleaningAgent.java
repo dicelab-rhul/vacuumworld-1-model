@@ -23,13 +23,17 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	private static final int PERCEPTION_RANGE = 2;
 	private static final boolean CAN_SEE_BEHIND = false;
 
+	private VacuumWorldCoordinates oldLocation;
 	private VacuumWorldCoordinates currentLocation;
+	private ActorFacingDirection oldFacingDirection;
 	private ActorFacingDirection facingDirection;
 
 	public VacuumWorldCleaningAgent(VacuumWorldAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, VacuumWorldDefaultMind mind, VacuumWorldDefaultBrain brain, ActorFacingDirection facingDirection) {
 		super(appearance, sensors, actuators, mind, brain);
 
+		this.oldFacingDirection = null;
 		this.facingDirection = facingDirection;
+		this.oldLocation = null;
 		this.currentLocation = null;
 	}
 
@@ -141,10 +145,13 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	}
 
 	private void manageBrainRequest(EnvironmentalAction action) {
+		this.oldLocation = this.currentLocation;
+		this.oldFacingDirection = this.facingDirection;
+		
 		action.setActor(this);
 		VacuumWorldEvent event = new VacuumWorldEvent(action, System.currentTimeMillis(), this);
 
-		String sensorToBeNotifiedBackId = selectSensorToBeNotifiedBackId(action);
+		String sensorToBeNotifiedBackId = getSeeingSensors().get(0).getSensorId();
 		event.setSensorToCallBackId(sensorToBeNotifiedBackId);
 
 		String actuatorRecipientId = selectActuatorRecipientId(action);
@@ -182,14 +189,10 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 		return null;
 	}
 
-	private String selectSensorToBeNotifiedBackId(EnvironmentalAction action) {
-		if (EnvironmentalAction.class.isAssignableFrom(action.getClass())) {
-			return getSeeingSensors().get(0).getSensorId();
-		}
-
-		return null;
+	public VacuumWorldCoordinates getOldLocation() {
+		return this.oldLocation;
 	}
-
+	
 	public VacuumWorldCoordinates getCurrentLocation() {
 		return this.currentLocation;
 	}
@@ -198,6 +201,10 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 		this.currentLocation = coordinates;
 	}
 
+	public ActorFacingDirection getOldFacingDirection() {
+		return this.oldFacingDirection;
+	}
+	
 	public ActorFacingDirection getFacingDirection() {
 		return this.facingDirection;
 	}

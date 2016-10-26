@@ -18,4 +18,9 @@ public class VacuumWorldAgentAppearance extends AbstractAgentAppearance {
 	public String represent() {
 		return this.type.compactRepresentation();
 	}
+
+	@Override
+	public VacuumWorldAgentAppearance duplicate() {
+		return new VacuumWorldAgentAppearance(getName(), getDimensions(), this.type);
+	}
 }

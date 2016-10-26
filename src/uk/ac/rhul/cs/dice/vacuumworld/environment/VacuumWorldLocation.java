@@ -14,6 +14,7 @@ public class VacuumWorldLocation implements Location, Lockable {
 	private VacuumWorldCleaningAgent agent;
 	private User user;
 	private Obstacle obstacle;
+	private Obstacle oldObstacle;
 	private VacuumWorldLocationType type;
 	private VacuumWorldLocationType northernLocationType;
 	private VacuumWorldLocationType southernLocationType;
@@ -57,7 +58,11 @@ public class VacuumWorldLocation implements Location, Lockable {
 	}
 
 	public boolean isFree() {
-		return !(isAnAgentPresent() || isAnObstaclePresent() || isAUserPresent());
+		return !isNotFree();
+	}
+	
+	public boolean isNotFree() {
+		return isAnAgentPresent() || isAnObstaclePresent() || isAUserPresent();
 	}
 	
 	public boolean isAUserPresent() {
@@ -114,6 +119,15 @@ public class VacuumWorldLocation implements Location, Lockable {
 		}
 	}
 	
+	public Dirt getOldDirt() {
+		if(this.oldObstacle == null || !(this.oldObstacle instanceof Dirt)) {
+			return null;
+		}
+		else {
+			return (Dirt) this.oldObstacle;
+		}
+	}
+	
 	public void setObstacle(Obstacle obstacle) {
 		this.obstacle = obstacle;
 	}
@@ -124,6 +138,7 @@ public class VacuumWorldLocation implements Location, Lockable {
 	
 	public void removeDirt() {
 		if(isDirtPresent()) {
+			this.oldObstacle = ((Dirt) this.obstacle).duplicate();
 			this.obstacle = null;
 		}
 	}

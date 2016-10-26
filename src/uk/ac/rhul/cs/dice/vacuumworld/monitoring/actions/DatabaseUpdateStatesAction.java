@@ -2,6 +2,8 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions;
 
 import java.util.List;
 
+import javax.json.JsonObject;
+
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
@@ -9,9 +11,17 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInt
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
 
-public class DatabaseUpdateUserHistoryAction extends DatabaseWriteHistoriesAction {
-	public DatabaseUpdateUserHistoryAction(VacuumWorldDatabaseInteractions actionToPerform, List<VacuumWorldMonitoringActionResult> historyWrappers) {
-		super(actionToPerform, historyWrappers);
+public class DatabaseUpdateStatesAction extends DatabaseWriteAction {
+	private List<JsonObject> states;
+	
+	public DatabaseUpdateStatesAction(VacuumWorldDatabaseInteractions actionToPerform, List<JsonObject> states) {
+		super(actionToPerform);
+		
+		this.states = states;
+	}
+	
+	public List<JsonObject> getStates() {
+		return this.states;
 	}
 
 	@Override

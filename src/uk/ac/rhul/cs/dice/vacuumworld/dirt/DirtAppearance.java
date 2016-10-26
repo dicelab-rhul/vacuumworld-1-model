@@ -22,4 +22,9 @@ public class DirtAppearance extends PassiveBodyAppearance {
 	public void changeDirtType(DirtType newType) {
 		this.dirtType = newType;
 	}
+	
+	@Override
+	public DirtAppearance duplicate() {
+		return new DirtAppearance(getName(), getDimensions(), this.dirtType);
+	}
 }

@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import javax.json.JsonObject;
+
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultActuator;
@@ -63,7 +65,7 @@ public class VacuumWorldServer implements Observer {
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server started.");
 		
 		doHandshakePhase();
-		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server connected with " + this.clientSocket.getInetAddress().getHostAddress());
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server connected with " + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + ".");
 		
 		startManagingRequests(delayInSeconds);
 	}
@@ -296,7 +298,8 @@ public class VacuumWorldServer implements Observer {
 		int[] dimensions = initialState.getDimensions();
 		Map<SpaceCoordinates, Double[]> dimensionsMap = createDimensionsMap(dimensions);
 		VacuumWorldAppearance appearance = new VacuumWorldAppearance("VacuumWorld", dimensionsMap, initialState);
-		VacuumWorldMonitoringContainer monitoringContainer = InitialStateParser.createMonitoringContainer();
+		JsonObject initialStateRepresentation = StateRepresentationBuilder.buildStateRepresentation(initialState.getFullGrid());
+		VacuumWorldMonitoringContainer monitoringContainer = InitialStateParser.createMonitoringContainer(initialStateRepresentation);
 		VacuumWorldMonitoringPhysics monitoringPhysics = new VacuumWorldMonitoringPhysics();
 		
 		this.universe = new VacuumWorldUniverse(initialState, physics, monitoringContainer, monitoringPhysics, appearance);

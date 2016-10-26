@@ -7,12 +7,12 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInt
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
 
-public class DatabaseReadAgentHistoryAction extends DatabaseSingleReadHistoryAction {
+public class DatabaseReadStatesAction extends DatabaseReadAction {
 
-	public DatabaseReadAgentHistoryAction(VacuumWorldDatabaseInteractions actionToPerform, String idToReadAbout) {
-		super(actionToPerform, idToReadAbout);
+	public DatabaseReadStatesAction(VacuumWorldDatabaseInteractions actionToPerform) {
+		super(actionToPerform);
 	}
-	
+
 	@Override
 	public boolean isPossible(Physics physics, Space context) {
 		if(physics instanceof VacuumWorldMonitoringPhysics) {

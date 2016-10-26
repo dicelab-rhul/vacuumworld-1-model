@@ -12,4 +12,9 @@ public class VacuumWorldMonitoringAgentAppearance extends AbstractAgentAppearanc
 	public String represent() {
 		return "M";
 	}
+
+	@Override
+	public VacuumWorldMonitoringAgentAppearance duplicate() {
+		return new VacuumWorldMonitoringAgentAppearance(getName(), getDimensions());
+	}
 }

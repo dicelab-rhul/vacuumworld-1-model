@@ -26,6 +26,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class UserMind extends VacuumWorldAbstractActorMind {
+	private int cycle;
 	private DirtType lastDroppedDirt;
 	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
 	private UserPlan plan;
@@ -39,6 +40,7 @@ public class UserMind extends VacuumWorldAbstractActorMind {
 		this.lastCycleIncomingSpeeches = new ArrayList<>();
 		this.lastDroppedDirt = DirtType.GREEN;
 		this.plan = null;
+		this.cycle = 0;
 	}
 	
 	public UserMind(String bodyId) {
@@ -57,6 +59,8 @@ public class UserMind extends VacuumWorldAbstractActorMind {
 
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
+		this.cycle++;
+		
 		if(this.plan != null) {
 			if(!this.plan.getActionsToPerform().isEmpty()) {
 				return followPlan(false);
@@ -194,7 +198,7 @@ public class UserMind extends VacuumWorldAbstractActorMind {
 			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceeded() ? DirtType.ORANGE : DirtType.GREEN;
 			this.lastDroppedDirt = dirtType;
 			
-			return DropDirtAction.class.getConstructor(DirtType.class).newInstance(dirtType);
+			return DropDirtAction.class.getConstructor(DirtType.class, Integer.class).newInstance(dirtType, this.cycle);
 		}
 		catch (Exception e) {
 			VWUtils.log(e);
@@ -203,7 +207,7 @@ public class UserMind extends VacuumWorldAbstractActorMind {
 		}
 	}
 
-	protected EnvironmentalAction buildPerceiveAction() {
+	private EnvironmentalAction buildPerceiveAction() {
 		try {
 			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
 		}
@@ -214,7 +218,7 @@ public class UserMind extends VacuumWorldAbstractActorMind {
 		}
 	}
 
-	public EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	private EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 		try {
 			return actionPrototype.newInstance();
 		}

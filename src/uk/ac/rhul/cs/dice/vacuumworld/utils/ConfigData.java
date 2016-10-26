@@ -39,6 +39,7 @@ public class ConfigData {
 	private static int dbPort;
 	private static String agentsCollection;
 	private static String dirtsCollection;
+	private static String systemStatesCollection;
 	
 	private ConfigData(){}
 	
@@ -133,6 +134,10 @@ public class ConfigData {
 
 	public static String getDirtsCollection() {
 		return ConfigData.dirtsCollection;
+	}
+	
+	public static String getSystemStatesCollection() {
+		return ConfigData.systemStatesCollection;
 	}
 
 	public static boolean initConfigData(String configFilePath) {
@@ -283,6 +288,7 @@ public class ConfigData {
 		ConfigData.dbPort = Integer.valueOf(db.getString("port"));
 		ConfigData.agentsCollection = db.getString("agents_collection");
 		ConfigData.dirtsCollection = db.getString("dirts_collection");
+		ConfigData.systemStatesCollection = db.getString("system_states_collection");
 		
 		return true;
 	}

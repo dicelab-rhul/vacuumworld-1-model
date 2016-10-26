@@ -10,13 +10,19 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 
 public class DropDirtAction extends PhysicalAction {
 	private DirtType dirtType;
+	private int dropCycle;
 	
-	public DropDirtAction(DirtType dirtType) {
+	public DropDirtAction(DirtType dirtType, int dropCycle) {
 		this.dirtType = dirtType;
+		this.dropCycle = dropCycle;
 	}
 	
 	public DirtType getDirtToDropType() {
 		return this.dirtType;
+	}
+	
+	public int getDropCycle() {
+		return this.dropCycle;
 	}
 	
 	@Override

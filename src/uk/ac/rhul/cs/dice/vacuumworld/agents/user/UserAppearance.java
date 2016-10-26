@@ -12,4 +12,9 @@ public class UserAppearance extends AbstractAgentAppearance {
 	public String represent() {
 		return "U";
 	}
+
+	@Override
+	public UserAppearance duplicate() {
+		return new UserAppearance(getName(), getDimensions());
+	}
 }

@@ -8,21 +8,18 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.AbstractPhysics;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadAgentHistoryAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadAgentsHistoriesAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadDirtHistoryAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadDirtsHistoriesAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadUserHistoryAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateAgentsHistoriesAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateDirtsHistoriesAction;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateUserHistoryAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadStatesAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.MongoConnector;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringBridge;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWPair;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements VacuumWorldMonitoringPhysicsInterface {
 
@@ -34,11 +31,29 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 		else if(o instanceof VacuumWorldMonitoringBridge && arg instanceof VacuumWorldMonitoringActionResult) {
 			notifyObservers((VacuumWorldMonitoringActionResult) arg, VacuumWorldMonitoringContainer.class);
 		}
+		else if(o instanceof VacuumWorldMonitoringBridge && arg instanceof VacuumWorldActionResult) {
+			VacuumWorldActionResult temp = (VacuumWorldActionResult) arg;
+			VacuumWorldMonitoringActionResult result = new VacuumWorldMonitoringActionResult(temp.getActionResult(), temp.getActorId(), temp.getFailureReason(), temp.getRecipientsIds());
+			notifyObservers(result, VacuumWorldMonitoringContainer.class);
+		}
 	}
 
 	private void manageMonitoringContainerRequest(VWPair<?, ?> arg) {
 		if(arg.checkClasses(VacuumWorldMonitoringEvent.class, VacuumWorldMonitoringContainer.class)) {
-			((VacuumWorldMonitoringEvent) arg.getFirst()).attempt(this, (VacuumWorldMonitoringContainer) arg.getSecond());
+			Result result = ((VacuumWorldMonitoringEvent) arg.getFirst()).attempt(this, (VacuumWorldMonitoringContainer) arg.getSecond());
+			forwardEventIfNeededOrSendResultBack((VacuumWorldMonitoringEvent) arg.getFirst(), result);
+		}
+	}
+
+	private void forwardEventIfNeededOrSendResultBack(VacuumWorldMonitoringEvent event, Result result) {
+		if(ActionResult.ACTION_FAILED.equals(result.getActionResult()) || ActionResult.ACTION_IMPOSSIBLE.equals(result.getActionResult())) {
+			notifyObservers((VacuumWorldMonitoringActionResult) result, VacuumWorldMonitoringContainer.class);
+		}
+		else {
+			TotalPerceptionAction action = event.getAction() instanceof TotalPerceptionAction ? (TotalPerceptionAction) event.getAction() : new TotalPerceptionAction();
+			action.setActor(event.getAction().getActor());
+			Event totalPerceptionEvent = new VacuumWorldEvent(action, System.currentTimeMillis(), action.getActor());
+			notifyObservers(totalPerceptionEvent, VacuumWorldMonitoringBridge.class);
 		}
 	}
 
@@ -54,9 +69,6 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 
 	@Override
 	public synchronized Result perform(TotalPerceptionAction action, VacuumWorldMonitoringContainer context) {
-		Event totalPerceptionEvent = new VacuumWorldEvent(action, System.currentTimeMillis(), action.getActor());
-		notifyObservers(totalPerceptionEvent, VacuumWorldMonitoringBridge.class);
-		
 		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId(), new ArrayList<>(), null);
 	}
 
@@ -64,195 +76,53 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	public synchronized boolean succeeded(TotalPerceptionAction action, VacuumWorldMonitoringContainer context) {
 		return true;
 	}
+	
+	@Override
+	public boolean isPossible(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
+		return VWUtils.isCollectionNotNullAndNotEmpty(action.getStates());
+	}
 
 	@Override
-	public boolean isPossible(DatabaseReadAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
+	public boolean isNecessary(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
 		return false;
 	}
 
 	@Override
-	public boolean isNecessary(DatabaseReadAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
+	public Result perform(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
+		MongoConnector connector = new MongoConnector();
+		
+		if(connector.updateSystemStates(action.getStates())) {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId().toString(), new ArrayList<>(), null);
+		}
+		else {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, action.getActor().getId().toString(), null, new ArrayList<>());
+		}
+	}
+
+	@Override
+	public boolean succeeded(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
 		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	@Override
+	public boolean isPossible(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
+		return true;
+	}
+
+	@Override
+	public boolean isNecessary(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
 		return false;
 	}
 
 	@Override
-	public Result perform(DatabaseReadAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
+	public Result perform(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean succeeded(DatabaseReadAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseReadDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseReadDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseReadDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseReadDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseReadAgentHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseReadAgentHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseReadAgentHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseReadAgentHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseReadDirtHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseReadDirtHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseReadDirtHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseReadDirtHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseReadUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseReadUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseReadUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseReadUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseUpdateAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseUpdateAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseUpdateAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseUpdateAgentsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseUpdateDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseUpdateDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseUpdateDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseUpdateDirtsHistoriesAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isPossible(DatabaseUpdateUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseUpdateUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Result perform(DatabaseUpdateUserHistoryAction action, VacuumWorldMonitoringContainer context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean succeeded(DatabaseUpdateUserHistoryAction action, VacuumWorldMonitoringContainer context) {
+	public boolean succeeded(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -271,9 +141,10 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	public synchronized Result attempt(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
 		if(event.isPossible(this, context)) {
 			Result result = event.perform(this, context);
+			result.setRecipientsIds(Arrays.asList(event.getSensorToCallBackId()));
 			
 			if(!event.succeeded(this, context)) {
-				return editResultIfnecessary(event, result);
+				return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), null, Arrays.asList(event.getSensorToCallBackId()));
 			}
 			else {
 				return result;
@@ -292,13 +163,5 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	@Override
 	public synchronized boolean succeeded(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
 		return event.getAction().succeeded(this, context);
-	}
-	
-	private Result editResultIfnecessary(VacuumWorldMonitoringEvent event, Result result) {
-		if(ActionResult.ACTION_FAILED.equals(result.getActionResult())) {
-			return result;
-		}
-		
-		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), result.getFailureReason(), Arrays.asList(event.getSensorToCallBackId()));
 	}
 }

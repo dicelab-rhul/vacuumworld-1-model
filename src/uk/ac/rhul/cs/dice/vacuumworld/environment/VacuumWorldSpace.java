@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.json.JsonObject;
+
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.EnvironmentalSpace;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.Location;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
@@ -33,22 +35,14 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	private int[] dimensions;
 	private static final String BAD_DIRECTION = "Bad agent direction: ";
 	private Map<String, VacuumWorldCleaningAgent> agents;
+	private JsonObject initialStateRepresentation;
 	
 	private User user;
-	private boolean monitoring;
-
-	public VacuumWorldSpace(int[] dimensions) {
-		super(new HashMap<>());
-		this.dimensions = dimensions;
-		
-		initEmptyMap();
-	}
 	
-	public VacuumWorldSpace(int[] dimensions, Map<VacuumWorldCoordinates, VacuumWorldLocation> grid, User user, boolean monitoring) {
+	public VacuumWorldSpace(int[] dimensions, Map<VacuumWorldCoordinates, VacuumWorldLocation> grid, User user) {
 		super(checkedCast(grid));
 		
 		this.user = user;
-		this.monitoring = monitoring;
 		this.dimensions = dimensions;
 		this.agents = new HashMap<>();
 		
@@ -66,15 +60,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 		return (Map<LocationKey, Location>) grid;
 	}
 
-	private void initEmptyMap() {
-		for (int i = 0; i < this.dimensions[0]; i++) {
-			for (int j = 0; j < this.dimensions[1]; j++) {
-				VacuumWorldCoordinates coordinates = new VacuumWorldCoordinates(i, j);
-				this.addLocation(coordinates, new VacuumWorldLocation(coordinates, VacuumWorldLocationType.NORMAL, this.dimensions[0] - 1, this.dimensions[1] - 1));
-			}
-		}
-	}
-
 	private void fillAgentsMap() {
 		for (VacuumWorldLocation location : getAllLocations()) {
 			if (location.isAnAgentPresent()) {
@@ -83,6 +68,14 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 			}
 		}
 	}
+	
+	public void setJsonRepresentation(JsonObject representation) {
+		this.initialStateRepresentation = representation;
+	}
+	
+	public JsonObject getInitialStateRepresentation() {
+		return this.initialStateRepresentation;
+	}
 
 	public boolean isUserPresent() {
 		return this.user != null;
@@ -90,10 +83,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	
 	public User getUser() {
 		return this.user;
-	}
-	
-	public boolean isMonitored() {
-		return this.monitoring;
 	}
 	
 	public int[] getDimensions() {

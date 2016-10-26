@@ -351,9 +351,10 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	public synchronized Result attempt(VacuumWorldEvent event, VacuumWorldSpace context) {
 		if(event.isPossible(this, context)) {
 			Result result = event.perform(this, context);
+			result.setRecipientsIds(Arrays.asList(event.getSensorToCallBackId()));
 			
 			if(!event.succeeded(this, context)) {
-				return editResultIfNecessary(event, result);
+				return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), null, Arrays.asList(event.getSensorToCallBackId()));
 			}
 			else {
 				return result;
@@ -466,14 +467,6 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 		if (location != null) {
 			perception.put(coordinates, location);
 		}
-	}
-	
-	private Result editResultIfNecessary(VacuumWorldEvent event, Result result) {
-		if(ActionResult.ACTION_FAILED.equals(result.getActionResult())) {
-			return result;
-		}
-		
-		return new VacuumWorldActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), result.getFailureReason(), Arrays.asList(event.getSensorToCallBackId()));
 	}
 	
 	private void unlockLocationsIfNecessary(VWPair<List<Lockable>, List<Lockable>> locationsToUnlock) {
@@ -843,6 +836,6 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	private void dropDirt(VacuumWorldLocation currentActorLocation, DropDirtAction action) {
 		Double[] dimensions = new Double[] { (double) 1, (double) 1 };
 		String name = "Dirt";
-		currentActorLocation.setDirt(new Dirt(new DirtAppearance(name, dimensions, action.getDirtToDropType())));
+		currentActorLocation.setDirt(new Dirt(new DirtAppearance(name, dimensions, action.getDirtToDropType()), false, action.getDropCycle()));
 	}
 }

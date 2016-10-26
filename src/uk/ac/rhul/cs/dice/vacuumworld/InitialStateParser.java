@@ -76,6 +76,7 @@ public class InitialStateParser {
 
 	private static VacuumWorldSpace parseInitialState(JsonObject json) throws IOException {
 		VacuumWorldSpace space = createInitialState(json);
+		space.setJsonRepresentation(json);
 		checkAgentsNumber(space);
 		
 		return space;
@@ -104,37 +105,36 @@ public class InitialStateParser {
 		int width = json.getInt("width");
 		int height = json.getInt("height");
 		boolean user = json.getBoolean("user");
-		boolean monitoring = json.getBoolean("monitoring");
 
 		List<VacuumWorldLocation> notableLocations = getNotableLocations(json, width, height);
 
-		return createInitialState(notableLocations, width, height, user, monitoring);
+		return createInitialState(notableLocations, width, height, user);
 	}
 
-	private static VacuumWorldSpace createInitialState(List<VacuumWorldLocation> notableLocations, int width, int height, boolean user, boolean monitoring) {
+	private static VacuumWorldSpace createInitialState(List<VacuumWorldLocation> notableLocations, int width, int height, boolean user) {
 		Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap = new HashMap<>();
 
 		for (VacuumWorldLocation location : notableLocations) {
 			spaceMap.put(location.getCoordinates(), location);
 		}
 
-		return fillState(spaceMap, width, height, user, monitoring);
+		return fillState(spaceMap, width, height, user);
 	}
 
-	private static VacuumWorldSpace fillState(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int width, int height, boolean user, boolean monitoring) {
+	private static VacuumWorldSpace fillState(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int width, int height, boolean user) {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				putNewLocationIfNecessary(spaceMap, i, j, width, height);
 			}
 		}
-		return packState(spaceMap, width, height, user, monitoring);
+		return packState(spaceMap, width, height, user);
 	}
 
-	private static VacuumWorldSpace packState(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int width, int height, boolean userPresent, boolean monitoring) {
+	private static VacuumWorldSpace packState(Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap, int width, int height, boolean userPresent) {
 		int[] dimensions = new int[] {width, height};
 		User user = createAndInitUser(userPresent, spaceMap);
 		
-		return new VacuumWorldSpace(dimensions, spaceMap, user, monitoring);
+		return new VacuumWorldSpace(dimensions, spaceMap, user);
 	}
 
 	private static User createAndInitUser(boolean userPreent, Map<VacuumWorldCoordinates, VacuumWorldLocation> spaceMap) {
@@ -201,7 +201,7 @@ public class InitialStateParser {
 		}
 	}
 
-	private static List<VacuumWorldLocation> getNotableLocations(JsonObject json, int width, int height) {
+	public static List<VacuumWorldLocation> getNotableLocations(JsonObject json, int width, int height) {
 		List<VacuumWorldLocation> locations = new ArrayList<>();
 		JsonArray notableLocations = json.getJsonArray("notable_locations");
 
@@ -263,7 +263,7 @@ public class InitialStateParser {
 		String name = "Dirt";
 		DirtAppearance appearance = new DirtAppearance(name, dimensions, type);
 
-		return new Dirt(appearance);
+		return new Dirt(appearance, true, 0);
 	}
 
 	private static VacuumWorldCleaningAgent parseAgentIfPresent(JsonObject value) {
@@ -435,12 +435,12 @@ public class InitialStateParser {
 		return null; //change this upon implementation.
 	}
 
-	public static VacuumWorldMonitoringContainer createMonitoringContainer() {
+	public static VacuumWorldMonitoringContainer createMonitoringContainer(JsonObject initialStateRepresentation) {
 		VacuumWorldMonitoringContainer container = new VacuumWorldMonitoringContainer();
 		List<VacuumWorldMonitoringAgent> monitoringAgents = new ArrayList<>();
 		
 		for(int i=0; i < ConfigData.getMonitoringAgentsNumber(); i++) {
-			VacuumWorldMonitoringAgent agent = createMonitoringAgent();
+			VacuumWorldMonitoringAgent agent = createMonitoringAgent(initialStateRepresentation);
 			monitoringAgents.add(agent);
 		}
 		
@@ -449,9 +449,9 @@ public class InitialStateParser {
 		return container;
 	}
 
-	private static VacuumWorldMonitoringAgent createMonitoringAgent() {
+	private static VacuumWorldMonitoringAgent createMonitoringAgent(JsonObject initialStateRepresentation) {
 		String bodyId = "Monitor-" + UUID.randomUUID().toString();
-		VacuumWorldMonitoringAgentMind mind = new VacuumWorldMonitoringAgentMind(bodyId);
+		VacuumWorldMonitoringAgentMind mind = new VacuumWorldMonitoringAgentMind(bodyId, initialStateRepresentation);
 		VacuumWorldMonitoringAgentBrain brain = new VacuumWorldMonitoringAgentBrain();
 		List<Sensor<VacuumWorldSensorRole>> sensors = createSensors(2, bodyId, VacuumWorldMonitoringAgentSensor.class);
 		List<Actuator<VacuumWorldActuatorRole>> actuators = createActuators(2, bodyId, VacuumWorldMonitoringAgentActuator.class);

@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.json.JsonObject;
 
+import org.bson.BsonDocument;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -14,7 +16,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 public class MongoConnector {
 	private MongoClient mongoClient;
 	private MongoDatabase database;
-	private MongoCollection<JsonObject> agentsHistories;
+	private MongoCollection<BsonDocument> systemStates;
 	
 	public boolean connect() {
 		if(check()) {
@@ -29,8 +31,7 @@ public class MongoConnector {
 		try {
 			this.mongoClient = new MongoClient(ConfigData.getDbHostname(), ConfigData.getDbPort());
 			this.database = this.mongoClient.getDatabase(ConfigData.getDbName());
-			this.agentsHistories = this.database.getCollection(ConfigData.getAgentsCollection(), JsonObject.class);
-			
+			this.systemStates = this.database.getCollection(ConfigData.getAgentsCollection(), BsonDocument.class);
 			return check();
 		}
 		catch(Exception e) {
@@ -41,24 +42,25 @@ public class MongoConnector {
 	}
 
 	private boolean check() {
-		return this.mongoClient != null && this.database != null && this.agentsHistories != null;
+		return this.mongoClient != null && this.database != null && this.systemStates != null;
 	}
 	
-	public boolean updateAgentsHistories(List<JsonObject> agentsHistories) {
+	public boolean updateSystemStates(List<JsonObject> states) {
 		if(!connect()) {
 			return false;
 		}
 		
-		return updateAgentsHistoriesHelper(agentsHistories);
+		return updateSystemStatesHelper(states);
 	}
 	
-	private boolean updateAgentsHistoriesHelper(List<JsonObject> agentsHistories) {
-		//TODO
-		return false;
+	private boolean updateSystemStatesHelper(List<JsonObject> states) {
+		long statesNumber = this.systemStates.count();
+		states.forEach(this::insertState);
+		
+		return this.systemStates.count() == statesNumber + states.size();
 	}
 	
-	/*private JsonObject mergeDocuments(JsonObject first, JsonObject second) {
-		//TODO
-		return null;
-	}*/
+	private void insertState(JsonObject state) {
+		this.systemStates.insertOne(BsonDocument.parse(state.toString()));
+	}
 }

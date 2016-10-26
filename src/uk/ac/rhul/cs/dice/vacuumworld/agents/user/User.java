@@ -22,23 +22,23 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
 public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> {
+	private VacuumWorldCoordinates oldLocation;
 	private ActorFacingDirection facingDirection;
+	private ActorFacingDirection oldFacingDirection;
 	private VacuumWorldCoordinates currentLocation;
 	
 	public User(UserAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, UserMind mind, UserBrain brain, ActorFacingDirection facingDirection) {
 		super(appearance, sensors, actuators, mind, brain);
 	
+		this.oldFacingDirection = null;
 		this.facingDirection = facingDirection;
+		this.oldLocation = null;
 		this.currentLocation = null;
 	}
 
 	@Override
 	public String getId() {
 		return super.getId().toString();
-	}
-	
-	public ActorFacingDirection getFacingDirection() {
-		return this.facingDirection;
 	}
 	
 	@Override
@@ -176,12 +176,24 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 		return toReturn;
 	}
 	
+	public VacuumWorldCoordinates getOldLocation() {
+		return this.oldLocation;
+	}
+	
 	public VacuumWorldCoordinates getCurrentLocation() {
 		return this.currentLocation;
 	}
 
 	public void setCurrentLocation(VacuumWorldCoordinates coordinates) {
 		this.currentLocation = coordinates;
+	}
+
+	public ActorFacingDirection getOldFacingDirection() {
+		return this.oldFacingDirection;
+	}
+	
+	public ActorFacingDirection getFacingDirection() {
+		return this.facingDirection;
 	}
 
 	public void turn(TurningDirection turningDirection) {

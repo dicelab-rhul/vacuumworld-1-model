@@ -13,6 +13,15 @@ public class TextualInterfaceBuilder {
 	private TextualInterfaceBuilder(){}
 	
 	public static List<String> getStringRepresentation(VacuumWorldSpace state) {
+		if(state == null) {
+			return new ArrayList<>();
+		}
+		else {
+			return getStringRepresentationHelper(state);
+		}
+	}
+
+	private static List<String> getStringRepresentationHelper(VacuumWorldSpace state) {
 		List<String> representation = new ArrayList<>();
 
 		int width = state.getDimensions()[0];
