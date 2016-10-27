@@ -14,8 +14,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPh
 public class DatabaseUpdateStatesAction extends DatabaseWriteAction {
 	private List<JsonObject> states;
 	
-	public DatabaseUpdateStatesAction(VacuumWorldDatabaseInteractions actionToPerform, List<JsonObject> states) {
-		super(actionToPerform);
+	public DatabaseUpdateStatesAction(List<JsonObject> states) {
+		super(VacuumWorldDatabaseInteractions.UPDATE_STATES);
 		
 		this.states = states;
 	}

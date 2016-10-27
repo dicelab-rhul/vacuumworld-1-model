@@ -11,8 +11,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Event;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.AbstractPhysics;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
@@ -153,6 +153,10 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 		if(event.isPossible(this, context)) {
 			Result result = event.perform(this, context);
 			result.setRecipientsIds(Arrays.asList(event.getSensorToCallBackId()));
+			
+			if(!ActionResult.ACTION_DONE.equals(result.getActionResult())) {
+				return result;
+			}
 			
 			if(!event.succeeded(this, context)) {
 				return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, event.getActor().getId().toString(), null, Arrays.asList(event.getSensorToCallBackId()));

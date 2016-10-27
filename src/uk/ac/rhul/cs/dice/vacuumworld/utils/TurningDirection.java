@@ -1,5 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.utils;
 
+import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
+
 public enum TurningDirection {
 	LEFT, RIGHT;
 	
@@ -22,6 +24,18 @@ public enum TurningDirection {
 		case RIGHT:
 			return "RIGHT";
 		default:
+			throw new IllegalArgumentException();
+		}
+	}
+	
+	public static TurningDirection fromFacingDirections(Pair<ActorFacingDirection> pair) {
+		if(pair.getSecond().equals(pair.getFirst().getLeftDirection())) {
+			return TurningDirection.LEFT;
+		}
+		else if(pair.getSecond().equals(pair.getFirst().getRightDirection())) {
+			return TurningDirection.RIGHT;
+		}
+		else {
 			throw new IllegalArgumentException();
 		}
 	}

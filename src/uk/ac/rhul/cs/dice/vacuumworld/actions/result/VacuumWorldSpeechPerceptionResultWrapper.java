@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld.actions;
+package uk.ac.rhul.cs.dice.vacuumworld.actions.result;
 
 import java.util.List;
 

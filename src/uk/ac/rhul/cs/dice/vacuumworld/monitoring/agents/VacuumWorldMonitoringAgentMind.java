@@ -9,11 +9,11 @@ import javax.json.JsonObject;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
-import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInteractions;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.StateRepresentationBuilder;
 
@@ -95,13 +95,22 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 			return buildPerceiveAction();
 		}
 		else if(DatabaseUpdateStatesAction.class.isAssignableFrom(actionPrototype)) {
-			return new DatabaseUpdateStatesAction(VacuumWorldDatabaseInteractions.UPDATE_STATES, this.states);
+			return buildDatabaseAction(DatabaseUpdateStatesAction.class);
 		}
 		else {
 			throw new UnsupportedOperationException();
 		}
 	}
 	
+	private EnvironmentalAction buildDatabaseAction(Class<? extends DatabaseAction> actionPrototype) {
+		try {
+			return actionPrototype.getConstructor(List.class).newInstance(this.states);
+		}
+		catch(Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
+
 	private EnvironmentalAction buildPerceiveAction() {
 		try {
 			return TotalPerceptionAction.class.newInstance();

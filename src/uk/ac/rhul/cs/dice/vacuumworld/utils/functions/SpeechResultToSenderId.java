@@ -3,7 +3,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils.functions;
 import java.util.function.Function;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechActionResult;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldSpeechActionResult;
 
 public class SpeechResultToSenderId implements Function<Result, String> {
 

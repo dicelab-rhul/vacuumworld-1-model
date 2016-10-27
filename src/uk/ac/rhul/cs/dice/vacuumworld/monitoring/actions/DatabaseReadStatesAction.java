@@ -9,8 +9,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPh
 
 public class DatabaseReadStatesAction extends DatabaseReadAction {
 
-	public DatabaseReadStatesAction(VacuumWorldDatabaseInteractions actionToPerform) {
-		super(actionToPerform);
+	public DatabaseReadStatesAction() {
+		super(VacuumWorldDatabaseInteractions.READ_STATES);
 	}
 
 	@Override

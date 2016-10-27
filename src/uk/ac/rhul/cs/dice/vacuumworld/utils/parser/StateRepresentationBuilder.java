@@ -2,6 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils.parser;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -27,6 +28,7 @@ public class StateRepresentationBuilder {
 	public static JsonObject buildStateRepresentation(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid, int cycleNumber) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		
+		builder.add("_id", UUID.randomUUID().toString());
 		builder.add("cycle", cycleNumber);
 		builder.add("size", getSize(grid));
 		builder.add("user", isUserPresent(grid));

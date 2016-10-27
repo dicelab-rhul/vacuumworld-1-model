@@ -2,7 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractSensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldActionResult;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
 public class VacuumWorldDefaultSensor extends AbstractSensor<VacuumWorldSensorRole> {
