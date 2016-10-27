@@ -2,6 +2,7 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.physics.VacuumWorldPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
@@ -25,6 +26,9 @@ public class VacuumWorldMonitoringBridge extends CustomObservable implements Mon
 	public void update(CustomObservable o, Object arg) {
 		if(this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldMonitoringActionResult) {
 			notifySuperContainerPhysics((VacuumWorldMonitoringActionResult) arg);
+		}
+		else if(this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldActionResult) {
+			notifySuperContainerPhysics((VacuumWorldActionResult) arg);
 		}
 		else if(this.monitoringContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldEvent) {
 			VacuumWorldPhysics physics = (VacuumWorldPhysics) getObservers().stream().filter(observer -> this.monitoredContainerPhysicsClass.isAssignableFrom(observer.getClass())).findFirst().orElseGet(() -> null);

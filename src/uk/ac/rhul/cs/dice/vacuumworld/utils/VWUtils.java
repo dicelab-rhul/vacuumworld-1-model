@@ -3,6 +3,8 @@ package uk.ac.rhul.cs.dice.vacuumworld.utils;
 import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +14,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
+import uk.ac.rhul.cs.dice.vacuumworld.actions.result.report.AbstractActionReport;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
 public class VWUtils {
@@ -141,5 +144,12 @@ public class VWUtils {
 	
 	public static boolean isInitialStateInvalid(Exception e) {
 		return VWUtils.INVALID_INITIAL_STATE.equals(e.getMessage());
+	}
+	
+	public static Map<String, AbstractActionReport> duplicateStringMap(Map<String, AbstractActionReport> map) {
+		Map<String, AbstractActionReport> toReturn = new HashMap<>();
+		map.forEach((key, value) -> toReturn.put(key, value.duplicate()));
+		
+		return toReturn;
 	}
 }

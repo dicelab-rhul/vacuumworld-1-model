@@ -73,47 +73,38 @@ public interface VacuumWorldPhysicsInterface extends Physics {
 	}
 	
 	public abstract boolean isPossible(TurnLeftAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(TurnLeftAction action, VacuumWorldSpace context);
 	public abstract Result perform(TurnLeftAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(TurnLeftAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(TurnRightAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(TurnRightAction action, VacuumWorldSpace context);
 	public abstract Result perform(TurnRightAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(TurnRightAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(MoveAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(MoveAction action, VacuumWorldSpace context);
 	public abstract Result perform(MoveAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(MoveAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(CleanAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(CleanAction action, VacuumWorldSpace context);
 	public abstract Result perform(CleanAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(CleanAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(PerceiveAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(PerceiveAction action, VacuumWorldSpace context);
 	public abstract Result perform(PerceiveAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(PerceiveAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(SpeechAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(SpeechAction action, VacuumWorldSpace context);
 	public abstract Result perform(SpeechAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(SpeechAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(DropDirtAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(DropDirtAction action, VacuumWorldSpace context);
 	public abstract Result perform(DropDirtAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(DropDirtAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(TotalPerceptionAction action, VacuumWorldSpace context);
-	public abstract boolean isNecessary(TotalPerceptionAction action, VacuumWorldSpace context);
 	public abstract Result perform(TotalPerceptionAction action, VacuumWorldSpace context);
 	public abstract boolean succeeded(TotalPerceptionAction action, VacuumWorldSpace context);
 	
 	public abstract boolean isPossible(VacuumWorldEvent event, VacuumWorldSpace context);
-	public abstract boolean isNecessary(VacuumWorldEvent event, VacuumWorldSpace context);
 	public abstract Result attempt(VacuumWorldEvent event, VacuumWorldSpace context);
 	public abstract Result perform(VacuumWorldEvent event, VacuumWorldSpace context);
 	public abstract boolean succeeded(VacuumWorldEvent event, VacuumWorldSpace context);

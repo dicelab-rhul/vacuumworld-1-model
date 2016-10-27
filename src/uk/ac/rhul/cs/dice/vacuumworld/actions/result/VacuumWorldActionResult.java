@@ -22,4 +22,9 @@ public class VacuumWorldActionResult extends AbstractActionResult {
 	public VacuumWorldActionResult(ActionResult result, String actorId, Exception failureReason, List<String> recipientsIds) {
 		super(result, actorId, failureReason, recipientsIds);
 	}
+	
+	@Override
+	public VacuumWorldPerception getPerception() {
+		return (VacuumWorldPerception) super.getPerception();
+	}
 }

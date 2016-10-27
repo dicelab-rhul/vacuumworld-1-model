@@ -3,11 +3,13 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.json.JsonObject;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.result.report.AbstractActionReport;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
@@ -22,6 +24,7 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	private boolean updateDatabase;
 	
 	private List<JsonObject> states;
+	private List<Map<String, AbstractActionReport>> actionReports; //need to store this in the db every n cycles and then clear this list
 	
 	public VacuumWorldMonitoringAgentMind(String bodyId, JsonObject initialStateRepresentation) {
 		super(bodyId);
@@ -33,6 +36,7 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 		this.updateDatabase = false;
 		this.states = new ArrayList<>();
 		this.states.add(initialStateRepresentation);
+		this.actionReports = new ArrayList<>();
 	}
 	
 	@Override
@@ -58,10 +62,17 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		updateMonitoringVariables();
+		storeActionReportsInMemory();
 		
 		return buildSystemMonitoringAction();
 	}
-	
+
+	private void storeActionReportsInMemory() {
+		if(this.cycleCounter > 1) {
+			this.actionReports.add(getLastActionResult().getCycleReports());
+		}
+	}
+
 	private EnvironmentalAction buildSystemMonitoringAction() {
 		if(this.updateDatabase) {
 			return buildNewAction(DatabaseUpdateStatesAction.class);

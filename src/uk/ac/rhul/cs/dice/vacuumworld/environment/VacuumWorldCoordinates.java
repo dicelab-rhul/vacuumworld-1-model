@@ -9,8 +9,9 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.locations.LocationKey;
 import uk.ac.rhul.cs.dice.gawl.interfaces.utils.AbstractSingleTypedPair;
 import uk.ac.rhul.cs.dice.gawl.interfaces.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.Duplicable;
 
-public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> implements Coordinates {
+public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> implements Coordinates, Duplicable<VacuumWorldCoordinates> {
 	public VacuumWorldCoordinates(int x, int y) {
 		super(x, y);
 	}
@@ -130,6 +131,7 @@ public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> imp
 		return x1 > x2 ? 1 : -1;
 	}
 	
+	@Override
 	public VacuumWorldCoordinates duplicate() {
 		return new VacuumWorldCoordinates(getFirst(), getSecond());
 	}

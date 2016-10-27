@@ -48,7 +48,7 @@ public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
 
 	@Override
 	public VacuumWorldPerception getPerception() {
-		return (VacuumWorldPerception) this.perceptionResult.getPerception();
+		return this.perceptionResult.getPerception();
 	}
 
 	@Override
