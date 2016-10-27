@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.Appearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.UniverseAppearance;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.SpaceCoordinates;
-import uk.ac.rhul.cs.dice.vacuumworld.TextualInterfaceBuilder;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.TextualInterfaceBuilder;
 
 public class VacuumWorldAppearance extends UniverseAppearance {
 	private List<String> stringRepresentation;

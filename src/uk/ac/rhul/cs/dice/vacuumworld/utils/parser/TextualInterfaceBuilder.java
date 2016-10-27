@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld;
+package uk.ac.rhul.cs.dice.vacuumworld.utils.parser;
 
 import java.util.ArrayList;
 import java.util.List;

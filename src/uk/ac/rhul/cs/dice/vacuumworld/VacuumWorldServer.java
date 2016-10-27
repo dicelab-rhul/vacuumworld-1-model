@@ -32,6 +32,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.VacuumWorldAgentThreadManager;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.InitialStateParser;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.JsonForControllerBuilder;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.StateRepresentationBuilder;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeCodes;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
@@ -57,12 +60,13 @@ public class VacuumWorldServer implements Observer {
 	}
 
 	public void startServer(double delayInSeconds) {
-		VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting server...");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Starting Model server...");
 		this.threadManager = new VacuumWorldAgentThreadManager(this.sharedStopSignal);
-		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server started.");
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Model server started.");
 		
 		doHandshakePhase();
-		VWUtils.logWithClass(this.getClass().getSimpleName(), "Server connected with " + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + ".");
+		
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Handshake with Controller and View succesfully completed.");
 		
 		startManagingRequests(delayInSeconds);
 	}
@@ -267,6 +271,8 @@ public class VacuumWorldServer implements Observer {
 		ObjectOutputStream o = new ObjectOutputStream(candidate.getOutputStream());
 		ObjectInputStream i = new ObjectInputStream(candidate.getInputStream());
 
+		VWUtils.logWithClass(this.getClass().getSimpleName(), "Model server connected with (presumably the Controller server) " + candidate.getInetAddress().getHostAddress() + ":" + candidate.getPort() + ".");
+		
 		HandshakeCodes codeFromController = HandshakeCodes.fromString((String) i.readObject());
 		VWUtils.logWithClass(this.getClass().getSimpleName(), "Received " + (codeFromController == null ? null : codeFromController.toString()) + " from controller.");  //CHCM
 		

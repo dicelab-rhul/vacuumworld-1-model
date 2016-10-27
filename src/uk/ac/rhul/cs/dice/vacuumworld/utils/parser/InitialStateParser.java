@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs.dice.vacuumworld;
+package uk.ac.rhul.cs.dice.vacuumworld.utils.parser;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonString;
 import javax.json.JsonValue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
@@ -62,16 +61,26 @@ public class InitialStateParser {
 	private InitialStateParser() {}
 
 	public static VacuumWorldSpace parseInitialState(InputStream input) throws IOException {
-		JsonObject json = null;
+		JsonObject json = retrieveJsonObject(input);
 		
+		if(json != null) {
+			return parseInitialState(json);
+		}
+		else {
+			throw new IOException("Corrupted initial state.");
+		}
+	}
+
+	private static JsonObject retrieveJsonObject(InputStream input) throws IOException {
 		if(input instanceof ObjectInputStream) {
-			json = parseInitialStateFromController((ObjectInputStream) input);
+			return retrieveJsonObjectFromController((ObjectInputStream) input);
 		}
 		else if(input instanceof FileInputStream) {
-			json = parseInitialStateFromFile((FileInputStream) input);
+			return retrieveJsonObjectFromFile((FileInputStream) input);
 		}
-		
-		return parseInitialState(json);
+		else {
+			return null;
+		}
 	}
 
 	private static VacuumWorldSpace parseInitialState(JsonObject json) throws IOException {
@@ -93,15 +102,6 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldSpace createInitialState(JsonObject json) {
-		if(json == null) {
-			return null;
-		}
-		else {
-			return createInitialStateHelper(json);
-		}
-	}
-
-	private static VacuumWorldSpace createInitialStateHelper(JsonObject json) {
 		int width = json.getInt("width");
 		int height = json.getInt("height");
 		boolean user = json.getBoolean("user");
@@ -175,7 +175,12 @@ public class InitialStateParser {
 		if(!userPresent) {
 			return null;
 		}
-		
+		else {
+			return createUser();
+		}
+	}
+
+	private static User createUser() {
 		String id = "User-" + UUID.randomUUID().toString();
 		UserMind mind = new UserMind(id);
 		UserBrain brain = new UserBrain();
@@ -202,27 +207,24 @@ public class InitialStateParser {
 	}
 
 	public static List<VacuumWorldLocation> getNotableLocations(JsonObject json, int width, int height) {
-		List<VacuumWorldLocation> locations = new ArrayList<>();
 		JsonArray notableLocations = json.getJsonArray("notable_locations");
-
-		for (JsonValue value : notableLocations) {
-			if (value instanceof JsonObject) {
-				locations.add(parseLocation((JsonObject) value, width, height));
-			}
-		}
-
-		return locations;
+		
+		return notableLocations.stream().filter(value -> value instanceof JsonObject).map(value -> parseLocation((JsonObject) value, width, height)).collect(Collectors.toList());
 	}
 
 	private static VacuumWorldLocation parseLocation(JsonObject value, int width, int height) {
-		int x = value.getInt("x");
-		int y = value.getInt("y");
-		VacuumWorldCoordinates coordinates = new VacuumWorldCoordinates(x - 1, y - 1);
-		
+		VacuumWorldCoordinates coordinates = parseCoordinates(value);		
 		VacuumWorldCleaningAgent agent = parseAgentIfPresent(value);
 		Dirt dirt = parseDirtIfPresent(value);
 
 		return createLocation(coordinates, agent, dirt, width, height);
+	}
+
+	private static VacuumWorldCoordinates parseCoordinates(JsonObject value) {
+		int x = value.getInt("x");
+		int y = value.getInt("y");
+		
+		return new VacuumWorldCoordinates(x - 1, y - 1);
 	}
 
 	private static VacuumWorldLocation createLocation(VacuumWorldCoordinates coordinates, VacuumWorldCleaningAgent agent, Dirt dirt, int width, int height) {
@@ -239,26 +241,18 @@ public class InitialStateParser {
 	}
 
 	private static Dirt parseDirtIfPresent(JsonObject value) {
-		if(value.containsKey("dirt")) {
-			JsonString dirtString = value.getJsonString("dirt");
-			return parseDirt(dirtString);
+		JsonValue dirtType = value.getOrDefault("dirt", null);
+		
+		if(dirtType != null && dirtType.getValueType() == JsonValue.ValueType.STRING) {
+			return parseDirt(dirtType.toString());
 		}
 		else {
 			return null;
-		}
-	}
-
-	private static Dirt parseDirt(JsonString dirtString) {
-		if (dirtString == null) {
-			return null;
-		}
-		else {
-			return parseDirt(dirtString.getString());
 		}
 	}
 
 	private static Dirt parseDirt(String dirtString) {
-		DirtType type = DirtType.fromString(dirtString);
+		DirtType type = DirtType.fromString(dirtString.replaceAll("\"", ""));
 		Double[] dimensions = new Double[] { (double) 1, (double) 1 };
 		String name = "Dirt";
 		DirtAppearance appearance = new DirtAppearance(name, dimensions, type);
@@ -267,9 +261,10 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldCleaningAgent parseAgentIfPresent(JsonObject value) {
-		if(value.containsKey("agent")) {
-			JsonObject agentObject = value.getJsonObject("agent");
-			return parseAgent(agentObject);
+		JsonValue agent = value.getOrDefault("agent", null);
+		
+		if(agent != null && agent.getValueType() == JsonValue.ValueType.OBJECT) {
+			return parseAgent((JsonObject) agent);
 		}
 		else {
 			return null;
@@ -277,15 +272,6 @@ public class InitialStateParser {
 	}
 
 	private static VacuumWorldCleaningAgent parseAgent(JsonObject agentObject) {
-		if (agentObject == null) {
-			return null;
-		}
-		else {
-			return parseNotNullAgent(agentObject);
-		}
-	}
-
-	private static VacuumWorldCleaningAgent parseNotNullAgent(JsonObject agentObject) {
 		String id = agentObject.getString("id");
 		String name = agentObject.getString("name");
 		String color = agentObject.getString("color");
@@ -329,11 +315,16 @@ public class InitialStateParser {
 	}
 
 	private static List<Actuator<VacuumWorldActuatorRole>> createActuators(int actuatorsNumber, String bodyId, Class<? extends Actuator<VacuumWorldActuatorRole>> classToUse) {
-		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
-
 		if (actuatorsNumber < 2) {
-			return actuators;
+			return new ArrayList<>();
 		}
+		else {
+			return createActuatorsHelper(actuatorsNumber, bodyId, classToUse);
+		}
+	}
+
+	private static List<Actuator<VacuumWorldActuatorRole>> createActuatorsHelper(int actuatorsNumber, String bodyId, Class<? extends Actuator<VacuumWorldActuatorRole>> classToUse) {
+		List<Actuator<VacuumWorldActuatorRole>> actuators = new ArrayList<>();
 		
 		try {
 			actuators.add(classToUse.getConstructor(String.class, VacuumWorldActuatorRole.class).newInstance(bodyId, VacuumWorldActuatorRole.PHYSICAL_ACTUATOR));
@@ -361,11 +352,16 @@ public class InitialStateParser {
 	}
 
 	private static List<Sensor<VacuumWorldSensorRole>> createSensors(int sensorsNumber, String bodyId, Class<? extends Sensor<VacuumWorldSensorRole>> realClass) {
-		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
-
 		if (sensorsNumber < 2) {
-			return sensors;
+			return new ArrayList<>();
 		}
+		else {
+			return createSensorsHelper(sensorsNumber, bodyId, realClass);
+		}
+	}
+
+	private static List<Sensor<VacuumWorldSensorRole>> createSensorsHelper(int sensorsNumber, String bodyId, Class<? extends Sensor<VacuumWorldSensorRole>> realClass) {
+		List<Sensor<VacuumWorldSensorRole>> sensors = new ArrayList<>();
 		
 		try {
 			sensors.add(realClass.getConstructor(String.class, VacuumWorldSensorRole.class).newInstance(bodyId, VacuumWorldSensorRole.SEEING_SENSOR));
@@ -392,7 +388,7 @@ public class InitialStateParser {
 		}
 	}
 
-	private static JsonObject parseInitialStateFromFile(FileInputStream input) {
+	private static JsonObject retrieveJsonObjectFromFile(FileInputStream input) {
 		JsonReader reader = Json.createReader(input);
 		JsonObject json = reader.readObject();
 		reader.close();
@@ -400,28 +396,28 @@ public class InitialStateParser {
 		return json;
 	}
 
-	private static JsonObject parseInitialStateFromController(ObjectInputStream input) throws IOException {
+	private static JsonObject retrieveJsonObjectFromController(ObjectInputStream input) throws IOException {
 		try {
 			ViewRequest viewRequest = (ViewRequest) input.readObject();
-			return parseInitialStateFromController(viewRequest, input);
+			return retrieveJsonObjectFromController(viewRequest, input);
 		}
 		catch(ClassNotFoundException e) {
 			throw new IOException(e);
 		}
 	}
 
-	private static JsonObject parseInitialStateFromController(ViewRequest viewRequest, ObjectInputStream input) {
+	private static JsonObject retrieveJsonObjectFromController(ViewRequest viewRequest, ObjectInputStream input) {
 		switch(viewRequest.getCode()) {
 		case NEW:
 			return VWUtils.parseJsonObjectFromString((String) viewRequest.getPayload());
 		case LOAD_TEMPLATE_FROM_FILE: //for now this cannot happen.
-			return parseJsonObjectFromFile(input);
+			return retrieveJsonObjectFromTemplateFile(input);
 		default:
 			return null;
 		}
 	}
 
-	private static JsonObject parseJsonObjectFromFile(ObjectInputStream input) {
+	private static JsonObject retrieveJsonObjectFromTemplateFile(ObjectInputStream input) {
 		try {
 			input.readObject();
 			//this is incomplete.

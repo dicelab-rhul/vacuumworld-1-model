@@ -8,7 +8,6 @@ import javax.json.JsonObject;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.StateRepresentationBuilder;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
@@ -16,6 +15,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringAc
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInteractions;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.StateRepresentationBuilder;
 
 public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind {
 	private int cycleCounter;
