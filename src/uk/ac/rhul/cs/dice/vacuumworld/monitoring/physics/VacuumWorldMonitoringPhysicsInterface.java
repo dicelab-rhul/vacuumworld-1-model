@@ -10,6 +10,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.environment.Space;
 import uk.ac.rhul.cs.dice.gawl.interfaces.environment.physics.Physics;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadStatesAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateActionsAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
@@ -67,22 +68,22 @@ public interface VacuumWorldMonitoringPhysicsInterface extends Physics {
 	}
 	
 	public abstract boolean isPossible(TotalPerceptionAction action, VacuumWorldMonitoringContainer context);
-	public abstract boolean isNecessary(TotalPerceptionAction action, VacuumWorldMonitoringContainer context);
 	public abstract Result perform(TotalPerceptionAction action, VacuumWorldMonitoringContainer context);
 	public abstract boolean succeeded(TotalPerceptionAction action, VacuumWorldMonitoringContainer context);
 	
 	public abstract boolean isPossible(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context);
-	public abstract boolean isNecessary(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context);
 	public abstract Result perform(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context);
 	public abstract boolean succeeded(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context);
 	
+	public abstract boolean isPossible(DatabaseUpdateActionsAction action, VacuumWorldMonitoringContainer context);
+	public abstract Result perform(DatabaseUpdateActionsAction action, VacuumWorldMonitoringContainer context);
+	public abstract boolean succeeded(DatabaseUpdateActionsAction action, VacuumWorldMonitoringContainer context);
+	
 	public abstract boolean isPossible(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context);
-	public abstract boolean isNecessary(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context);
 	public abstract Result perform(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context);
 	public abstract boolean succeeded(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context);
 	
 	public abstract boolean isPossible(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context);
-	public abstract boolean isNecessary(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context);
 	public abstract Result attempt(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context);
 	public abstract Result perform(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context);
 	public abstract boolean succeeded(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context);

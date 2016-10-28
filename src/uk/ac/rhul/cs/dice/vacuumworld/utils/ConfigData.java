@@ -37,8 +37,7 @@ public class ConfigData {
 	private static String dbName;
 	private static String dbHostname;
 	private static int dbPort;
-	private static String agentsCollection;
-	private static String dirtsCollection;
+	private static String stateActionsCollection;
 	private static String systemStatesCollection;
 	
 	private ConfigData(){}
@@ -128,12 +127,8 @@ public class ConfigData {
 		return ConfigData.dbPort;
 	}
 
-	public static String getAgentsCollection() {
-		return ConfigData.agentsCollection;
-	}
-
-	public static String getDirtsCollection() {
-		return ConfigData.dirtsCollection;
+	public static String getStateActionsCollection() {
+		return ConfigData.stateActionsCollection;
 	}
 	
 	public static String getSystemStatesCollection() {
@@ -286,8 +281,7 @@ public class ConfigData {
 		ConfigData.dbName = db.getString("name");
 		ConfigData.dbHostname = db.getString("hostname");
 		ConfigData.dbPort = Integer.valueOf(db.getString("port"));
-		ConfigData.agentsCollection = db.getString("agents_collection");
-		ConfigData.dirtsCollection = db.getString("dirts_collection");
+		ConfigData.stateActionsCollection = db.getString("state_actions_collection");
 		ConfigData.systemStatesCollection = db.getString("system_states_collection");
 		
 		return true;

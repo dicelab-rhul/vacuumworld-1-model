@@ -22,6 +22,7 @@ public class MongoConnector {
 	private MongoClient mongoClient;
 	private MongoDatabase database;
 	private MongoCollection<BsonDocument> systemStates;
+	private MongoCollection<BsonDocument> statesActions;
 	
 	public boolean connect() {
 		if(check()) {
@@ -37,6 +38,7 @@ public class MongoConnector {
 			this.mongoClient = new MongoClient(ConfigData.getDbHostname(), ConfigData.getDbPort());
 			this.database = this.mongoClient.getDatabase(ConfigData.getDbName());
 			this.systemStates = this.database.getCollection(ConfigData.getSystemStatesCollection(), BsonDocument.class);
+			this.statesActions = this.database.getCollection(ConfigData.getStateActionsCollection(), BsonDocument.class);
 			
 			return check();
 		}
@@ -87,5 +89,24 @@ public class MongoConnector {
 			
 			return null;
 		}
+	}
+
+	public boolean updateSystemStatesActions(List<JsonObject> actionReports) {
+		if(!connect()) {
+			return false;
+		}
+
+		return updateSystemStatesActionsHelper(actionReports);
+	}
+
+	private boolean updateSystemStatesActionsHelper(List<JsonObject> actionReports) {
+		long statesNumber = this.statesActions.count();
+		actionReports.forEach(this::insertActionsReport);
+		
+		return this.statesActions.count() == statesNumber + actionReports.size();
+	}
+	
+	private void insertActionsReport(JsonObject actionsReport) {
+		this.statesActions.insertOne(BsonDocument.parse(actionsReport.toString()));
 	}
 }

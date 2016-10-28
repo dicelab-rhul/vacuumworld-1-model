@@ -14,6 +14,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseReadStatesAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateActionsAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
@@ -69,11 +70,6 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	}
 
 	@Override
-	public synchronized boolean isNecessary(TotalPerceptionAction action, VacuumWorldMonitoringContainer context) {
-		return false;
-	}
-
-	@Override
 	public synchronized Result perform(TotalPerceptionAction action, VacuumWorldMonitoringContainer context) {
 		return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId(), new ArrayList<>(), null);
 	}
@@ -86,11 +82,6 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	@Override
 	public boolean isPossible(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
 		return VWUtils.isCollectionNotNullAndNotEmpty(action.getStates());
-	}
-
-	@Override
-	public boolean isNecessary(DatabaseUpdateStatesAction action, VacuumWorldMonitoringContainer context) {
-		return false;
 	}
 
 	@Override
@@ -111,13 +102,30 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	}
 	
 	@Override
-	public boolean isPossible(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
-		return true;
+	public boolean isPossible(DatabaseUpdateActionsAction action, VacuumWorldMonitoringContainer context) {
+		return VWUtils.isCollectionNotNullAndNotEmpty(action.getActionReports());
 	}
 
 	@Override
-	public boolean isNecessary(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
-		return false;
+	public Result perform(DatabaseUpdateActionsAction action, VacuumWorldMonitoringContainer context) {
+		MongoConnector connector = new MongoConnector();
+		
+		if(connector.updateSystemStatesActions(action.getActionReports())) {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_DONE, action.getActor().getId().toString(), new ArrayList<>(), null);
+		}
+		else {
+			return new VacuumWorldMonitoringActionResult(ActionResult.ACTION_FAILED, action.getActor().getId().toString(), null, new ArrayList<>());
+		}
+	}
+
+	@Override
+	public boolean succeeded(DatabaseUpdateActionsAction action, VacuumWorldMonitoringContainer context) {
+		return true;
+	}
+	
+	@Override
+	public boolean isPossible(DatabaseReadStatesAction action, VacuumWorldMonitoringContainer context) {
+		return true;
 	}
 
 	@Override
@@ -141,11 +149,6 @@ public class VacuumWorldMonitoringPhysics extends AbstractPhysics implements Vac
 	@Override
 	public boolean isPossible(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
 		return event.getAction().isPossible(this, context);
-	}
-
-	@Override
-	public boolean isNecessary(VacuumWorldMonitoringEvent event, VacuumWorldMonitoringContainer context) {
-		return event.getAction().isNecessary(this, context);
 	}
 
 	@Override

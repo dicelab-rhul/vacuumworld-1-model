@@ -3,58 +3,61 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.json.JsonObject;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
-import uk.ac.rhul.cs.dice.vacuumworld.actions.result.report.AbstractActionReport;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAbstractActorMind;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseAction;
+import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateActionsAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseUpdateStatesAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.TotalPerceptionAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringPerception;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.StateActionsRepresentationBuilder;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.parser.StateRepresentationBuilder;
 
 public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind {
 	private int cycleCounter;
-	private boolean updateDatabase;
+	private boolean updateStatesCollection;
+	private boolean updateActionsCollection;
 	
 	private List<JsonObject> states;
-	private List<Map<String, AbstractActionReport>> actionReports; //need to store this in the db every n cycles and then clear this list
+	private List<JsonObject> actionReports;
 	
 	public VacuumWorldMonitoringAgentMind(String bodyId, JsonObject initialStateRepresentation) {
 		super(bodyId);
 		
-		super.setPerceptionRange(Integer.MAX_VALUE);
-		super.setCanSeeBehind(true);
-		
+		setPerceptionRange(Integer.MAX_VALUE);
+		setCanSeeBehind(true);
+		init(initialStateRepresentation);
+	}
+	
+	private void init(JsonObject initialStateRepresentation) {
 		this.cycleCounter = 0;
-		this.updateDatabase = false;
+		this.updateStatesCollection = false;
+		this.updateActionsCollection = false;
 		this.states = new ArrayList<>();
 		this.states.add(initialStateRepresentation);
 		this.actionReports = new ArrayList<>();
 	}
-	
+
 	@Override
 	public void perceive(Object perceptionWrapper) {
 		notifyObservers(null, VacuumWorldMonitoringAgentBrain.class);
-		storeUpdateForDatabaseInMemory();
+		storeStatesHistoryInMemory();
+		storeActionsHistoryInMemory();
 		loadAvailableActionsForThisCycle(new ArrayList<>(getAvailableActionsForThisMind()));
 	}
 	
-	private void storeUpdateForDatabaseInMemory() {
-		if(this.updateDatabase) {
+	private void storeStatesHistoryInMemory() {
+		if(this.updateStatesCollection) {
 			this.states.clear();
 		}
 		
-		if(this.cycleCounter == 0) {
-			return;
-		}
-		else {
+		if(this.cycleCounter > 0) {
 			this.states.add(StateRepresentationBuilder.buildCompactStateRepresentation(getPerception() == null ? new HashMap<>() : getPerception().getPerceivedMap(), this.cycleCounter));
 		}
 	}
@@ -62,20 +65,26 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
 		updateMonitoringVariables();
-		storeActionReportsInMemory();
 		
 		return buildSystemMonitoringAction();
 	}
 
-	private void storeActionReportsInMemory() {
-		if(this.cycleCounter > 1) {
-			this.actionReports.add(getLastActionResult().getCycleReports());
+	private void storeActionsHistoryInMemory() {
+		if(this.updateActionsCollection) {
+			this.actionReports.clear();
+		}
+		
+		if(this.cycleCounter > 0) {
+			this.actionReports.add(StateActionsRepresentationBuilder.buildStateActionsRepresentation(getLastActionResult().getCycleReports(), this.cycleCounter));
 		}
 	}
 
 	private EnvironmentalAction buildSystemMonitoringAction() {
-		if(this.updateDatabase) {
+		if(this.updateStatesCollection) {
 			return buildNewAction(DatabaseUpdateStatesAction.class);
+		}
+		else if(this.updateActionsCollection) {
+			return buildNewAction(DatabaseUpdateActionsAction.class);
 		}
 		else {
 			return buildNewAction(TotalPerceptionAction.class);
@@ -89,7 +98,8 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 
 	private void updateMonitoringVariables() {
 		this.cycleCounter++;
-		this.updateDatabase = this.cycleCounter % 5 == 0;
+		this.updateStatesCollection = this.cycleCounter % 5 == 0;
+		this.updateActionsCollection = this.cycleCounter % 5 == 1 && this.cycleCounter != 1; 
 	}
 
 	@Override
@@ -106,16 +116,19 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 			return buildPerceiveAction();
 		}
 		else if(DatabaseUpdateStatesAction.class.isAssignableFrom(actionPrototype)) {
-			return buildDatabaseAction(DatabaseUpdateStatesAction.class);
+			return buildDatabaseAction(DatabaseUpdateStatesAction.class, List.class, this.states);
+		}
+		else if(DatabaseUpdateActionsAction.class.isAssignableFrom(actionPrototype)) {
+			return buildDatabaseAction(DatabaseUpdateActionsAction.class, List.class, this.actionReports);
 		}
 		else {
 			throw new UnsupportedOperationException();
 		}
 	}
 	
-	private EnvironmentalAction buildDatabaseAction(Class<? extends DatabaseAction> actionPrototype) {
+	private EnvironmentalAction buildDatabaseAction(Class<? extends DatabaseAction> actionPrototype, Class<?> payloadType, Object payload) {
 		try {
-			return actionPrototype.getConstructor(List.class).newInstance(this.states);
+			return actionPrototype.getConstructor(payloadType).newInstance(payload);
 		}
 		catch(Exception e) {
 			throw new UnsupportedOperationException(e);
@@ -151,16 +164,6 @@ public class VacuumWorldMonitoringAgentMind extends VacuumWorldAbstractActorMind
 				setLastActionResult((VacuumWorldMonitoringActionResult) result);
 			}
 		}
-	}
-	
-	@Override
-	public void setCanSeeBehind(boolean canSeeBehind) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setPerceptionRange(int preceptionRange) {
-		throw new UnsupportedOperationException();
 	}
 	
 	@Override
