@@ -29,9 +29,8 @@ public class VWUtils {
 	private static Logger initLogger() {
 		Logger logger = Logger.getAnonymousLogger();
 		logger.setUseParentHandlers(false);
-		VacuumWorldLogFormatter formatter = new VacuumWorldLogFormatter();
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setFormatter(formatter);
+		handler.setFormatter(new VacuumWorldLogFormatter());
 		logger.addHandler(handler);
 		
 		return logger;
