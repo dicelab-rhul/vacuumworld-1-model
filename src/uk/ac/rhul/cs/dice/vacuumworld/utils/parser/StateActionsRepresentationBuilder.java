@@ -65,10 +65,10 @@ public class StateActionsRepresentationBuilder {
 			builder.add("turning_direction", ((TurnActionReport) actionReport).getTurningDirection().toString());
 		}
 		else if(actionReport instanceof CleanActionReport) {
-			builder.add("cleaned_dirt", ((CleanActionReport) actionReport).getCleanedDirt() == null ? null : ((CleanActionReport) actionReport).getCleanedDirt().toString());
+			builder.add("cleaned_dirt", ((CleanActionReport) actionReport).getCleanedDirt() == null ? "" : ((CleanActionReport) actionReport).getCleanedDirt().toString());
 		}
 		else if(actionReport instanceof DropDirtActionReport) {
-			builder.add("dropped_dirt", ((DropDirtActionReport) actionReport).getDroppedDirtType() == null ? null :((DropDirtActionReport) actionReport).getDroppedDirtType().toString());
+			builder.add("dropped_dirt", ((DropDirtActionReport) actionReport).getDroppedDirtType() == null ? "" :((DropDirtActionReport) actionReport).getDroppedDirtType().toString());
 		}
 		else if(actionReport instanceof SpeechActionReport) {
 			builder.add("speech", buildSpeech(((SpeechActionReport) actionReport).getSpeeches()));
