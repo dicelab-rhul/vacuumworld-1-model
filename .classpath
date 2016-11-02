@@ -7,6 +7,6 @@
 	<classpathentry kind="lib" path="res/bson-3.4.0-rc1.jar"/>
 	<classpathentry kind="lib" path="res/mongodb-driver-3.4.0-rc1.jar" sourcepath="res/mongodb-driver-3.4.0-rc1-sources.jar"/>
 	<classpathentry kind="lib" path="res/mongodb-driver-core-3.4.0-rc1.jar" sourcepath="res/mongodb-driver-core-3.4.0-rc1-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/GenericAgentsWorldLibrary"/>
+	<classpathentry kind="lib" path="res/gawl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
