@@ -8,10 +8,8 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.Result;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
-import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.AgentToId;
-import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.SpeechResultToSenderId;
+import uk.ac.rhul.cs.dice.vacuumworld.common.VWPerception;
+import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;import uk.ac.rhul.cs.dice.vacuumworld.utils.functions.SpeechResultToSenderId;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.Contained;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.IsGreeting;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.predicates.IsGreetingAction;
@@ -44,7 +42,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 	 */
 	@Override
 	public EnvironmentalAction decide(Object... parameters) {
-		VacuumWorldPerception perception = getPerception();
+		VWPerception perception = getPerception();
 		List<Result> receivedCommunications = getReceivedCommunications();
 		
 		if(perception == null) {
@@ -59,7 +57,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		}
 	}
 
-	private EnvironmentalAction decideWithPerception(VacuumWorldPerception perception, List<Result> receivedCommunications) {		
+	private EnvironmentalAction decideWithPerception(VWPerception perception, List<Result> receivedCommunications) {		
 		if(someoneJustGreetedMe(receivedCommunications)) {
 			
 			/* 
@@ -120,7 +118,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		return decideWithPerception(perception);
 	}
 
-	private EnvironmentalAction decideWithPerception(VacuumWorldPerception perception) {
+	private EnvironmentalAction decideWithPerception(VWPerception perception) {
 		/*
 		 * From perception I get all the agents within it whose ID is different from this agent's ID,
 		 * then I create a Stream from those,
@@ -133,7 +131,7 @@ public class VacuumWorldSmartRandomSocialMind extends VacuumWorldDefaultMind {
 		 * The collect(...) method transforms a Stream into a Collection thanks to its
 		 * Collector parameter.
 		 */
-		List<String> agentsISee = perception.getActorsInPerception(getBodyId()).stream().map(new AgentToId()).collect(Collectors.toList());
+		List<String> agentsISee = perception.getActorsIdsInPerception();
 		
 		if(VWUtils.isCollectionNotNullAndNotEmpty(agentsISee)) {
 			

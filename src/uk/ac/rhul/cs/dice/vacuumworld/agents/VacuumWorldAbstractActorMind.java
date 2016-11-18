@@ -11,68 +11,73 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents.VacuumWorldMonitoringAge
 import uk.ac.rhul.cs.dice.vacuumworld.utils.ConfigData;
 
 public abstract class VacuumWorldAbstractActorMind extends AbstractAgentMind {
-	private int perceptionRange;
-	private boolean canSeeBehind;
-	
-	public VacuumWorldAbstractActorMind(Random rng, String bodyId) {
-		super(rng, bodyId);
-	}
-	
-	public VacuumWorldAbstractActorMind(String bodyId) {
-		super(new Random(System.currentTimeMillis()), bodyId);
-	}
+    private int perceptionRange;
+    private boolean canSeeBehind;
 
-	@Override
-	public void loadAvailableActionsForThisMindFromArbitraryParameters(Object... mindActions) {
-		if(this instanceof VacuumWorldDefaultMind) {
-			for(Class<? extends EnvironmentalAction> candidate : ConfigData.getCleaningAgentActions()) {
-				loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
-			}
-		}
-		else if(this instanceof VacuumWorldMonitoringAgentMind) {
-			for(Class<? extends EnvironmentalAction> candidate : ConfigData.getMonitoringAgentActions()) {
-				loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
-			}
-		}
-		else if(this instanceof UserMind) {
-			for(Class<? extends EnvironmentalAction> candidate : ConfigData.getUserActions()) {
-				loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
-			}
-		}
-	}
+    public VacuumWorldAbstractActorMind(Random rng, String bodyId) {
+	super(rng, bodyId);
+    }
 
-	@Override
-	public boolean lastActionSucceeded() {
-		return ActionResult.ACTION_DONE.equals(getLastActionResult().getActionResult());
-	}
-	
-	@Override
-	public boolean wasLastActionImpossible() {
-		return ActionResult.ACTION_IMPOSSIBLE.equals(getLastActionResult().getActionResult());
-	}
-	
-	@Override
-	public boolean lastActionFailed() {
-		return ActionResult.ACTION_FAILED.equals(getLastActionResult().getActionResult());
-	}
+    public VacuumWorldAbstractActorMind(String bodyId) {
+	super(new Random(System.currentTimeMillis()), bodyId);
+    }
 
-	@Override
-	public int getPerceptionRange() {
-		return this.perceptionRange;
+    /**
+     * 
+     * Loads the available actions for this mind.
+     * 
+     */
+    @Override
+    public void loadAvailableActionsForThisMindFromArbitraryParameters(Object... mindActions) {
+	if (this instanceof VacuumWorldDefaultMind) {
+	    for (Class<? extends EnvironmentalAction> candidate : ConfigData.getCleaningAgentActions()) {
+		loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
+	    }
 	}
+	else if (this instanceof VacuumWorldMonitoringAgentMind) {
+	    for (Class<? extends EnvironmentalAction> candidate : ConfigData.getMonitoringAgentActions()) {
+		loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
+	    }
+	}
+	else if (this instanceof UserMind) {
+	    for (Class<? extends EnvironmentalAction> candidate : ConfigData.getUserActions()) {
+		loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
+	    }
+	}
+    }
 
-	@Override
-	public boolean canSeeBehind() {
-		return this.canSeeBehind;
-	}
+    @Override
+    public boolean lastActionSucceeded() {
+	return ActionResult.ACTION_DONE.equals(getLastActionResult().getActionResult());
+    }
 
-	@Override
-	public void setCanSeeBehind(boolean canSeeBehind) {
-		this.canSeeBehind = canSeeBehind;
-	}
+    @Override
+    public boolean wasLastActionImpossible() {
+	return ActionResult.ACTION_IMPOSSIBLE.equals(getLastActionResult().getActionResult());
+    }
 
-	@Override
-	public void setPerceptionRange(int preceptionRange) {
-		this.perceptionRange = preceptionRange;
-	}
+    @Override
+    public boolean lastActionFailed() {
+	return ActionResult.ACTION_FAILED.equals(getLastActionResult().getActionResult());
+    }
+
+    @Override
+    public int getPerceptionRange() {
+	return this.perceptionRange;
+    }
+
+    @Override
+    public boolean canSeeBehind() {
+	return this.canSeeBehind;
+    }
+
+    @Override
+    public void setCanSeeBehind(boolean canSeeBehind) {
+	this.canSeeBehind = canSeeBehind;
+    }
+
+    @Override
+    public void setPerceptionRange(int preceptionRange) {
+	this.perceptionRange = preceptionRange;
+    }
 }

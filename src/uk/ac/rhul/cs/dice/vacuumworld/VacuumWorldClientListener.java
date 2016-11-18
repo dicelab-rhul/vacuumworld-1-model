@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
-import uk.ac.rhul.cs.dice.vacuumworld.crypto.VacuumWorldEncryptedData;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.StopSignal;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
@@ -68,15 +67,6 @@ public class VacuumWorldClientListener implements Runnable {
 
     private boolean waitForRequest() {
 	try {
-	    /*VacuumWorldEncryptedData data = (VacuumWorldEncryptedData) this.input.readObject();
-	    
-	    if(data == null) {
-		return false;
-	    }
-	    else {
-		return decrypt(data);
-	    }*/
-	    
 	    Object request = this.input.readObject();
 
 	    if (request instanceof ViewRequest) {
@@ -95,11 +85,6 @@ public class VacuumWorldClientListener implements Runnable {
 	    
 	    return false;
 	}
-    }
-
-    private boolean decrypt(VacuumWorldEncryptedData data) {
-	// TODO Auto-generated method stub
-	return false;
     }
 
     private void manageViewRequest(ViewRequest request) {

@@ -17,6 +17,8 @@ public enum ActorFacingDirection {
 	NORTH, SOUTH, WEST, EAST;
 	
 	private static final Map<Pair<ActorFacingDirection>, List<Class<? extends EnvironmentalAction>>> bestStrategies = getBestStrategy();
+	private static final String ERROR = "Bad facing position: ";
+	
 	
 	public static ActorFacingDirection fromString(String value) {
 		switch(value) {
@@ -100,7 +102,7 @@ public enum ActorFacingDirection {
 		case EAST:
 			return NORTH;
 		default:
-			throw new IllegalArgumentException("Bad facing position: " + this + ".");
+			throw new IllegalArgumentException(ERROR + this + ".");
 		}
 	}
 	
@@ -115,7 +117,22 @@ public enum ActorFacingDirection {
 		case EAST:
 			return SOUTH;
 		default:
-			throw new IllegalArgumentException("Bad facing position: " + this + ".");
+			throw new IllegalArgumentException(ERROR + this + ".");
+		}
+	}
+	
+	public ActorFacingDirection getOppositeDirection() {
+		switch(this) {
+		case NORTH:
+			return SOUTH;
+		case SOUTH:
+			return NORTH;
+		case WEST:
+			return EAST;
+		case EAST:
+			return WEST;
+		default:
+			throw new IllegalArgumentException(ERROR + this + ".");
 		}
 	}
 	
