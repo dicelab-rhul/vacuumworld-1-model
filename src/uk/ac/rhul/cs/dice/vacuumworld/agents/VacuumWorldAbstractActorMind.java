@@ -24,7 +24,7 @@ public abstract class VacuumWorldAbstractActorMind extends AbstractAgentMind {
 
     /**
      * 
-     * Loads the available actions for this mind.
+     * Loads the available action prototypes for this mind (in general, non for a specific cycle).
      * 
      */
     @Override

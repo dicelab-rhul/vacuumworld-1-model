@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Random;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
+import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.speech.Payload;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Brain;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.CleanAction;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
@@ -25,12 +27,22 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocation;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
+/**
+ * 
+ * This class is the default abstract mind for all the cleaning agents.
+ * 
+ * @author cloudstrife9999, a.k.a. Emanuele Uliana
+ *
+ */
 public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMind {
 
     public VacuumWorldDefaultMind(String bodyId) {
 	super(new Random(System.currentTimeMillis()), bodyId);
     }
 
+    /**
+     * This is part of the Observer pattern. This method is automatically called when an {@link Object} observed by this mind calls notifyObservers(...). 
+     */
     @Override
     public final void update(CustomObservable o, Object arg) {
 	if (o instanceof VacuumWorldDefaultBrain && arg instanceof List<?>) {
@@ -38,12 +50,18 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * Asks the brain for the most recent {@link VWPerception} and received communications {@link List}.
+     */
     @Override
     public void perceive(Object perceptionWrapper) {
 	notifyObservers(null, VacuumWorldDefaultBrain.class);
 	loadAvailableActionsForThisCycle(new ArrayList<>(getAvailableActionsForThisMind()));
     }
 
+    /**
+     * Executes the next action by notifying the {@link Brain}.
+     */
     @Override
     public void execute(EnvironmentalAction action) {
 	setLastActionResult(null);
@@ -64,6 +82,9 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * Randomly decides the next action from the available actions for this cycle.
+     */
     @Override
     public EnvironmentalAction decideActionRandomly() {
 	Class<? extends EnvironmentalAction> actionPrototype = super.decideActionPrototypeRandomly();
@@ -71,6 +92,14 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	return buildNewAction(actionPrototype);
     }
 
+    /**
+     * 
+     * Returns a new {@link EnvironmentalAction} from its prototype {@link Class}.
+     * 
+     * @param actionPrototype the prototype {@link Class} of the {@link EnvironmentalAction} to build.
+     * @return a new {@link EnvironmentalAction}.
+     * 
+     */
     public EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
 	if (actionPrototype.equals(SpeechAction.class)) {
 	    return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
@@ -83,6 +112,13 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * 
+     * Returns a new {@link PerceiveAction}
+     * 
+     * @return a new {@link PerceiveAction}.
+     * 
+     */
     public EnvironmentalAction buildPerceiveAction() {
 	try {
 	    return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(getPerceptionRange(), canSeeBehind());
@@ -94,6 +130,14 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * 
+     * Returns a new {@link PhysicalAction} from its prototype {@link Class}.
+     * 
+     * @param actionPrototype the prototype {@link Class} of the {@link EnvironmentalAction} to build.
+     * @return a new {@link PhysicalAction}.
+     * 
+     */
     public EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
 	try {
 	    return actionPrototype.newInstance();
@@ -105,6 +149,16 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * 
+     * Returns a new {@link SpeechAction} from the sender id, the {@link List} of recipients ids and the {@link VacuumWorldSpeechPayload}.
+     * 
+     * @param senderId: the sender id.
+     * @param recipientIds the {@link List} of recipients ids.
+     * @param payload the {@link VacuumWorldSpeechPayload}.
+     * @return a new {@link SpeechAction}.
+     * 
+     */
     public SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
 	try {
 	    Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
@@ -117,6 +171,13 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * 
+     * Updates the available actions for this cycle.
+     * 
+     * @param perception the most recent perception.
+     * 
+     */
     public void updateAvailableActions(VWPerception perception) {
 	updateMoveActionIfNecessary(perception);
 	updateCleaningActionIfNecessary(perception);
@@ -158,6 +219,9 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	}
     }
 
+    /**
+     * Returns the {@link VWPerception} from last cycle execution. It can be null.
+     */
     @Override
     public VWPerception getPerception() {
 	return (VWPerception) super.getPerception();

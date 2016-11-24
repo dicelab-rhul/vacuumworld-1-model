@@ -301,22 +301,22 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<Dirt> getDirtsInPerception() {
-	return this.perception.values().stream().filter(location -> location.isDirtPresent()).map(location -> location.getDirt()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).map(VacuumWorldLocation::getDirt).collect(Collectors.toList());
     }
 
     @Override
     public List<Dirt> getDirtsOfSpecificTypeInPerception(DirtType type) {
-	return this.perception.values().stream().filter(location -> location.isDirtPresent()).filter(location -> type.equals(location.getDirt().getExternalAppearance().getDirtType())).map(location -> location.getDirt()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> type.equals(location.getDirt().getExternalAppearance().getDirtType())).map(location -> location.getDirt()).collect(Collectors.toList());
     }
 
     @Override
     public int countDirtsInPerception() {
-	return (int) this.perception.values().stream().filter(location -> location.isDirtPresent()).count();
+	return (int) this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).count();
     }
 
     @Override
     public int countDirtsOfSpecificTypeInPerception(DirtType type) {
-	return (int) this.perception.values().stream().filter(location -> location.isDirtPresent()).filter(location -> type.equals(location.getDirt().getExternalAppearance().getDirtType())).count();
+	return (int) this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> type.equals(location.getDirt().getExternalAppearance().getDirtType())).count();
     }
 
     @Override
@@ -370,92 +370,82 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<Dirt> getCompatibleDirtsInPerception() {
-	return this.perception.values().stream().filter(location -> location.isDirtPresent()).filter(location -> DirtType.agentAndDirtCompatible(location.getDirt().getExternalAppearance().getDirtType(), getCurrentActorColorIfAgent())).map(location -> location.getDirt()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> DirtType.agentAndDirtCompatible(location.getDirt().getExternalAppearance().getDirtType(), getCurrentActorColorIfAgent())).map(location -> location.getDirt()).collect(Collectors.toList());
     }
 
     @Override
     public int countCompatibleDirtsInPerception() {
-	return (int) this.perception.values().stream().filter(location -> location.isDirtPresent()).filter(location -> DirtType.agentAndDirtCompatible(location.getDirt().getExternalAppearance().getDirtType(), getCurrentActorColorIfAgent())).count();
+	return (int) this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> DirtType.agentAndDirtCompatible(location.getDirt().getExternalAppearance().getDirtType(), getCurrentActorColorIfAgent())).count();
     }
 
     @Override
     public List<VacuumWorldCleaningAgent> getGreenAgentsInPerception() {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(VacuumWorldLocation::getAgent).collect(Collectors.toList());
     }
 
     @Override
     public List<VacuumWorldCleaningAgent> getGreenAgentsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getGreenAgentsIdsInPerception() {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getGreenAgentsIdsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
     }
 
     @Override
     public List<VacuumWorldCleaningAgent> getOrangeAgentsInPerception() {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(VacuumWorldLocation::getAgent).collect(Collectors.toList());
     }
 
     @Override
     public List<VacuumWorldCleaningAgent> getOrangeAgentsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getOrangeAgentsIdsInPerception() {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getOrangeAgentsIdsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
     }
 
     @Override
     public List<VacuumWorldCleaningAgent> getWhiteAgentsInPerception() {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(VacuumWorldLocation::getAgent).collect(Collectors.toList());
     }
 
     @Override
     public List<VacuumWorldCleaningAgent> getWhiteAgentsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getWhiteAgentsIdsInPerception() {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getWhiteAgentsIdsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(location -> location.isAnAgentPresent()).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent().getId()).collect(Collectors.toList());
     }
 
     @Override
     public User getUserInPerceptionIfPresent() {
-	if(getCurrentActorLocation().isAUserPresent()) {
-	    return getCurrentActorLocation().getUser();
-	}
-	else {
-	    return null;
-	}
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAUserPresent).map(VacuumWorldLocation::getUser).findAny().orElse(null);
     }
 
     @Override
     public String getUserIdInPerceptionIfPresent() {
-	if(getCurrentActorLocation().isAUserPresent()) {
-	    return getCurrentActorLocation().getUser().getId();
-	}
-	else {
-	    return null;
-	}
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAUserPresent).map(location -> location.getUser().getId()).findAny().orElse(null);
     }
 
     @Override

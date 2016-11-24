@@ -26,301 +26,298 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldLocationType;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class UserMind extends VacuumWorldAbstractActorMind {
-	private int cycle;
-	private DirtType lastDroppedDirt;
-	private List<VacuumWorldSpeechActionResult> lastCycleIncomingSpeeches;
-	private UserPlan plan;
-	
-	public UserMind(Random rng, String bodyId) {
-		super(rng, bodyId);
-		
-		super.setPerceptionRange(Integer.MAX_VALUE);
-		super.setCanSeeBehind(true);
-		
-		this.lastCycleIncomingSpeeches = new ArrayList<>();
-		this.lastDroppedDirt = DirtType.GREEN;
+    private int cycle;
+    private DirtType lastDroppedDirt;
+    private UserPlan plan;
+
+    public UserMind(Random rng, String bodyId) {
+	super(rng, bodyId);
+
+	super.setPerceptionRange(Integer.MAX_VALUE);
+	super.setCanSeeBehind(true);
+
+	this.lastDroppedDirt = DirtType.GREEN;
+	this.plan = null;
+	this.cycle = 0;
+    }
+
+    public UserMind(String bodyId) {
+	super(bodyId);
+
+	this.lastDroppedDirt = DirtType.GREEN;
+	this.plan = null;
+    }
+
+    @Override
+    public void perceive(Object perceptionWrapper) {
+	notifyObservers(null, UserBrain.class);
+	loadAvailableActionsForThisCycle(new ArrayList<>(getAvailableActionsForThisMind()));
+    }
+
+    @Override
+    public EnvironmentalAction decide(Object... parameters) {
+	this.cycle++;
+
+	if (this.plan != null) {
+	    if (!this.plan.getActionsToPerform().isEmpty()) {
+		return followPlan(false);
+	    }
+	    else {
+		VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": Plan is empty: I will follow it no more!");
 		this.plan = null;
-		this.cycle = 0;
-	}
-	
-	public UserMind(String bodyId) {
-		super(bodyId);
-		
-		this.lastCycleIncomingSpeeches = new ArrayList<>();
-		this.lastDroppedDirt = DirtType.GREEN;
-		this.plan = null;
-	}
-	
-	@Override
-	public void perceive(Object perceptionWrapper) {
-		notifyObservers(null, UserBrain.class);
-		loadAvailableActionsForThisCycle(new ArrayList<>(getAvailableActionsForThisMind()));
+	    }
 	}
 
-	@Override
-	public EnvironmentalAction decide(Object... parameters) {
-		this.cycle++;
-		
-		if(this.plan != null) {
-			if(!this.plan.getActionsToPerform().isEmpty()) {
-				return followPlan(false);
-			}
-			else {
-				VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": Plan is empty: I will follow it no more!");
-				this.plan = null;
-			}
-		}
-		
-		VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": No plan found! I'm free to decide what to do!");
-		
-		return decideWithPerception();
+	VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": No plan found! I'm free to decide what to do!");
+
+	return decideWithPerception();
+    }
+
+    private EnvironmentalAction decideWithPerception() {
+	VacuumWorldPerception perception = getPerception();
+
+	if (perception == null) {
+	    return buildPerceiveAction();
 	}
-	
-	private EnvironmentalAction decideWithPerception() {
-		VacuumWorldPerception perception = getPerception();
-		
-		if(perception == null) {
-			return buildPerceiveAction();
-		}
-		else {
-			updateAvailableActions(perception);
-			
-			return decideWithPerceptionAndMessages(perception);
-		}
+	else {
+	    updateAvailableActions(perception);
+
+	    return decideWithPerceptionAndMessages(perception);
+	}
+    }
+
+    private EnvironmentalAction followPlan(boolean specialFlag) {
+	if (lastActionSucceeded() || specialFlag) {
+	    this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
+	    this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
+
+	    return buildNewAction(this.plan.getLastAction());
+	}
+	else {
+	    this.plan.incrementNumberOfConsecutiveFailuresOfTheSameAction();
+
+	    return retryIfPossible();
+	}
+    }
+
+    private EnvironmentalAction retryIfPossible() {
+	if (this.plan.getNumberOfConsecutiveFailuresOfTheSameAction() <= 10) {
+	    return buildPhysicalAction(this.plan.getLastAction());
+	}
+	else {
+	    this.plan = null;
+
+	    return decideActionRandomly();
+	}
+    }
+
+    private EnvironmentalAction decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
+	List<Result> messages = getReceivedCommunications();
+	EnvironmentalAction toReturn;
+
+	for (Result result : messages) {
+	    toReturn = getNextActionFromMessage(((VacuumWorldSpeechActionResult) result).getPayload().getPayload(), perception);
+
+	    if (toReturn == null) {
+		continue;
+	    }
+	    else {
+		return toReturn;
+	    }
 	}
 
-	private EnvironmentalAction followPlan(boolean specialFlag) {
-		if(lastActionSucceeded() || specialFlag) {
-			this.plan.setNumberOfConsecutiveFailuresOfTheSameAction(0);
-			this.plan.setLastAction(this.plan.pullActionToPerform(getBodyId()));
-			
-			
-			return buildNewAction(this.plan.getLastAction());
-		}
-		else {
-			this.plan.incrementNumberOfConsecutiveFailuresOfTheSameAction();
-			
-			return retryIfPossible();
-		}
+	return decideActionRandomly();
+    }
+
+    private EnvironmentalAction getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
+	if (payload.matches("^move[NSWE]$")) {
+	    this.plan = buildPlanMaybe(payload, perception);
+
+	    if (this.plan == null) {
+		return null;
+	    }
+
+	    return followPlan(true);
+	}
+	else {
+	    return null;
+	}
+    }
+
+    private UserPlan buildPlanMaybe(String payload, VacuumWorldPerception perception) {
+	if (getRNG().nextBoolean()) {
+	    VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I agree to build a plan...");
+
+	    return buildPlan(payload, perception);
+	}
+	else {
+	    VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I don't want to build a plan...");
+
+	    return null;
+	}
+    }
+
+    private UserPlan buildPlan(String payload, VacuumWorldPerception perception) {
+	String temp = payload.replaceAll("move", "");
+
+	return buildPlanHelper(ActorFacingDirection.fromCompactRepresentation(temp), perception.getActorCurrentFacingDirection());
+    }
+
+    private UserPlan buildPlanHelper(ActorFacingDirection target, ActorFacingDirection direction) {
+	return new UserPlan(direction.getBestStrategyForMoving(target), getBodyId());
+    }
+
+    @Override
+    public EnvironmentalAction decideActionRandomly() {
+	Class<? extends EnvironmentalAction> actionPrototype = decideActionPrototypeRandomly();
+
+	return buildNewAction(actionPrototype);
+    }
+
+    public EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	if (actionPrototype.equals(SpeechAction.class)) {
+	    return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
+	}
+	else if (actionPrototype.equals(PerceiveAction.class)) {
+	    return buildPerceiveAction();
+	}
+	else if (actionPrototype.equals(DropDirtAction.class)) {
+	    return buildDropDirtAction();
+	}
+	else {
+	    return buildPhysicalAction(actionPrototype);
+	}
+    }
+
+    private EnvironmentalAction buildDropDirtAction() {
+	try {
+	    DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceeded() ? DirtType.ORANGE : DirtType.GREEN;
+	    this.lastDroppedDirt = dirtType;
+
+	    return DropDirtAction.class.getConstructor(DirtType.class, Integer.class).newInstance(dirtType, this.cycle);
+	}
+	catch (Exception e) {
+	    VWUtils.log(e);
+
+	    return null;
+	}
+    }
+
+    private EnvironmentalAction buildPerceiveAction() {
+	try {
+	    return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
+	}
+	catch (Exception e) {
+	    VWUtils.fakeLog(e);
+
+	    return new PerceiveAction();
+	}
+    }
+
+    private EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
+	try {
+	    return actionPrototype.newInstance();
+	}
+	catch (Exception e) {
+	    VWUtils.log(e);
+
+	    return null;
+	}
+    }
+
+    public SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
+	try {
+	    Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
+	    
+	    return constructor.newInstance(senderId, new ArrayList<>(recipientIds), payload);
+	} 
+	catch (Exception e) {
+	    VWUtils.log(e);
+
+	    return null;
+	}
+    }
+
+    private void updateAvailableActions(VacuumWorldPerception perception) {
+	updateMoveActionIfNecessary(perception);
+    }
+
+    private void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
+	VacuumWorldCoordinates userCoordinates = perception.getActorCoordinates();
+	VacuumWorldLocation userLocation = perception.getPerceivedMap().get(userCoordinates);
+	User user = userLocation.getUser();
+
+	if (user != null) {
+	    ActorFacingDirection facingDirection = user.getFacingDirection();
+
+	    if (userLocation.getNeighborLocationType(facingDirection) == VacuumWorldLocationType.WALL) {
+		removeActionIfNecessary(MoveAction.class);
+	    }
+	}
+    }
+
+    private void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
+	List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
+
+	for (Class<? extends EnvironmentalAction> a : this.getAvailableActionsForThisCycle()) {
+	    if (a.isAssignableFrom(name)) {
+		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
+		toRemove.add(name);
+	    }
 	}
 
-	private EnvironmentalAction retryIfPossible() {
-		if(this.plan.getNumberOfConsecutiveFailuresOfTheSameAction() <= 10) {
-			return buildPhysicalAction(this.plan.getLastAction());
-		}
-		else {
-			this.plan = null;
-			
-			return decideActionRandomly();
-		}
-	}
+	this.getAvailableActionsForThisCycle().removeAll(toRemove);
+    }
 
-	private EnvironmentalAction decideWithPerceptionAndMessages(VacuumWorldPerception perception) {
-		List<Result> messages = getReceivedCommunications();
-		EnvironmentalAction toReturn;
-		
-		for(Result result : messages) {
-			toReturn = getNextActionFromMessage(((VacuumWorldSpeechActionResult) result).getPayload().getPayload(), perception);
-			
-			if(toReturn == null) {
-				continue;
-			}
-			else {
-				return toReturn;
-			}
-		}
-		
-		return decideActionRandomly();
-	}
+    @Override
+    public void execute(EnvironmentalAction action) {
+	setLastActionResult(null);
+	clearReceivedCommunications();
 
-	private EnvironmentalAction getNextActionFromMessage(String payload, VacuumWorldPerception perception) {
-		if(payload.matches("^move[NSWE]$")) {
-			this.plan = buildPlanMaybe(payload, perception);
-			
-			if(this.plan == null) {
-				return null;
-			}
-			
-			return followPlan(true);
-		}
-		else {
-			return null;
-		}
-	}
+	VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
+	notifyObservers(this.getNextAction(), UserBrain.class);
+    }
 
-	private UserPlan buildPlanMaybe(String payload, VacuumWorldPerception perception) {
-		if(getRNG().nextBoolean()) {
-			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I agree to build a plan...");
-			
-			return buildPlan(payload, perception);
-		}
-		else {
-			VWUtils.logWithClass(getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": I don't want to build a plan...");
-			
-			return null;
-		}
+    @Override
+    public void update(CustomObservable o, Object arg) {
+	if (o instanceof UserBrain && arg instanceof List<?>) {
+	    manageBrainRequest((List<?>) arg);
 	}
+    }
 
-	private UserPlan buildPlan(String payload, VacuumWorldPerception perception) {
-		String temp = payload.replaceAll("move", "");
-		
-		return buildPlanHelper(ActorFacingDirection.fromCompactRepresentation(temp), perception.getActorCurrentFacingDirection());
+    private void manageBrainRequest(List<?> arg) {
+	for (Object result : arg) {
+	    if (result instanceof VacuumWorldActionResult) {
+		setLastActionResult((VacuumWorldActionResult) result);
+	    }
+	    else if (result instanceof VacuumWorldSpeechActionResult) {
+		addReceivedCommunicationToList((VacuumWorldSpeechActionResult) result);
+	    }
 	}
+    }
 
-	private UserPlan buildPlanHelper(ActorFacingDirection target, ActorFacingDirection direction) {
-		return new UserPlan(direction.getBestStrategyForMoving(target), getBodyId());
-	}
+    @Override
+    public void setCanSeeBehind(boolean canSeeBehind) {
+	throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public EnvironmentalAction decideActionRandomly() {
-		Class<? extends EnvironmentalAction> actionPrototype = decideActionPrototypeRandomly();
+    @Override
+    public void setPerceptionRange(int preceptionRange) {
+	throw new UnsupportedOperationException();
+    }
 
-		return buildNewAction(actionPrototype);
-	}
-	
-	public EnvironmentalAction buildNewAction(Class<? extends EnvironmentalAction> actionPrototype) {
-		if (actionPrototype.equals(SpeechAction.class)) {
-			return buildSpeechAction(getBodyId(), new ArrayList<>(), new VacuumWorldSpeechPayload("Hello everyone!!!", false));
-		}
-		else if(actionPrototype.equals(PerceiveAction.class)) {
-			return buildPerceiveAction();
-		}
-		else if(actionPrototype.equals(DropDirtAction.class)) {
-			return buildDropDirtAction();
-		}
-		else {
-			return buildPhysicalAction(actionPrototype);
-		}
-	}
+    @Override
+    public int getPerceptionRange() {
+	return Integer.MAX_VALUE;
+    }
 
-	private EnvironmentalAction buildDropDirtAction() {
-		try {
-			DirtType dirtType = DirtType.GREEN.equals(this.lastDroppedDirt) && lastActionSucceeded() ? DirtType.ORANGE : DirtType.GREEN;
-			this.lastDroppedDirt = dirtType;
-			
-			return DropDirtAction.class.getConstructor(DirtType.class, Integer.class).newInstance(dirtType, this.cycle);
-		}
-		catch (Exception e) {
-			VWUtils.log(e);
-			
-			return null;
-		}
-	}
+    @Override
+    public boolean canSeeBehind() {
+	return true;
+    }
 
-	private EnvironmentalAction buildPerceiveAction() {
-		try {
-			return PerceiveAction.class.getConstructor(Integer.class, Boolean.class).newInstance(Integer.MAX_VALUE, true);
-		}
-		catch(Exception e) {
-			VWUtils.fakeLog(e);
-			
-			return new PerceiveAction();
-		}
-	}
-
-	private EnvironmentalAction buildPhysicalAction(Class<? extends EnvironmentalAction> actionPrototype) {
-		try {
-			return actionPrototype.newInstance();
-		}
-		catch (Exception e) {
-			VWUtils.log(e);
-			
-			return null;
-		}
-	}
-	
-	public SpeechAction buildSpeechAction(String senderId, List<String> recipientIds, VacuumWorldSpeechPayload payload) {
-		try {
-			Constructor<SpeechAction> constructor = SpeechAction.class.getConstructor(String.class, List.class, Payload.class);
-			return constructor.newInstance(senderId, new ArrayList<>(recipientIds), payload);
-		}
-		catch (Exception e) {
-			VWUtils.log(e);
-			
-			return null;
-		}
-	}
-	
-	private void updateAvailableActions(VacuumWorldPerception perception) {
-		updateMoveActionIfNecessary(perception);
-	}
-	
-	private void updateMoveActionIfNecessary(VacuumWorldPerception perception) {
-		VacuumWorldCoordinates userCoordinates = perception.getActorCoordinates();
-		VacuumWorldLocation userLocation = perception.getPerceivedMap().get(userCoordinates);
-		User user= userLocation.getUser();
-
-		if (user != null) {
-			ActorFacingDirection facingDirection = user.getFacingDirection();
-
-			if (userLocation.getNeighborLocationType(facingDirection) == VacuumWorldLocationType.WALL) {
-				removeActionIfNecessary(MoveAction.class);
-			}
-		}
-	}
-	
-	private void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
-		List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
-
-		for (Class<? extends EnvironmentalAction> a : this.getAvailableActionsForThisCycle()) {
-			if (a.isAssignableFrom(name)) {
-				VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
-				toRemove.add(name);
-			}
-		}
-		
-		this.getAvailableActionsForThisCycle().removeAll(toRemove);
-	}
-
-	@Override
-	public void execute(EnvironmentalAction action) {
-		setLastActionResult(null);
-		this.lastCycleIncomingSpeeches = new ArrayList<>();
-		
-		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
-		notifyObservers(this.getNextAction(), UserBrain.class);
-	}
-
-	@Override
-	public void update(CustomObservable o, Object arg) {
-		if (o instanceof UserBrain && arg instanceof List<?>) {
-			manageBrainRequest((List<?>) arg);
-		}
-	}
-	
-	private void manageBrainRequest(List<?> arg) {
-		for (Object result : arg) {
-			if (result instanceof VacuumWorldActionResult) {
-				setLastActionResult((VacuumWorldActionResult) result);
-			}
-			else if(result instanceof VacuumWorldSpeechActionResult) {
-				this.lastCycleIncomingSpeeches.add((VacuumWorldSpeechActionResult) result);
-			}
-		}
-	}
-	
-	@Override
-	public void setCanSeeBehind(boolean canSeeBehind) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setPerceptionRange(int preceptionRange) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getPerceptionRange() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean canSeeBehind() {
-		return true;
-	}
-	
-	@Override
-	public VacuumWorldPerception getPerception() {
-		return (VacuumWorldPerception) super.getPerception();
-	}
+    @Override
+    public VacuumWorldPerception getPerception() {
+	return (VacuumWorldPerception) super.getPerception();
+    }
 }

@@ -263,56 +263,58 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 
 	@Override
 	public void update(CustomObservable o, Object arg) {
-		if ((o instanceof VacuumWorldDefaultActuator || o instanceof UserActuator) && arg instanceof VacuumWorldEvent) {
-			manageActuatorRequest((VacuumWorldEvent) arg);
-		}
-		else if (o instanceof VacuumWorldPhysics) {
-			managePhysicsRequest(arg);
-		}
+	    if ((o instanceof VacuumWorldDefaultActuator || o instanceof UserActuator) && arg instanceof VacuumWorldEvent) {
+		manageActuatorRequest((VacuumWorldEvent) arg);
+	    }
+	    else if (o instanceof VacuumWorldPhysics) {
+		managePhysicsRequest(arg);
+	    }
 	}
 	
 	private void managePhysicsRequest(Object arg) {
-		if (VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
-			managePhysicsRequest((VacuumWorldActionResult) arg);
-		} 
-		else if (VacuumWorldSpeechPerceptionResultWrapper.class.isAssignableFrom(arg.getClass())) {
-			manageSpeechActionResult((VacuumWorldSpeechPerceptionResultWrapper) arg);
-		}
+	    if (VacuumWorldActionResult.class.isAssignableFrom(arg.getClass())) {
+		managePhysicsRequest((VacuumWorldActionResult) arg);
+	    } 
+	    else if (VacuumWorldSpeechPerceptionResultWrapper.class.isAssignableFrom(arg.getClass())) {
+		manageSpeechActionResult((VacuumWorldSpeechPerceptionResultWrapper) arg);
+	    }
 	}
 
 	private void manageSpeechActionResult(VacuumWorldSpeechPerceptionResultWrapper wrapper) {
-		List<String> recipientActorsIds = wrapper.getSpeechResult().getRecipientsIds();
-		List<String> senderSensorIds = wrapper.getRecipientsIds();
-
-		notifyActor(senderSensorIds, wrapper.getPerceptionResult());
-		notifyTargets(recipientActorsIds, wrapper.getSpeechResult());
+	    List<String> recipientActorsIds = wrapper.getSpeechResult().getRecipientsIds();
+	    List<String> senderSensorIds = wrapper.getRecipientsIds();
+	    
+	    logResult(wrapper.getPerceptionResult());
+	    
+	    notifyActor(senderSensorIds, wrapper.getPerceptionResult());
+	    notifyTargets(recipientActorsIds, wrapper.getSpeechResult());
 	}
 
 	private void notifyActor(List<String> senderSensorIds, VacuumWorldActionResult result) {
-		notifyObserversIfNeeded(senderSensorIds, result);
+	    notifyObserversIfNeeded(senderSensorIds, result);
 	}
 	
 	private void notifyTargets(List<String> recipientActorsIds, VacuumWorldSpeechActionResult result) {
-		List<VacuumWorldCleaningAgent> recipientAgents = this.agents.values().stream().filter((VacuumWorldCleaningAgent agent) -> recipientActorsIds.contains(agent.getId())).collect(Collectors.toList());
-		recipientAgents.forEach((VacuumWorldCleaningAgent agent) -> notifyListeningSensors(agent, result));
-		
-		if(this.user != null) {
-			notifyUserIfNecessary(result, recipientActorsIds);
-		}
+	    List<VacuumWorldCleaningAgent> recipientAgents = this.agents.values().stream().filter(agent -> recipientActorsIds.contains(agent.getId())).collect(Collectors.toList());
+	    recipientAgents.forEach(agent -> notifyListeningSensors(agent, result));
+	    
+	    if(this.user != null) {
+		notifyUserIfNecessary(result, recipientActorsIds);
+	    }
 	}
 
 	private void notifyUserIfNecessary(VacuumWorldSpeechActionResult result, List<String> recipientActorsIds) {
-		if(recipientActorsIds.contains(this.user.getId())) {
-			notifyListeningSensors(this.user, result);
-		}
+	    if(recipientActorsIds.contains(this.user.getId())) {
+		notifyListeningSensors(this.user, result);
+	    }
 	}
 
 	private void notifyListeningSensors(VacuumWorldCleaningAgent agent, VacuumWorldSpeechActionResult result) {
-		agent.getListeningSensors().forEach((VacuumWorldDefaultSensor sensor) -> sensor.update(this, result));
+	    agent.getListeningSensors().forEach(sensor -> sensor.update(this, result));
 	}
 	
 	private void notifyListeningSensors(User user, VacuumWorldSpeechActionResult result) {
-		user.getListeningSensors().forEach((UserSensor sensor) -> sensor.update(this, result));
+	    user.getListeningSensors().forEach(sensor -> sensor.update(this, result));
 	}
 
 	private void notifyObserversIfNeeded(List<String> sensorsToNotifyIds, VacuumWorldActionResult result) {
@@ -364,6 +366,6 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	}
 
 	private void manageActuatorRequest(VacuumWorldEvent event) {
-		notifyObservers(new VWPair<VacuumWorldEvent, VacuumWorldSpace>(event, this), VacuumWorldPhysics.class);
+	notifyObservers(new VWPair<VacuumWorldEvent, VacuumWorldSpace>(event, this), VacuumWorldPhysics.class);
 	}
 }

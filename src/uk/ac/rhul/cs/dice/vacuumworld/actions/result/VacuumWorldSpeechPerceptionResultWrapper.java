@@ -8,67 +8,67 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.vacuumworld.common.VacuumWorldPerception;
 
 public class VacuumWorldSpeechPerceptionResultWrapper implements Result {
-	private VacuumWorldSpeechActionResult speechResult;
-	private VacuumWorldActionResult perceptionResult;
+    private VacuumWorldSpeechActionResult speechResult;
+    private VacuumWorldActionResult perceptionResult;
 
-	public VacuumWorldSpeechPerceptionResultWrapper(VacuumWorldSpeechActionResult speechResult, VacuumWorldActionResult actionResult) {
-		this.speechResult = speechResult;
-		this.perceptionResult = actionResult;
-	}
+    public VacuumWorldSpeechPerceptionResultWrapper(VacuumWorldSpeechActionResult speechResult, VacuumWorldActionResult actionResult) {
+	this.speechResult = speechResult;
+	this.perceptionResult = actionResult;
+    }
 
-	@Override
-	public ActionResult getActionResult() {
-		return this.perceptionResult.getActionResult();
-	}
+    @Override
+    public ActionResult getActionResult() {
+	return this.perceptionResult.getActionResult();
+    }
 
-	@Override
-	public void changeActionResult(ActionResult newResult) {
-		this.perceptionResult.changeActionResult(newResult);
-	}
+    @Override
+    public void changeActionResult(ActionResult newResult) {
+	this.perceptionResult.changeActionResult(newResult);
+    }
 
-	@Override
-	public Exception getFailureReason() {
-		return this.perceptionResult.getFailureReason();
-	}
+    @Override
+    public Exception getFailureReason() {
+	return this.perceptionResult.getFailureReason();
+    }
 
-	@Override
-	public List<String> getRecipientsIds() {
-		return this.perceptionResult.getRecipientsIds();
-	}
+    @Override
+    public List<String> getRecipientsIds() {
+	return this.perceptionResult.getRecipientsIds();
+    }
 
-	@Override
-	public void setRecipientsIds(List<String> recipientsIds) {
-		this.perceptionResult.setRecipientsIds(recipientsIds);
-	}
-	
-	@Override
-	public String getActorId() {
-		return this.perceptionResult.getActorId();
-	}
+    @Override
+    public void setRecipientsIds(List<String> recipientsIds) {
+	this.perceptionResult.setRecipientsIds(recipientsIds);
+    }
 
-	@Override
-	public VacuumWorldPerception getPerception() {
-		return this.perceptionResult.getPerception();
-	}
+    @Override
+    public String getActorId() {
+	return this.perceptionResult.getActorId();
+    }
 
-	@Override
-	public void setPerception(Perception perception) {
-		this.perceptionResult.setPerception(perception);
-	}
+    @Override
+    public VacuumWorldPerception getPerception() {
+	return this.perceptionResult.getPerception();
+    }
 
-	public VacuumWorldSpeechActionResult getSpeechResult() {
-		return speechResult;
-	}
+    @Override
+    public void setPerception(Perception perception) {
+	this.perceptionResult.setPerception(perception);
+    }
 
-	public void setSpeechResult(VacuumWorldSpeechActionResult speechResult) {
-		this.speechResult = speechResult;
-	}
+    public VacuumWorldSpeechActionResult getSpeechResult() {
+	return speechResult;
+    }
 
-	public VacuumWorldActionResult getPerceptionResult() {
-		return perceptionResult;
-	}
+    public void setSpeechResult(VacuumWorldSpeechActionResult speechResult) {
+	this.speechResult = speechResult;
+    }
 
-	public void setPerceptionResult(VacuumWorldActionResult perceptionResult) {
-		this.perceptionResult = perceptionResult;
-	}
+    public VacuumWorldActionResult getPerceptionResult() {
+	return perceptionResult;
+    }
+
+    public void setPerceptionResult(VacuumWorldActionResult perceptionResult) {
+	this.perceptionResult = perceptionResult;
+    }
 }
