@@ -8,14 +8,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitori
 
 public class VacuumWorldMonitoringAgentActuator extends AbstractActuator<VacuumWorldActuatorRole> {
 
-	public VacuumWorldMonitoringAgentActuator(String bodyId, VacuumWorldActuatorRole role) {
-		super(bodyId, role);
+    public VacuumWorldMonitoringAgentActuator(String bodyId, VacuumWorldActuatorRole role) {
+	super(bodyId, role);
+    }
+
+    @Override
+    public void update(CustomObservable o, Object arg) {
+	if (o instanceof VacuumWorldMonitoringAgent && arg instanceof VacuumWorldMonitoringEvent) {
+	    notifyObservers((VacuumWorldMonitoringEvent) arg, VacuumWorldMonitoringContainer.class);
 	}
-	
-	@Override
-	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldMonitoringAgent && arg instanceof VacuumWorldMonitoringEvent) {
-			notifyObservers((VacuumWorldMonitoringEvent) arg, VacuumWorldMonitoringContainer.class);
-		}
-	}
+    }
 }

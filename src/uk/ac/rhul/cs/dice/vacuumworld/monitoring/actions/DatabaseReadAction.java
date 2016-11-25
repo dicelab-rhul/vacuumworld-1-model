@@ -4,7 +4,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInt
 
 public abstract class DatabaseReadAction extends DatabaseAction {
 
-	public DatabaseReadAction(VacuumWorldDatabaseInteractions actionToPerform) {
-		super(actionToPerform);
-	}
+    public DatabaseReadAction(VacuumWorldDatabaseInteractions actionToPerform) {
+	super(actionToPerform);
+    }
 }

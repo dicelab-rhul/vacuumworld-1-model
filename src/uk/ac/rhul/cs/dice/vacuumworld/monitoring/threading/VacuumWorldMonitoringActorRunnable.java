@@ -5,12 +5,12 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.AbstractActorRunnable;
 
 public class VacuumWorldMonitoringActorRunnable extends AbstractActorRunnable {
 
-	public VacuumWorldMonitoringActorRunnable(Mind agentMind) {
-		super(agentMind);
-	}
+    public VacuumWorldMonitoringActorRunnable(Mind agentMind) {
+	super(agentMind);
+    }
 
-	@Override
-	public void run() {
-		super.getState().run(this);
-	}
+    @Override
+    public void run() {
+	super.getState().run(this);
+    }
 }

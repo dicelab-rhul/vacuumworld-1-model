@@ -1,6 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents.user;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +78,7 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 	String actuatorRecipientId = selectActuatorRecipientId(action);
 	event.setActuatorRecipientId(actuatorRecipientId);
 
-	notifyAgentActuators(event, actuatorRecipientId);
+	getObservers().forEach(recipient -> notifyIfNeeded(recipient, event, actuatorRecipientId));
     }
 
     private String selectActuatorRecipientId(EnvironmentalAction action) {
@@ -91,14 +90,6 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 	}
 	else {
 	    return null;
-	}
-    }
-
-    private void notifyAgentActuators(Object arg, String actuatorId) {
-	List<CustomObserver> recipients = this.getObservers();
-
-	for (CustomObserver recipient : recipients) {
-	    notifyIfNeeded(recipient, arg, actuatorId);
 	}
     }
 
@@ -141,15 +132,8 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 
     private List<UserSensor> getSpecificSensors(VacuumWorldSensorRole role) {
 	List<Sensor<VacuumWorldSensorRole>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getRole())).collect(Collectors.toList());
-	List<UserSensor> toReturn = new ArrayList<>();
-
-	for (Sensor<VacuumWorldSensorRole> sensor : candidates) {
-	    if (sensor instanceof UserSensor) {
-		toReturn.add((UserSensor) sensor);
-	    }
-	}
-
-	return toReturn;
+	
+	return candidates.stream().filter(sensor -> sensor instanceof UserSensor).map(sensor -> (UserSensor) sensor).collect(Collectors.toList());
     }
 
     public List<UserActuator> getPhysicalActuators() {
@@ -166,15 +150,8 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
 
     private List<UserActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
 	List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getRole())).collect(Collectors.toList());
-	List<UserActuator> toReturn = new ArrayList<>();
-
-	for (Actuator<VacuumWorldActuatorRole> actuator : candidates) {
-	    if (actuator instanceof UserActuator) {
-		toReturn.add((UserActuator) actuator);
-	    }
-	}
-
-	return toReturn;
+	
+	return candidates.stream().filter(actuator -> actuator instanceof UserActuator).map(actuator -> (UserActuator) actuator).collect(Collectors.toList());
     }
 
     public VacuumWorldCoordinates getOldLocation() {

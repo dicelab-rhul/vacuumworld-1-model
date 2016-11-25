@@ -8,19 +8,19 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class IsGreeting implements Predicate<Result> {
 
-	@Override
-	public boolean test(Result result) {
-		if(!(result instanceof VacuumWorldSpeechActionResult)) {
-			return false;
-		}
-		
-		try {
-			return ((VacuumWorldSpeechActionResult) result).getPayload().isGreetingAction();
-		}
-		catch(Exception e) {
-			VWUtils.fakeLog(e);
-			
-			return false;
-		}
+    @Override
+    public boolean test(Result result) {
+	if (!(result instanceof VacuumWorldSpeechActionResult)) {
+	    return false;
 	}
+
+	try {
+	    return ((VacuumWorldSpeechActionResult) result).getPayload().isGreetingAction();
+	}
+	catch (Exception e) {
+	    VWUtils.fakeLog(e);
+
+	    return false;
+	}
+    }
 }

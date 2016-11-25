@@ -469,7 +469,7 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	private int[] getOverheads(ActorFacingDirection facingDirection, int perceptionRange, boolean canSeeBehind) {
 		int[] overheads = new int[4];
 		int counter = 0;
-		
+
 		for(ActorFacingDirection direction : ActorFacingDirection.values()) {
 			overheads[counter++] = !canSeeBehind && direction.isOpposite(facingDirection) ? 0 : perceptionRange - 1;
 		}
@@ -508,8 +508,8 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
 	}
 	
 	private void unlockLocationsIfNecessary(VWPair<List<Lockable>, List<Lockable>> locationsToUnlock) {
-		locationsToUnlock.getFirst().stream().filter((Lockable location) -> location != null).forEach(Lockable::releaseSharedReadLock);
-		locationsToUnlock.getSecond().stream().filter((Lockable location) -> location != null).forEach(Lockable::releaseExclusiveWriteLock);
+		locationsToUnlock.getFirst().stream().filter(location -> location != null).forEach(Lockable::releaseSharedReadLock);
+		locationsToUnlock.getSecond().stream().filter(location -> location != null).forEach(Lockable::releaseExclusiveWriteLock);
 	}
 	
 	private VacuumWorldLocation getCurrentActorLocation(VacuumWorldSpace context, Actor actor) {

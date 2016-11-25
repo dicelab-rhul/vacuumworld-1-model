@@ -12,55 +12,55 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitori
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
 
 public class DatabaseUpdateStatesAction extends DatabaseWriteAction {
-	private List<JsonObject> states;
-	
-	public DatabaseUpdateStatesAction(List<JsonObject> states) {
-		super(VacuumWorldDatabaseInteractions.UPDATE_STATES);
-		
-		this.states = states;
-	}
-	
-	public List<JsonObject> getStates() {
-		return this.states;
-	}
+    private List<JsonObject> states;
 
-	@Override
-	public boolean isPossible(Physics physics, Space context) {
-		if(physics instanceof VacuumWorldMonitoringPhysics) {
-			return ((VacuumWorldMonitoringPhysics) physics).isPossible(this, (VacuumWorldMonitoringContainer) context);
-		}
-		else {
-			return physics.isPossible(this, context);
-		}
-	}
+    public DatabaseUpdateStatesAction(List<JsonObject> states) {
+	super(VacuumWorldDatabaseInteractions.UPDATE_STATES);
 
-	@Override
-	public boolean isNecessary(Physics physics, Space context) {
-		if(physics instanceof VacuumWorldMonitoringPhysics) {
-			return ((VacuumWorldMonitoringPhysics) physics).isNecessary(this, (VacuumWorldMonitoringContainer) context);
-		}
-		else {
-			return physics.isNecessary(this, context);
-		}
-	}
+	this.states = states;
+    }
 
-	@Override
-	public Result perform(Physics physics, Space context) {
-		if(physics instanceof VacuumWorldMonitoringPhysics) {
-			return ((VacuumWorldMonitoringPhysics) physics).perform(this, (VacuumWorldMonitoringContainer) context);
-		}
-		else {
-			return physics.perform(this, context);
-		}
-	}
+    public List<JsonObject> getStates() {
+	return this.states;
+    }
 
-	@Override
-	public boolean succeeded(Physics physics, Space context) {
-		if(physics instanceof VacuumWorldMonitoringPhysics) {
-			return ((VacuumWorldMonitoringPhysics) physics).succeeded(this, (VacuumWorldMonitoringContainer) context);
-		}
-		else {
-			return physics.succeeded(this, context);
-		}
+    @Override
+    public boolean isPossible(Physics physics, Space context) {
+	if (physics instanceof VacuumWorldMonitoringPhysics) {
+	    return ((VacuumWorldMonitoringPhysics) physics).isPossible(this, (VacuumWorldMonitoringContainer) context);
 	}
+	else {
+	    return physics.isPossible(this, context);
+	}
+    }
+
+    @Override
+    public boolean isNecessary(Physics physics, Space context) {
+	if (physics instanceof VacuumWorldMonitoringPhysics) {
+	    return ((VacuumWorldMonitoringPhysics) physics).isNecessary(this, (VacuumWorldMonitoringContainer) context);
+	}
+	else {
+	    return physics.isNecessary(this, context);
+	}
+    }
+
+    @Override
+    public Result perform(Physics physics, Space context) {
+	if (physics instanceof VacuumWorldMonitoringPhysics) {
+	    return ((VacuumWorldMonitoringPhysics) physics).perform(this, (VacuumWorldMonitoringContainer) context);
+	}
+	else {
+	    return physics.perform(this, context);
+	}
+    }
+
+    @Override
+    public boolean succeeded(Physics physics, Space context) {
+	if (physics instanceof VacuumWorldMonitoringPhysics) {
+	    return ((VacuumWorldMonitoringPhysics) physics).succeeded(this, (VacuumWorldMonitoringContainer) context);
+	}
+	else {
+	    return physics.succeeded(this, context);
+	}
+    }
 }

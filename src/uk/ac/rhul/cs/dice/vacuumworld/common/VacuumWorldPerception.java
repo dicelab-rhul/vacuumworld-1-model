@@ -46,62 +46,14 @@ public class VacuumWorldPerception implements VWPerception {
 	this.actorCoordinates = actorCoordinates;
     }
 
-    /**
-     * 
-     * @deprecated This is NOT FOR STUDENTS' USE. Adds an entry to the perceived {@link Map}.
-     * 
-     * @param coordinates the key.
-     * @param location the value.
-     * 
-     */
-    @Deprecated
-    public void addPerceivedLocation(VacuumWorldCoordinates coordinates, VacuumWorldLocation location) {
-	this.perception.put(coordinates, location);
-    }
-
-    /**
-     * 
-     * @deprecated This is NOT FOR STUDENTS' USE. Removes an entry from the perceived {@link Map}.
-     * 
-     * @param coordinates the key.
-     * @param location the value.
-     * 
-     */
-    @Deprecated
-    public void removePerceivedLocation(VacuumWorldCoordinates coordinates) {
-	this.perception.remove(coordinates);
-    }
-
     @Override
     public Map<VacuumWorldCoordinates, VacuumWorldLocation> getPerceivedMap() {
 	return this.perception;
     }
 
-    /**
-     * 
-     * @deprecated This is NOT FOR STUDENTS' USE. Replaces the perceived {@link Map}.
-     * 
-     * @param perception the new perceived {@link Map}.
-     * 
-     */
-    @Deprecated
-    public void replacePerceivedMap(Map<VacuumWorldCoordinates, VacuumWorldLocation> perception) {
-	this.perception = perception;
-    }
-
     @Override
     public VacuumWorldCoordinates getActorCoordinates() {
 	return this.actorCoordinates;
-    }
-
-    /**
-     * 
-     * @deprecated Use {@link #getCurrentActorLocation()}.
-     * 
-     */
-    @Deprecated
-    public VacuumWorldLocation getActorCurentLocation() {
-	return this.perception.get(this.actorCoordinates);
     }
     
     @Override
@@ -126,65 +78,6 @@ public class VacuumWorldPerception implements VWPerception {
     public boolean isDirtOnCurrentActorLocation() {
 	return getCurrentActorLocation().isDirtPresent();
     }
-    
-    /**
-     * 
-     * @deprecated Use {@link #isDirtOnCurrentActorLocation()}.
-     * 
-     */
-    public boolean isDirtOnActorCurrentLocation() {
-	return getActorCurentLocation().isDirtPresent();
-    }
-
-    /**
-     * 
-     * @deprecated Use {@link #getCurrentActorColorIfAgent()}.
-     * 
-     */
-    @Deprecated
-    public VacuumWorldAgentType getAgentType() {
-	if (!getActorCurentLocation().isAnAgentPresent()) {
-	    return null;
-	}
-
-	return getActorCurentLocation().getAgent().getExternalAppearance().getType();
-    }
-
-    /**
-     * 
-     * @deprecated Use {@link #canCurrentActorCleanOnHisCurrentLocation()}.
-     * 
-     */
-    @Deprecated
-    public boolean canAgentClean() {
-	if (!isDirtOnActorCurrentLocation() || !getActorCurentLocation().isAnAgentPresent()) {
-	    return false;
-	}
-
-	DirtType dirtType = getActorCurentLocation().getDirt().getExternalAppearance().getDirtType();
-
-	return DirtType.agentAndDirtCompatible(dirtType, getAgentType());
-    }
-
-    /**
-     * 
-     * @deprecated Use {@link #canCurrentActorSpotCompatibleDirt()}.
-     * 
-     */
-    @Deprecated
-    public boolean canAgentSpotCompatibleDirt() {
-	if (!getActorCurentLocation().isAnAgentPresent()) {
-	    return false;
-	}
-
-	for (VacuumWorldLocation location : this.perception.values()) {
-	    if (isCompatibleDirtPresent(location)) {
-		return true;
-	    }
-	}
-
-	return false;
-    }
 
     private boolean isCompatibleDirtPresent(VacuumWorldLocation location) {
 	if (!location.isDirtPresent()) {
@@ -203,34 +96,6 @@ public class VacuumWorldPerception implements VWPerception {
 	DirtType dirtType = dirt.getExternalAppearance().getDirtType();
 
 	return DirtType.agentAndDirtCompatible(dirtType, getCurrentActorColorIfAgent());
-    }
-
-    /**
-     * 
-     * @deprecated Use {@link #getLocationsWithDirtCompatibleWithCurrentActor()}.
-     * 
-     */
-    @Deprecated
-    public List<VacuumWorldLocation> getLocationsWithCompatibleDirt() {
-	List<VacuumWorldLocation> locationsWithCompatibleDirt = new ArrayList<>();
-
-	for (VacuumWorldLocation location : this.perception.values()) {
-	    if (isCompatibleDirtPresent(location)) {
-		locationsWithCompatibleDirt.add(location);
-	    }
-	}
-
-	return locationsWithCompatibleDirt;
-    }
-
-    /**
-     * 
-     * @deprecated Use {@link #getActorsInPerception()}.
-     * 
-     */
-    @Deprecated
-    public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerception(String actorId) {
-	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent() || location.isAUserPresent()).map(location -> location.isAnAgentPresent() ? location.getAgent() : location.isAUserPresent() ? location.getUser() : null).collect(Collectors.toList());
     }
     
     @Override

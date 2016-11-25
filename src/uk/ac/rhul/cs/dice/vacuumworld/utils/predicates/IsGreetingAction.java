@@ -7,8 +7,8 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldSpeechPayload;
 
 public class IsGreetingAction implements Predicate<SpeechAction> {
 
-	@Override
-	public boolean test(SpeechAction action) {
-		return ((VacuumWorldSpeechPayload) action.getPayload()).isGreetingAction();
-	}
+    @Override
+    public boolean test(SpeechAction action) {
+	return ((VacuumWorldSpeechPayload) action.getPayload()).isGreetingAction();
+    }
 }

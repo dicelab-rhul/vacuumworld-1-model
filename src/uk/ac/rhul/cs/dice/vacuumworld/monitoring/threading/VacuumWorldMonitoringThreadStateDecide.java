@@ -6,15 +6,15 @@ import uk.ac.rhul.cs.dice.vacuumworld.threading.AbstractActorRunnable;
 import uk.ac.rhul.cs.dice.vacuumworld.threading.AbstractThreadStateDecide;
 
 public class VacuumWorldMonitoringThreadStateDecide extends AbstractThreadStateDecide {
-	@Override
-	public void run(AbstractActorRunnable runnable) {
-		if(runnable instanceof VacuumWorldMonitoringActorRunnable) {
-			EnvironmentalAction nextAction = runnable.getActorMind().decide();
-			Mind mind = runnable.getActorMind();
-			mind.setNextActionForExecution(nextAction);
-		}
-		else {
-			super.run(runnable);
-		}
+    @Override
+    public void run(AbstractActorRunnable runnable) {
+	if (runnable instanceof VacuumWorldMonitoringActorRunnable) {
+	    EnvironmentalAction nextAction = runnable.getActorMind().decide();
+	    Mind mind = runnable.getActorMind();
+	    mind.setNextActionForExecution(nextAction);
 	}
+	else {
+	    super.run(runnable);
+	}
+    }
 }

@@ -259,12 +259,8 @@ public class UserMind extends VacuumWorldAbstractActorMind {
     private void removeActionIfNecessary(Class<? extends EnvironmentalAction> name) {
 	List<Class<? extends EnvironmentalAction>> toRemove = new ArrayList<>();
 
-	for (Class<? extends EnvironmentalAction> a : this.getAvailableActionsForThisCycle()) {
-	    if (a.isAssignableFrom(name)) {
-		VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + name.getSimpleName() + " from my available actions for this cycle because it is clearly impossible...");
-		toRemove.add(name);
-	    }
-	}
+	getAvailableActionsForThisCycle().stream().filter(a -> a.isAssignableFrom(name)).forEach(toRemove::add);
+	toRemove.forEach(candidate -> VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": removing " + candidate.getSimpleName() + " from my available actions for this cycle because it is clearly impossible..."));
 
 	this.getAvailableActionsForThisCycle().removeAll(toRemove);
     }
@@ -281,18 +277,16 @@ public class UserMind extends VacuumWorldAbstractActorMind {
     @Override
     public void update(CustomObservable o, Object arg) {
 	if (o instanceof UserBrain && arg instanceof List<?>) {
-	    manageBrainRequest((List<?>) arg);
+	    ((List<?>) arg).forEach(this::manageResult);
 	}
     }
-
-    private void manageBrainRequest(List<?> arg) {
-	for (Object result : arg) {
-	    if (result instanceof VacuumWorldActionResult) {
-		setLastActionResult((VacuumWorldActionResult) result);
-	    }
-	    else if (result instanceof VacuumWorldSpeechActionResult) {
-		addReceivedCommunicationToList((VacuumWorldSpeechActionResult) result);
-	    }
+    
+    private void manageResult(Object result) {
+	if (result instanceof VacuumWorldActionResult) {
+	    setLastActionResult((VacuumWorldActionResult) result);
+	}
+	else if (result instanceof VacuumWorldSpeechActionResult) {
+	    addReceivedCommunicationToList((VacuumWorldSpeechActionResult) result);
 	}
     }
 

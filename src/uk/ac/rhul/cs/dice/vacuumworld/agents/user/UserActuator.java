@@ -8,24 +8,24 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
 public class UserActuator extends AbstractActuator<VacuumWorldActuatorRole> {
 
-	public UserActuator(String bodyId, VacuumWorldActuatorRole role) {
-		super(bodyId, role);
-	}
+    public UserActuator(String bodyId, VacuumWorldActuatorRole role) {
+	super(bodyId, role);
+    }
 
-	@Override
-	public void update(CustomObservable o, Object arg) {
-		if(o instanceof User) {
-			executeUserBodyRequest(arg);
-		}
+    @Override
+    public void update(CustomObservable o, Object arg) {
+	if (o instanceof User) {
+	    executeUserBodyRequest(arg);
 	}
+    }
 
-	private void executeUserBodyRequest(Object arg) {
-		if(arg instanceof VacuumWorldEvent) {
-			executeUserBodyRequest((VacuumWorldEvent) arg);
-		}
+    private void executeUserBodyRequest(Object arg) {
+	if (arg instanceof VacuumWorldEvent) {
+	    executeUserBodyRequest((VacuumWorldEvent) arg);
 	}
-	
-	private void executeUserBodyRequest(VacuumWorldEvent event) {
-		notifyObservers(event, VacuumWorldSpace.class);
-	}
+    }
+
+    private void executeUserBodyRequest(VacuumWorldEvent event) {
+	notifyObservers(event, VacuumWorldSpace.class);
+    }
 }

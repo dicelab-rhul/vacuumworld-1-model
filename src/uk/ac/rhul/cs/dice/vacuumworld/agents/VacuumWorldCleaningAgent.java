@@ -1,6 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.agents;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,15 +71,8 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 
     private List<VacuumWorldDefaultSensor> getSpecificSensors(VacuumWorldSensorRole role) {
 	List<Sensor<VacuumWorldSensorRole>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getRole())).collect(Collectors.toList());
-	List<VacuumWorldDefaultSensor> toReturn = new ArrayList<>();
-
-	for (Sensor<VacuumWorldSensorRole> sensor : candidates) {
-	    if (sensor instanceof VacuumWorldDefaultSensor) {
-		toReturn.add((VacuumWorldDefaultSensor) sensor);
-	    }
-	}
-
-	return toReturn;
+	
+	return candidates.stream().filter(sensor -> sensor instanceof VacuumWorldDefaultSensor).map(sensor -> (VacuumWorldDefaultSensor) sensor).collect(Collectors.toList());
     }
 
     public List<VacuumWorldDefaultActuator> getPhysicalActuators() {
@@ -97,15 +89,8 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 
     private List<VacuumWorldDefaultActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
 	List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getRole())).collect(Collectors.toList());
-	List<VacuumWorldDefaultActuator> toReturn = new ArrayList<>();
-
-	for (Actuator<VacuumWorldActuatorRole> actuator : candidates) {
-	    if (actuator instanceof VacuumWorldDefaultActuator) {
-		toReturn.add((VacuumWorldDefaultActuator) actuator);
-	    }
-	}
-
-	return toReturn;
+	
+	return candidates.stream().filter(actuator -> actuator instanceof VacuumWorldDefaultActuator).map(actuator -> (VacuumWorldDefaultActuator) actuator).collect(Collectors.toList());
     }
 
     @Override
@@ -158,15 +143,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorRol
 	String actuatorRecipientId = selectActuatorRecipientId(action);
 	event.setActuatorRecipientId(actuatorRecipientId);
 
-	notifyAgentActuators(event, actuatorRecipientId);
-    }
-
-    private void notifyAgentActuators(Object arg, String actuatorId) {
-	List<CustomObserver> recipients = this.getObservers();
-
-	for (CustomObserver recipient : recipients) {
-	    notifyIfNeeded(recipient, arg, actuatorId);
-	}
+	getObservers().forEach(recipient -> notifyIfNeeded(recipient, event, actuatorRecipientId));
     }
 
     private void notifyIfNeeded(CustomObserver recipient, Object arg, String actuatorId) {

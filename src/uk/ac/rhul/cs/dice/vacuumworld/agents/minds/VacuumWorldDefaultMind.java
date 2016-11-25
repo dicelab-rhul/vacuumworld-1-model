@@ -46,7 +46,7 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
     @Override
     public final void update(CustomObservable o, Object arg) {
 	if (o instanceof VacuumWorldDefaultBrain && arg instanceof List<?>) {
-	    manageBrainRequest((List<?>) arg);
+	    ((List<?>) arg).forEach(this::manageResult);
 	}
     }
 
@@ -70,15 +70,13 @@ public abstract class VacuumWorldDefaultMind extends VacuumWorldAbstractActorMin
 	VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": executing " + this.getNextAction().getClass().getSimpleName() + "...");
 	notifyObservers(this.getNextAction(), VacuumWorldDefaultBrain.class);
     }
-
-    private void manageBrainRequest(List<?> arg) {
-	for (Object result : arg) {
-	    if (result instanceof VacuumWorldActionResult) {
-		setLastActionResult((VacuumWorldActionResult) result);
-	    }
-	    else if (result instanceof VacuumWorldSpeechActionResult) {
-		addReceivedCommunicationToList((VacuumWorldSpeechActionResult) result);
-	    }
+    
+    private void manageResult(Object result) {
+	if (result instanceof VacuumWorldActionResult) {
+	    setLastActionResult((VacuumWorldActionResult) result);
+	}
+	else if (result instanceof VacuumWorldSpeechActionResult) {
+	    addReceivedCommunicationToList((VacuumWorldSpeechActionResult) result);
 	}
     }
 

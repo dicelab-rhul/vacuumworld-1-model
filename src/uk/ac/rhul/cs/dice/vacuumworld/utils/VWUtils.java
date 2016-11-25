@@ -27,8 +27,7 @@ public class VWUtils {
 
     public static final String INVALID_INITIAL_STATE = "The received initial state is not valid.";
 
-    private VWUtils() {
-    }
+    private VWUtils() {}
 
     private static Logger initLogger() {
 	Logger logger = Logger.getAnonymousLogger();
@@ -55,7 +54,8 @@ public class VWUtils {
     public static void log(Exception e) {
 	if (e.getMessage() != null) {
 	    log(e.getMessage(), e);
-	} else {
+	}
+	else {
 	    log(e.getClass().getSimpleName(), e);
 	}
     }
@@ -63,7 +63,8 @@ public class VWUtils {
     public static void log(Exception e, String className) {
 	if (e.getMessage() != null) {
 	    log(className + ": " + e.getMessage(), e);
-	} else {
+	}
+	else {
 	    log(className + ": " + e.getClass().getSimpleName(), e);
 	}
     }

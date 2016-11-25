@@ -3,7 +3,6 @@ package uk.ac.rhul.cs.dice.vacuumworld.agents;
 import java.util.Random;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.ActionResult;
-import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgentMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.UserMind;
@@ -24,25 +23,19 @@ public abstract class VacuumWorldAbstractActorMind extends AbstractAgentMind {
 
     /**
      * 
-     * Loads the available action prototypes for this mind (in general, non for a specific cycle).
+     * Loads the available action prototypes for this mind (in general, not for a specific cycle).
      * 
      */
     @Override
     public void loadAvailableActionsForThisMindFromArbitraryParameters(Object... mindActions) {
 	if (this instanceof VacuumWorldDefaultMind) {
-	    for (Class<? extends EnvironmentalAction> candidate : ConfigData.getCleaningAgentActions()) {
-		loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
-	    }
+	    ConfigData.getCleaningAgentActions().forEach(this::loadAvailableActionForThisMind);
 	}
 	else if (this instanceof VacuumWorldMonitoringAgentMind) {
-	    for (Class<? extends EnvironmentalAction> candidate : ConfigData.getMonitoringAgentActions()) {
-		loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
-	    }
+	    ConfigData.getMonitoringAgentActions().forEach(this::loadAvailableActionForThisMind);
 	}
 	else if (this instanceof UserMind) {
-	    for (Class<? extends EnvironmentalAction> candidate : ConfigData.getUserActions()) {
-		loadAvailableActionForThisMind((Class<? extends EnvironmentalAction>) candidate);
-	    }
+	    ConfigData.getUserActions().forEach(this::loadAvailableActionForThisMind);
 	}
     }
 

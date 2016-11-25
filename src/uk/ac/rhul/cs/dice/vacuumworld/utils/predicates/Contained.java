@@ -6,21 +6,21 @@ import java.util.function.Predicate;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class Contained implements Predicate<String> {
-	private List<String> container;
-	
-	public Contained(List<String> container) {
-		this.container = container;
+    private List<String> container;
+
+    public Contained(List<String> container) {
+	this.container = container;
+    }
+
+    @Override
+    public boolean test(String candidate) {
+	try {
+	    return this.container.contains(candidate);
 	}
-	
-	@Override
-	public boolean test(String candidate) {
-		try {
-			return this.container.contains(candidate);
-		}
-		catch(Exception e) {
-			VWUtils.fakeLog(e);
-			
-			return false;
-		}
+	catch (Exception e) {
+	    VWUtils.fakeLog(e);
+
+	    return false;
 	}
+    }
 }

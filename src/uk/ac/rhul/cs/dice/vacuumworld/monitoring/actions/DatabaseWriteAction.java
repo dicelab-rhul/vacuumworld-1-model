@@ -4,7 +4,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.database.VacuumWorldDatabaseInt
 
 public abstract class DatabaseWriteAction extends DatabaseAction {
 
-	public DatabaseWriteAction(VacuumWorldDatabaseInteractions actionToPerform) {
-		super(actionToPerform);
-	}
+    public DatabaseWriteAction(VacuumWorldDatabaseInteractions actionToPerform) {
+	super(actionToPerform);
+    }
 }

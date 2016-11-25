@@ -3,24 +3,24 @@ package uk.ac.rhul.cs.dice.vacuumworld.agents;
 import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.AbstractAgentAppearance;
 
 public class VacuumWorldAgentAppearance extends AbstractAgentAppearance {
-	private VacuumWorldAgentType type;
-	
-	public VacuumWorldAgentAppearance(String name, Double[] dimensions, VacuumWorldAgentType type) {
-		super(name, dimensions);
-		this.type = type;
-	}
+    private VacuumWorldAgentType type;
 
-	public VacuumWorldAgentType getType() {
-		return this.type;
-	}
+    public VacuumWorldAgentAppearance(String name, Double[] dimensions, VacuumWorldAgentType type) {
+	super(name, dimensions);
+	this.type = type;
+    }
 
-	@Override
-	public String represent() {
-		return this.type.compactRepresentation();
-	}
+    public VacuumWorldAgentType getType() {
+	return this.type;
+    }
 
-	@Override
-	public VacuumWorldAgentAppearance duplicate() {
-		return new VacuumWorldAgentAppearance(getName(), getDimensions(), this.type);
-	}
+    @Override
+    public String represent() {
+	return this.type.compactRepresentation();
+    }
+
+    @Override
+    public VacuumWorldAgentAppearance duplicate() {
+	return new VacuumWorldAgentAppearance(getName(), getDimensions(), this.type);
+    }
 }

@@ -9,60 +9,60 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringAc
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.physics.VacuumWorldMonitoringPhysics;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.VWPair;
 
-public class VacuumWorldMonitoringBridge extends CustomObservable implements MonitoringBridgeInterface<VacuumWorldMonitoringContainer, VacuumWorldMonitoringPhysics, VacuumWorldSpace, VacuumWorldPhysics> {	
-	private Class<? extends VacuumWorldMonitoringContainer> monitoringContainerClass;
-	private Class<? extends VacuumWorldSpace> monitoredContainerClass;
-	private Class<? extends VacuumWorldMonitoringPhysics> monitoringContainerPhysicsClass;
-	private Class<? extends VacuumWorldPhysics> monitoredContainerPhysicsClass;
-	
-	public VacuumWorldMonitoringBridge(Class<? extends VacuumWorldMonitoringContainer> monitoringContainerClass, Class<? extends VacuumWorldMonitoringPhysics> monitoringContainerPhysicsClass, Class<? extends VacuumWorldSpace> monitoredContainerClass, Class<? extends VacuumWorldPhysics> monitoredContainerPhysicsClass) {
-		this.monitoringContainerClass = monitoringContainerClass;
-		this.monitoringContainerPhysicsClass = monitoringContainerPhysicsClass;
-		this.monitoredContainerClass = monitoredContainerClass;
-		this.monitoredContainerPhysicsClass = monitoredContainerPhysicsClass;
-	}
-	
-	@Override
-	public void update(CustomObservable o, Object arg) {
-		if(this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldMonitoringActionResult) {
-			notifySuperContainerPhysics((VacuumWorldMonitoringActionResult) arg);
-		}
-		else if(this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldActionResult) {
-			notifySuperContainerPhysics((VacuumWorldActionResult) arg);
-		}
-		else if(this.monitoringContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldEvent) {
-			VacuumWorldPhysics physics = (VacuumWorldPhysics) getObservers().stream().filter(observer -> this.monitoredContainerPhysicsClass.isAssignableFrom(observer.getClass())).findFirst().orElseGet(() -> null);
-			VacuumWorldSpace context = (VacuumWorldSpace) physics.getObservers().stream().filter(observer -> this.monitoredContainerClass.isAssignableFrom(observer.getClass())).findFirst().orElseGet(() -> null);
-			
-			notifySubContainerPhysics((VacuumWorldEvent) arg, context);
-		}
-	}
+public class VacuumWorldMonitoringBridge extends CustomObservable implements MonitoringBridgeInterface<VacuumWorldMonitoringContainer, VacuumWorldMonitoringPhysics, VacuumWorldSpace, VacuumWorldPhysics> {
+    private Class<? extends VacuumWorldMonitoringContainer> monitoringContainerClass;
+    private Class<? extends VacuumWorldSpace> monitoredContainerClass;
+    private Class<? extends VacuumWorldMonitoringPhysics> monitoringContainerPhysicsClass;
+    private Class<? extends VacuumWorldPhysics> monitoredContainerPhysicsClass;
 
-	private void notifySubContainerPhysics(VacuumWorldEvent event, VacuumWorldSpace context) {
-		notifyObservers(new VWPair<VacuumWorldEvent, VacuumWorldSpace>(event, context), this.monitoredContainerPhysicsClass);
-	}
-	
-	private void notifySuperContainerPhysics(Object arg) {
-		notifyObservers(arg, this.monitoringContainerPhysicsClass);
-	}
+    public VacuumWorldMonitoringBridge(Class<? extends VacuumWorldMonitoringContainer> monitoringContainerClass, Class<? extends VacuumWorldMonitoringPhysics> monitoringContainerPhysicsClass, Class<? extends VacuumWorldSpace> monitoredContainerClass, Class<? extends VacuumWorldPhysics> monitoredContainerPhysicsClass) {
+	this.monitoringContainerClass = monitoringContainerClass;
+	this.monitoringContainerPhysicsClass = monitoringContainerPhysicsClass;
+	this.monitoredContainerClass = monitoredContainerClass;
+	this.monitoredContainerPhysicsClass = monitoredContainerPhysicsClass;
+    }
 
-	@Override
-	public Class<? extends VacuumWorldMonitoringContainer> getMonitoringSpaceClass() {
-		return this.monitoringContainerClass;
+    @Override
+    public void update(CustomObservable o, Object arg) {
+	if (this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldMonitoringActionResult) {
+	    notifySuperContainerPhysics((VacuumWorldMonitoringActionResult) arg);
+	} 
+	else if (this.monitoredContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldActionResult) {
+	    notifySuperContainerPhysics((VacuumWorldActionResult) arg);
 	}
+	else if (this.monitoringContainerPhysicsClass.isAssignableFrom(o.getClass()) && arg instanceof VacuumWorldEvent) {
+	    VacuumWorldPhysics physics = (VacuumWorldPhysics) getObservers().stream().filter(observer -> this.monitoredContainerPhysicsClass.isAssignableFrom(observer.getClass())).findFirst().orElse(null);
+	    VacuumWorldSpace context = (VacuumWorldSpace) physics.getObservers().stream().filter(observer -> this.monitoredContainerClass.isAssignableFrom(observer.getClass())).findFirst().orElse(null);
+	    
+	    notifySubContainerPhysics((VacuumWorldEvent) arg, context);
+	}
+    }
 
-	@Override
-	public Class<? extends VacuumWorldSpace> getMonitoredSpaceClass() {
-		return this.monitoredContainerClass;
-	}
+    private void notifySubContainerPhysics(VacuumWorldEvent event, VacuumWorldSpace context) {
+	notifyObservers(new VWPair<VacuumWorldEvent, VacuumWorldSpace>(event, context), this.monitoredContainerPhysicsClass);
+    }
 
-	@Override
-	public Class<? extends VacuumWorldMonitoringPhysics> getMonitoringSpacePhysicsClass() {
-		return this.monitoringContainerPhysicsClass;
-	}
+    private void notifySuperContainerPhysics(Object arg) {
+	notifyObservers(arg, this.monitoringContainerPhysicsClass);
+    }
 
-	@Override
-	public Class<? extends VacuumWorldPhysics> getMonitoredSpacePhysicsClass() {
-		return this.monitoredContainerPhysicsClass;
-	}
+    @Override
+    public Class<? extends VacuumWorldMonitoringContainer> getMonitoringSpaceClass() {
+	return this.monitoringContainerClass;
+    }
+
+    @Override
+    public Class<? extends VacuumWorldSpace> getMonitoredSpaceClass() {
+	return this.monitoredContainerClass;
+    }
+
+    @Override
+    public Class<? extends VacuumWorldMonitoringPhysics> getMonitoringSpacePhysicsClass() {
+	return this.monitoringContainerPhysicsClass;
+    }
+
+    @Override
+    public Class<? extends VacuumWorldPhysics> getMonitoredSpacePhysicsClass() {
+	return this.monitoredContainerPhysicsClass;
+    }
 }

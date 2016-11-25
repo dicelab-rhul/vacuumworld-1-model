@@ -4,17 +4,17 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.appearances.AbstractAgentAppearance;
 
 public class UserAppearance extends AbstractAgentAppearance {
 
-	public UserAppearance(String name, Double[] dimensions) {
-		super(name, dimensions);
-	}
+    public UserAppearance(String name, Double[] dimensions) {
+	super(name, dimensions);
+    }
 
-	@Override
-	public String represent() {
-		return "U";
-	}
+    @Override
+    public String represent() {
+	return "U";
+    }
 
-	@Override
-	public UserAppearance duplicate() {
-		return new UserAppearance(getName(), getDimensions());
-	}
+    @Override
+    public UserAppearance duplicate() {
+	return new UserAppearance(getName(), getDimensions());
+    }
 }

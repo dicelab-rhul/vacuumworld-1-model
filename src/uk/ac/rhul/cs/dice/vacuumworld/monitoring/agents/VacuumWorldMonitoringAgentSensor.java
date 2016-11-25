@@ -8,14 +8,14 @@ import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitori
 
 public class VacuumWorldMonitoringAgentSensor extends VacuumWorldDefaultSensor {
 
-	public VacuumWorldMonitoringAgentSensor(String bodyId, VacuumWorldSensorRole role) {
-		super(bodyId, role);
+    public VacuumWorldMonitoringAgentSensor(String bodyId, VacuumWorldSensorRole role) {
+	super(bodyId, role);
+    }
+
+    @Override
+    public void update(CustomObservable o, Object arg) {
+	if (o instanceof VacuumWorldMonitoringContainer && arg instanceof VacuumWorldMonitoringActionResult) {
+	    notifyObservers(arg, VacuumWorldMonitoringAgent.class);
 	}
-	
-	@Override
-	public void update(CustomObservable o, Object arg) {
-		if(o instanceof VacuumWorldMonitoringContainer && arg instanceof VacuumWorldMonitoringActionResult) {
-			notifyObservers(arg, VacuumWorldMonitoringAgent.class);
-		}
-	}
+    }
 }

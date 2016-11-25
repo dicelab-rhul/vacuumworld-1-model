@@ -10,26 +10,26 @@ import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
 public class TurnActionReport extends AbstractActionReport {
-	private TurningDirection turningDirection;
-	
-	public TurnActionReport(Class<? extends EnvironmentalAction> action, ActionResult actionResult, ActorFacingDirection actorOldDirection, ActorFacingDirection actorNewDirection, VacuumWorldCoordinates actorOldCoordinates, VacuumWorldCoordinates actorNewCoordinates, TurningDirection turningDirection) {
-		super(action, actionResult, actorOldDirection, actorNewDirection, actorOldCoordinates, actorNewCoordinates, null);
-		
-		this.turningDirection = turningDirection;
-	}
+    private TurningDirection turningDirection;
 
-	public TurningDirection getTurningDirection() {
-		return this.turningDirection;
-	}
+    public TurnActionReport(Class<? extends EnvironmentalAction> action, ActionResult actionResult, ActorFacingDirection actorOldDirection, ActorFacingDirection actorNewDirection, VacuumWorldCoordinates actorOldCoordinates, VacuumWorldCoordinates actorNewCoordinates, TurningDirection turningDirection) {
+	super(action, actionResult, actorOldDirection, actorNewDirection, actorOldCoordinates, actorNewCoordinates, null);
 
-	@Override
-	public AbstractActionReport duplicate() {
-		Set<VacuumWorldCoordinates> perceptionKeysCopy = new HashSet<>();
-		getPerceptionKeys().forEach(coordinates -> perceptionKeysCopy.add(coordinates.duplicate()));
-		
-		TurnActionReport toReturn = new TurnActionReport(getAction(), getActionResult(), getActorOldDirection(), getActorNewDirection(), getActorOldCoordinates().duplicate(), getActorNewCoordinates().duplicate(), this.turningDirection);
-		toReturn.setPerceptionKeys(perceptionKeysCopy);
-		
-		return toReturn;
-	}
+	this.turningDirection = turningDirection;
+    }
+
+    public TurningDirection getTurningDirection() {
+	return this.turningDirection;
+    }
+
+    @Override
+    public AbstractActionReport duplicate() {
+	Set<VacuumWorldCoordinates> perceptionKeysCopy = new HashSet<>();
+	getPerceptionKeys().forEach(coordinates -> perceptionKeysCopy.add(coordinates.duplicate()));
+
+	TurnActionReport toReturn = new TurnActionReport(getAction(), getActionResult(), getActorOldDirection(), getActorNewDirection(), getActorOldCoordinates().duplicate(), getActorNewCoordinates().duplicate(), this.turningDirection);
+	toReturn.setPerceptionKeys(perceptionKeysCopy);
+
+	return toReturn;
+    }
 }
