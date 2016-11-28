@@ -152,6 +152,7 @@ public class VacuumWorldManhattanMind extends VacuumWorldDefaultMind {
     private EnvironmentalAction fillPlan(String planCode, int xDifference, int yDifference, ActorFacingDirection facingDirection) {
 	planCode.chars().mapToObj(character -> (char) character).forEach(character -> addActionsToPlan(character, xDifference, yDifference, facingDirection));
 	
+	
 	this.plan.pushActionToPerform(CleanAction.class, getBodyId());
 	VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + getBodyId() + ": finished bulding plan.");
 

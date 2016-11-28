@@ -28,6 +28,17 @@ public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> imp
     public String toString() {
 	return "(" + getFirst() + ", " + getSecond() + ")";
     }
+    
+    public static VacuumWorldCoordinates fromString(String representation) {
+	if (!representation.matches("^\\((0|[1-9]\\d+),(0|[1-9]\\d+)\\)$")) {
+	    throw new IllegalArgumentException("The parameter " + representation + " does not match the expected pattern " + "^\\((0|[1-9]\\d+),(0|[1-9]\\d+)\\)$");
+	}
+	else {
+	    String[] coords = representation.replace("(", "").replace(")", "").split(",");
+	    
+	    return new VacuumWorldCoordinates(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]));
+	}
+    }
 
     public VacuumWorldCoordinates getNorthernCoordinates() {
 	return new VacuumWorldCoordinates(getFirst(), getSecond() - 1);
@@ -80,7 +91,7 @@ public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> imp
 	case EAST:
 	    return getEasternCoordinates();
 	default:
-	    throw new IllegalArgumentException("Bad facing position: " + agentDirection);
+	    throw new IllegalArgumentException("Bad facing direction: " + agentDirection);
 	}
     }
 
@@ -128,7 +139,7 @@ public class VacuumWorldCoordinates extends AbstractSingleTypedPair<Integer> imp
     }
 
     private int breakTie(int x1, int x2) {
-	return x1 > x2 ? 1 : -1;
+	return x1 > x2 ? 1 : -1; //this is just a convention
     }
 
     @Override

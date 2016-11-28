@@ -148,6 +148,21 @@ public class VacuumWorldPerception implements VWPerception {
     public List<VacuumWorldLocation> getLocationsWithDirtCompatibleWithCurrentActor() {
 	return this.perception.values().stream().filter(this::isCompatibleDirtPresent).collect(Collectors.toList());
     }
+    
+    @Override
+    public List<VacuumWorldCoordinates> getCoordinatesWithDirtCompatibleWithCurrentActor() {
+	return this.perception.keySet().stream().filter(key -> isCompatibleDirtPresent(this.perception.get(key))).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<VacuumWorldLocation> getLocationsWithDirtInPerception() {
+	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<VacuumWorldCoordinates> getCoordinatesWithDirtInPerception() {
+	return this.perception.keySet().stream().filter(key -> this.perception.get(key).isDirtPresent()).collect(Collectors.toList());
+    }
 
     @Override
     public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerceptionIncludingSelf() {
@@ -222,6 +237,34 @@ public class VacuumWorldPerception implements VWPerception {
     @Override
     public boolean doesCurrentActorHaveWallOnEast() {
 	return VacuumWorldLocationType.WALL.equals(getCurrentActorLocation().getEasternLocationType());
+    }
+    
+    @Override
+    public boolean isWallStraightAtTheEndOfPerception() {
+	ActorFacingDirection direction = getActorCurrentFacingDirection();
+	VacuumWorldCoordinates iterator = getActorCoordinates().getNewCoordinates(direction);
+	VacuumWorldCoordinates old = getActorCoordinates();
+	
+	while(this.perception.containsKey(iterator)) {
+	    old = iterator;
+	    iterator = iterator.getNewCoordinates(direction);
+	}
+	
+	return VacuumWorldLocationType.WALL.equals(this.perception.get(old).getNeighborLocationType(direction));
+    }
+    
+    @Override
+    public int countNumberOfSafeMoveActionsWithinPerception() {
+	ActorFacingDirection direction = getActorCurrentFacingDirection();
+	int result = 0;
+	VacuumWorldCoordinates iterator = getActorCoordinates().getNewCoordinates(direction);
+	
+	while(this.perception.containsKey(iterator)) {
+	    result++;
+	    iterator = iterator.getNewCoordinates(direction);
+	}
+	
+	return result;
     }
 
     @Override

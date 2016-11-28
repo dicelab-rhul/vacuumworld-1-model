@@ -10,26 +10,26 @@ import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 
 public class CleanActionReport extends AbstractActionReport {
-	private DirtType cleanedDirt;
-	
-	public CleanActionReport(Class<? extends EnvironmentalAction> action, ActionResult actionResult, ActorFacingDirection actorOldDirection, ActorFacingDirection actorNewDirection, VacuumWorldCoordinates actorOldCoordinates, VacuumWorldCoordinates actorNewCoordinates, DirtType cleanedDirt) {
-		super(action, actionResult, actorOldDirection, actorNewDirection, actorOldCoordinates, actorNewCoordinates, null);
-		
-		this.cleanedDirt = cleanedDirt;
-	}
-	
-	public DirtType getCleanedDirt() {
-		return this.cleanedDirt;
-	}
+    private DirtType cleanedDirt;
 
-	@Override
-	public AbstractActionReport duplicate() {
-		Set<VacuumWorldCoordinates> perceptionKeysCopy = new HashSet<>();
-		getPerceptionKeys().forEach(coordinates -> perceptionKeysCopy.add(coordinates.duplicate()));
-		
-		CleanActionReport toReturn = new CleanActionReport(getAction(), getActionResult(), getActorOldDirection(), getActorNewDirection(), getActorOldCoordinates().duplicate(), getActorNewCoordinates().duplicate(), this.cleanedDirt);
-		toReturn.setPerceptionKeys(perceptionKeysCopy);
-		
-		return toReturn;
-	}
+    public CleanActionReport(Class<? extends EnvironmentalAction> action, ActionResult actionResult, ActorFacingDirection actorOldDirection, ActorFacingDirection actorNewDirection, VacuumWorldCoordinates actorOldCoordinates, VacuumWorldCoordinates actorNewCoordinates, DirtType cleanedDirt) {
+	super(action, actionResult, actorOldDirection, actorNewDirection, actorOldCoordinates, actorNewCoordinates, null);
+
+	this.cleanedDirt = cleanedDirt;
+    }
+
+    public DirtType getCleanedDirt() {
+	return this.cleanedDirt;
+    }
+
+    @Override
+    public AbstractActionReport duplicate() {
+	Set<VacuumWorldCoordinates> perceptionKeysCopy = new HashSet<>();
+	getPerceptionKeys().forEach(coordinates -> perceptionKeysCopy.add(coordinates.duplicate()));
+
+	CleanActionReport toReturn = new CleanActionReport(getAction(), getActionResult(), getActorOldDirection(), getActorNewDirection(), getActorOldCoordinates().duplicate(), getActorNewCoordinates().duplicate(), this.cleanedDirt);
+	toReturn.setPerceptionKeys(perceptionKeysCopy);
+
+	return toReturn;
+    }
 }

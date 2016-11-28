@@ -6,8 +6,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.utils.VWUtils;
 
 public class Main {
 
-    private Main() {
-    }
+    private Main() {}
 
     public static void main(String[] args) {
 	if (args.length < 4) {

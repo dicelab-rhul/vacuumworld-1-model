@@ -5,6 +5,7 @@ import java.util.Map;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
+import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
@@ -143,6 +144,33 @@ public interface VWPerception extends Perception {
      * 
      */
     public abstract List<VacuumWorldLocation> getLocationsWithDirtCompatibleWithCurrentActor();
+    
+    /**
+     * 
+     * Returns a {@link List} of {@link VacuumWorldCoordinates} keys in the perceived grid where each mapped location contains compatible dirt with the current actor. An empty list can be returned.
+     * 
+     * @return the {@link List} of {@link VacuumWorldCoordinates} keys in the perceived grid where each mapped location contains compatible dirt with the current actor.
+     * 
+     */
+    public abstract List<VacuumWorldCoordinates> getCoordinatesWithDirtCompatibleWithCurrentActor();
+    
+    /**
+     * 
+     * Returns a {@link List} of {@link VacuumWorldLocation} values in the perceived grid where each location contains a piece of dirt. An empty list can be returned.
+     * 
+     * @return the {@link List} of {@link VacuumWorldLocation} values in the perceived grid where each location contains a piece of dirt.
+     * 
+     */
+    public abstract List<VacuumWorldLocation> getLocationsWithDirtInPerception();
+    
+    /**
+     * 
+     * Returns a {@link List} of {@link VacuumWorldCoordinates} keys in the perceived grid where each mapped location contains a piece of dirt. An empty list can be returned.
+     * 
+     * @return the {@link List} of {@link VacuumWorldCoordinates} keys in the perceived grid where each mapped location contains a piece of dirt.
+     * 
+     */
+    public abstract List<VacuumWorldCoordinates> getCoordinatesWithDirtInPerception();
     
     /**
      * 
@@ -486,4 +514,23 @@ public interface VWPerception extends Perception {
      * 
      */
     public abstract boolean doesCurrentActorHaveWallOnEast();
+    
+    /**
+     * 
+     * Returns whether the farthest location in front of the current actor (within the perception) has a wall ahead of it or not.
+     * 
+     * @return true if the farthest location in front of the current actor (within the perception) has a wall ahead of it, false otherwise.
+     * 
+     */
+    public abstract boolean isWallStraightAtTheEndOfPerception();
+    
+    /**
+     * 
+     * Returns the number of {@link MoveAction}s which can be safely performed without bumping into a wall, according to the perception. Note that the result is a lower bound for the actual number of
+     * move actions which can be safely performed on the grid, and can be strictly less that the real value if the perception range is limited. 
+     * 
+     * @return a lower bound (which depends on the perception range) for the number of {@link MoveAction}s which can be safely performed without bumping into a wall.
+     * 
+     */
+    public abstract int countNumberOfSafeMoveActionsWithinPerception();
 }
