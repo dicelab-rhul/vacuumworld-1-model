@@ -4,8 +4,7 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 
 public class PlanFactory {
 
-    private PlanFactory() {
-    }
+    private PlanFactory() {}
 
     public static <T extends Plan> T of(Class<? extends T> prototype, Iterable<Class<? extends EnvironmentalAction>> actions) {
 	try {

@@ -58,8 +58,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 
 public class InitialStateParser {
 
-    private InitialStateParser() {
-    }
+    private InitialStateParser() {}
 
     public static VacuumWorldSpace parseInitialState(InputStream input) throws IOException {
 	JsonObject json = retrieveJsonObject(input);
