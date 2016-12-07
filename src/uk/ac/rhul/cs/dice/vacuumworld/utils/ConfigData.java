@@ -40,8 +40,7 @@ public class ConfigData {
     private static String stateActionsCollection;
     private static String systemStatesCollection;
 
-    private ConfigData() {
-    }
+    private ConfigData() {}
 
     public static int getModelPort() {
 	return ConfigData.modelPort;
