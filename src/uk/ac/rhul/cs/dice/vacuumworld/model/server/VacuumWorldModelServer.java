@@ -42,7 +42,7 @@ public class VacuumWorldModelServer implements Observer {
     
     public VacuumWorldModelServer(int maximumNumberOfCycles) {
 	this.sharedStopSignal = new StopSignal();
-	this.maximumNumberOfCycles = maximumNumberOfCycles == -1 ? 101 : maximumNumberOfCycles;
+	this.maximumNumberOfCycles = maximumNumberOfCycles == -1 ? 108 : maximumNumberOfCycles;
     }
     
     public void startServer(String initialStateFilePath, double delayInSeconds) {

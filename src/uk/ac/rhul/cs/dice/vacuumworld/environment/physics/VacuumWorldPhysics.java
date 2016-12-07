@@ -793,15 +793,15 @@ public class VacuumWorldPhysics extends AbstractPhysics implements VacuumWorldPh
     private Result finalizeMove(Actor actor, VacuumWorldLocation actorLocation, VacuumWorldLocation targetLocation, VacuumWorldCoordinates originalCooridinates, ActorFacingDirection actorFacingDirection) {
 	VWPair<List<Lockable>, List<Lockable>> locationsToUnlock = new VWPair<>(new ArrayList<>(), Arrays.asList(actorLocation, targetLocation));
 	unlockLocationsIfNecessary(locationsToUnlock);
-	logMove(actor.getId().toString(), actor, actorLocation, originalCooridinates, actorFacingDirection);
+	logMove(actor.getId().toString(), actor, targetLocation, originalCooridinates, actorFacingDirection);
 
 	return new VacuumWorldActionResult(ActionResult.ACTION_DONE, actor.getId().toString(), new ArrayList<>(), null);
     }
 
-    private void logMove(String actorId, Actor actor, VacuumWorldLocation actorLocation, VacuumWorldCoordinates originalCooridinates, ActorFacingDirection actorFacingDirection) {
+    private void logMove(String actorId, Actor actor, VacuumWorldLocation targetLocation, VacuumWorldCoordinates originalCooridinates, ActorFacingDirection actorFacingDirection) {
 	Pair<ActorFacingDirection> facingDirectionsBeforeAndAfter = new Pair<>(actorFacingDirection, actorFacingDirection);
-	Pair<VacuumWorldCoordinates> locationsBeforeAndAfter = new Pair<>(originalCooridinates, actorLocation.getCoordinates());
-	VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + actor.getId().toString() + " old position: " + originalCooridinates + ", new position: " + actorLocation.getCoordinates() + ", facing direction: " + actorFacingDirection + ".");
+	Pair<VacuumWorldCoordinates> locationsBeforeAndAfter = new Pair<>(originalCooridinates, targetLocation.getCoordinates());
+	VWUtils.logWithClass(this.getClass().getSimpleName(), VWUtils.ACTOR + actor.getId().toString() + " old position: " + originalCooridinates + ", new position: " + targetLocation.getCoordinates() + ", facing direction: " + actorFacingDirection + ".");
 	createAndStoreActionReport(actorId, MoveAction.class, ActionResult.ACTION_DONE, facingDirectionsBeforeAndAfter, locationsBeforeAndAfter);
     }
 
