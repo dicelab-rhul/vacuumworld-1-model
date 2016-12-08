@@ -94,13 +94,26 @@ public class VacuumWorldExplorerMind extends VacuumWorldDefaultMind {
 	    buildPlanToFindN(perception);
 	}
 	else {
+	    initLocationsToExplore();
 	    buildPlanToContinueExploration(perception);
+	}
+    }
+
+    private void initLocationsToExplore() {
+	if(this.n == 3) {
+	    return;
+	}
+	
+	for(int x = 0; x < this.n; x++) {
+	    for(int y = 3; y < this.n; y++) {
+		this.locationsToPerceiveYet.add(new VacuumWorldCoordinates(x, y));
+	    }
 	}
     }
 
     private void buildPlanToContinueExploration(VWPerception perception) {
 	if(this.cornersFound == 4) {
-	    buildPlanForLeftovers(perception);
+	    buildPlanForLeftovers();
 	}
 	else if(this.cornersFound == 2){
 	    buildPlanToDiscoverThirdCorner(perception);
@@ -146,9 +159,24 @@ public class VacuumWorldExplorerMind extends VacuumWorldDefaultMind {
 	
     }
 
-    private void buildPlanForLeftovers(VWPerception perception) {
-	// TODO Auto-generated method stub
-	this.plan.enqueueActionPrototype(PerceiveAction.class);
+    private void buildPlanForLeftovers() {
+	this.plan.enqueueActionPrototype(TurnRightAction.class);
+	
+	for(int i = 0; i < this.n - 6; i++) {
+	    this.plan.enqueueActionPrototype(MoveAction.class);
+	}
+	
+	this.plan.enqueueActionPrototype(TurnRightAction.class);
+	
+	for(int i = 0; i < this.n - 6; i++) {
+	    this.plan.enqueueActionPrototype(MoveAction.class);
+	}
+	
+	buildPlanForExplorationAfterFirstLap();
+    }
+
+    private void buildPlanForExplorationAfterFirstLap() {
+	//TODO
     }
 
     private void buildPlanToFindN(VWPerception perception) {
