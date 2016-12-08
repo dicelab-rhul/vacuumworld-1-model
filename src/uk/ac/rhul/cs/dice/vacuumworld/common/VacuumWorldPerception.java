@@ -45,7 +45,7 @@ public class VacuumWorldPerception implements VWPerception {
 	this.perception = perception != null ? perception : new HashMap<>();
 	this.actorCoordinates = actorCoordinates;
     }
-
+    
     @Override
     public Map<VacuumWorldCoordinates, VacuumWorldLocation> getPerceivedMap() {
 	return this.perception;

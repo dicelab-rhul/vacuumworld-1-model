@@ -57,7 +57,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	
 	return toReturn;
     }
-
+    
     public void setJsonRepresentation(JsonObject representation) {
 	this.initialStateRepresentation = representation;
     }
@@ -269,7 +269,7 @@ public class VacuumWorldSpace extends EnvironmentalSpace {
 	List<String> senderSensorIds = wrapper.getRecipientsIds();
 
 	logResult(wrapper.getPerceptionResult());
-
+	
 	notifyActor(senderSensorIds, wrapper.getPerceptionResult());
 	notifyTargets(recipientActorsIds, wrapper.getSpeechResult());
     }
