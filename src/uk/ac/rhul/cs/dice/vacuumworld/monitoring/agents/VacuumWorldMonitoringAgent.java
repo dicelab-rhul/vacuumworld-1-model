@@ -12,15 +12,15 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.SpeechAction;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.DatabaseAction;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringEvent;
 
-public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> {
+public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> {
 
-    public VacuumWorldMonitoringAgent(VacuumWorldMonitoringAgentAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, VacuumWorldMonitoringAgentMind mind, VacuumWorldMonitoringAgentBrain brain) {
+    public VacuumWorldMonitoringAgent(VacuumWorldMonitoringAgentAppearance appearance, List<Sensor<VacuumWorldSensorPurpose>> sensors, List<Actuator<VacuumWorldActuatorPurpose>> actuators, VacuumWorldMonitoringAgentMind mind, VacuumWorldMonitoringAgentBrain brain) {
 	super(appearance, sensors, actuators, mind, brain);
     }
 
@@ -50,45 +50,45 @@ public class VacuumWorldMonitoringAgent extends AbstractAgent<VacuumWorldSensorR
     }
 
     public List<VacuumWorldMonitoringAgentSensor> getSeeingSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.SEEING_SENSOR);
+	return getSpecificSensors(VacuumWorldSensorPurpose.SEEING_SENSOR);
     }
 
     public List<VacuumWorldMonitoringAgentSensor> getListeningSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.LISTENING_SENSOR);
+	return getSpecificSensors(VacuumWorldSensorPurpose.LISTENING_SENSOR);
     }
 
     public List<VacuumWorldMonitoringAgentSensor> getDatabaseSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.DATABASE_SENSOR);
+	return getSpecificSensors(VacuumWorldSensorPurpose.DATABASE_SENSOR);
     }
 
     public List<VacuumWorldMonitoringAgentSensor> getUndefinedSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.UNDEFINED);
+	return getSpecificSensors(VacuumWorldSensorPurpose.UNDEFINED);
     }
 
-    private List<VacuumWorldMonitoringAgentSensor> getSpecificSensors(VacuumWorldSensorRole role) {
-	List<Sensor<VacuumWorldSensorRole>> candidates = getSensors().stream().filter((Sensor<VacuumWorldSensorRole> sensor) -> role.equals(sensor.getRole())).collect(Collectors.toList());
+    private List<VacuumWorldMonitoringAgentSensor> getSpecificSensors(VacuumWorldSensorPurpose role) {
+	List<Sensor<VacuumWorldSensorPurpose>> candidates = getSensors().stream().filter((Sensor<VacuumWorldSensorPurpose> sensor) -> role.equals(sensor.getRole())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(sensor -> sensor instanceof VacuumWorldMonitoringAgentSensor).map(sensor -> (VacuumWorldMonitoringAgentSensor) sensor).collect(Collectors.toList());
     }
 
     public List<VacuumWorldMonitoringAgentActuator> getPhysicalActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.PHYSICAL_ACTUATOR);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.PHYSICAL_ACTUATOR);
     }
 
     public List<VacuumWorldMonitoringAgentActuator> getSpeakingActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.SPEAKING_ACTUATOR);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.SPEAKING_ACTUATOR);
     }
 
     public List<VacuumWorldMonitoringAgentActuator> getDatabaseActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.DATABASE_ACTUATOR);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.DATABASE_ACTUATOR);
     }
 
     public List<VacuumWorldMonitoringAgentActuator> getundefinedActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.UNDEFINED);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.UNDEFINED);
     }
 
-    private List<VacuumWorldMonitoringAgentActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
-	List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorRole> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
+    private List<VacuumWorldMonitoringAgentActuator> getSpecificActuators(VacuumWorldActuatorPurpose role) {
+	List<Actuator<VacuumWorldActuatorPurpose>> candidates = getActuators().stream().filter((Actuator<VacuumWorldActuatorPurpose> actuator) -> role.equals(actuator.getRole())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(actuator -> actuator instanceof VacuumWorldMonitoringAgentActuator).map(actuator -> (VacuumWorldMonitoringAgentActuator) actuator).collect(Collectors.toList());
     }

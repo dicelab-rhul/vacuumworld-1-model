@@ -13,9 +13,9 @@ import javax.json.JsonValue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
@@ -100,7 +100,7 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonObject buildSensors(List<Sensor<VacuumWorldSensorRole>> sensors) {
+    private static JsonObject buildSensors(List<Sensor<VacuumWorldSensorPurpose>> sensors) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("number", sensors.size());
@@ -109,14 +109,14 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonArray buildSensorsArray(List<Sensor<VacuumWorldSensorRole>> sensors) {
+    private static JsonArray buildSensorsArray(List<Sensor<VacuumWorldSensorPurpose>> sensors) {
 	JsonArrayBuilder builder = Json.createArrayBuilder();
 	sensors.forEach(sensor -> builder.add(buildSensor(sensor)));
 
 	return builder.build();
     }
 
-    private static JsonObject buildSensor(Sensor<VacuumWorldSensorRole> sensor) {
+    private static JsonObject buildSensor(Sensor<VacuumWorldSensorPurpose> sensor) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("id", sensor.getSensorId().toString());
@@ -125,7 +125,7 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonObject buildActuators(List<Actuator<VacuumWorldActuatorRole>> actuators) {
+    private static JsonObject buildActuators(List<Actuator<VacuumWorldActuatorPurpose>> actuators) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("number", actuators.size());
@@ -134,14 +134,14 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonArray buildActuatorsArray(List<Actuator<VacuumWorldActuatorRole>> actuators) {
+    private static JsonArray buildActuatorsArray(List<Actuator<VacuumWorldActuatorPurpose>> actuators) {
 	JsonArrayBuilder builder = Json.createArrayBuilder();
 	actuators.forEach(actuator -> builder.add(buildActuator(actuator)));
 
 	return builder.build();
     }
 
-    private static JsonObject buildActuator(Actuator<VacuumWorldActuatorRole> actuator) {
+    private static JsonObject buildActuator(Actuator<VacuumWorldActuatorPurpose> actuator) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("id", actuator.getActuatorId().toString());

@@ -2,13 +2,13 @@ package uk.ac.rhul.cs.dice.vacuumworld.monitoring.agents;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldDefaultSensor;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.actions.VacuumWorldMonitoringActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.monitoring.environment.VacuumWorldMonitoringContainer;
 
 public class VacuumWorldMonitoringAgentSensor extends VacuumWorldDefaultSensor {
 
-    public VacuumWorldMonitoringAgentSensor(String bodyId, VacuumWorldSensorRole role) {
+    public VacuumWorldMonitoringAgentSensor(String bodyId, VacuumWorldSensorPurpose role) {
 	super(bodyId, role);
     }
 

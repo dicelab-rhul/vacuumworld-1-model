@@ -7,10 +7,10 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.perception.Perception;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.MoveAction;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
@@ -179,7 +179,7 @@ public interface VWPerception extends Perception {
      * @return the {@link List} of actors in the perceived grid. The current actor is not included.
      * 
      */
-    public abstract List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerception();
+    public abstract List<AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose>> getActorsInPerception();
     
     /**
      * 
@@ -188,7 +188,7 @@ public interface VWPerception extends Perception {
      * @return the {@link List} of actors in the perceived grid, including the current actor.
      * 
      */
-    public abstract List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerceptionIncludingSelf();
+    public abstract List<AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose>> getActorsInPerceptionIncludingSelf();
     
     /**
      * 
@@ -377,7 +377,7 @@ public interface VWPerception extends Perception {
      * @return the current actor.
      * 
      */
-    public abstract AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> getCurentActor();
+    public abstract AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> getCurentActor();
     
     /**
      * 

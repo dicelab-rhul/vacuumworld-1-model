@@ -5,9 +5,9 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
-public class VacuumWorldDefaultActuator extends AbstractActuator<VacuumWorldActuatorRole> {
+public class VacuumWorldDefaultActuator extends AbstractActuator<VacuumWorldActuatorPurpose> {
 
-    public VacuumWorldDefaultActuator(String bodyId, VacuumWorldActuatorRole role) {
+    public VacuumWorldDefaultActuator(String bodyId, VacuumWorldActuatorPurpose role) {
 	super(bodyId, role);
     }
 

@@ -16,18 +16,18 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
-public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> {
+public class User extends AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> {
     private VacuumWorldCoordinates oldLocation;
     private ActorFacingDirection facingDirection;
     private ActorFacingDirection oldFacingDirection;
     private VacuumWorldCoordinates currentLocation;
 
-    public User(UserAppearance appearance, List<Sensor<VacuumWorldSensorRole>> sensors, List<Actuator<VacuumWorldActuatorRole>> actuators, UserMind mind, UserBrain brain, ActorFacingDirection facingDirection) {
+    public User(UserAppearance appearance, List<Sensor<VacuumWorldSensorPurpose>> sensors, List<Actuator<VacuumWorldActuatorPurpose>> actuators, UserMind mind, UserBrain brain, ActorFacingDirection facingDirection) {
 	super(appearance, sensors, actuators, mind, brain);
 
 	this.oldFacingDirection = null;
@@ -119,37 +119,37 @@ public class User extends AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuat
     }
 
     public List<UserSensor> getSeeingSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.SEEING_SENSOR);
+	return getSpecificSensors(VacuumWorldSensorPurpose.SEEING_SENSOR);
     }
 
     public List<UserSensor> getListeningSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.LISTENING_SENSOR);
+	return getSpecificSensors(VacuumWorldSensorPurpose.LISTENING_SENSOR);
     }
 
     public List<UserSensor> getUndefinedSensors() {
-	return getSpecificSensors(VacuumWorldSensorRole.UNDEFINED);
+	return getSpecificSensors(VacuumWorldSensorPurpose.UNDEFINED);
     }
 
-    private List<UserSensor> getSpecificSensors(VacuumWorldSensorRole role) {
-	List<Sensor<VacuumWorldSensorRole>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getRole())).collect(Collectors.toList());
+    private List<UserSensor> getSpecificSensors(VacuumWorldSensorPurpose role) {
+	List<Sensor<VacuumWorldSensorPurpose>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getRole())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(sensor -> sensor instanceof UserSensor).map(sensor -> (UserSensor) sensor).collect(Collectors.toList());
     }
 
     public List<UserActuator> getPhysicalActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.PHYSICAL_ACTUATOR);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.PHYSICAL_ACTUATOR);
     }
 
     public List<UserActuator> getSpeakingActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.SPEAKING_ACTUATOR);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.SPEAKING_ACTUATOR);
     }
 
     public List<UserActuator> getundefinedActuators() {
-	return getSpecificActuators(VacuumWorldActuatorRole.UNDEFINED);
+	return getSpecificActuators(VacuumWorldActuatorPurpose.UNDEFINED);
     }
 
-    private List<UserActuator> getSpecificActuators(VacuumWorldActuatorRole role) {
-	List<Actuator<VacuumWorldActuatorRole>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getRole())).collect(Collectors.toList());
+    private List<UserActuator> getSpecificActuators(VacuumWorldActuatorPurpose role) {
+	List<Actuator<VacuumWorldActuatorPurpose>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getRole())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(actuator -> actuator instanceof UserActuator).map(actuator -> (UserActuator) actuator).collect(Collectors.toList());
     }

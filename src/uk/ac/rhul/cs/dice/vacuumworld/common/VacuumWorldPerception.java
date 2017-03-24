@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorRole;
+import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
@@ -99,7 +99,7 @@ public class VacuumWorldPerception implements VWPerception {
     }
     
     @Override
-    public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerception() {
+    public List<AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose>> getActorsInPerception() {
 	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent() || location.isAUserPresent()).map(location -> location.isAnAgentPresent() ? location.getAgent() : location.isAUserPresent() ? location.getUser() : null).collect(Collectors.toList());
     }
 
@@ -165,7 +165,7 @@ public class VacuumWorldPerception implements VWPerception {
     }
 
     @Override
-    public List<AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole>> getActorsInPerceptionIncludingSelf() {
+    public List<AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose>> getActorsInPerceptionIncludingSelf() {
 	return this.perception.values().stream().filter(location -> location.isAnAgentPresent() || location.isAUserPresent()).map(location -> location.isAnAgentPresent() ? location.getAgent() : location.isAUserPresent() ? location.getUser() : null).collect(Collectors.toList());
     }
 
@@ -392,7 +392,7 @@ public class VacuumWorldPerception implements VWPerception {
     }
 
     @Override
-    public AbstractAgent<VacuumWorldSensorRole, VacuumWorldActuatorRole> getCurentActor() {
+    public AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> getCurentActor() {
 	if(getCurrentActorLocation().isAUserPresent()) {
 	    return getCurrentActorLocation().getUser();
 	}

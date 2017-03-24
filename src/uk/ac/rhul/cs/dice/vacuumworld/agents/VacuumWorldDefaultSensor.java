@@ -6,9 +6,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldSpace;
 
-public class VacuumWorldDefaultSensor extends AbstractSensor<VacuumWorldSensorRole> {
+public class VacuumWorldDefaultSensor extends AbstractSensor<VacuumWorldSensorPurpose> {
 
-    public VacuumWorldDefaultSensor(String bodyId, VacuumWorldSensorRole role) {
+    public VacuumWorldDefaultSensor(String bodyId, VacuumWorldSensorPurpose role) {
 	super(bodyId, role);
     }
 
