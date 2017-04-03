@@ -7,7 +7,9 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.ActuatorPurpose;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.SensorPurpose;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
@@ -19,7 +21,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.agents.minds.VacuumWorldDefaultMind;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
-public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> {
+public class VacuumWorldCleaningAgent extends AbstractAgent {
     private static final int PERCEPTION_RANGE = 2;
     private static final boolean CAN_SEE_BEHIND = false;
 
@@ -28,7 +30,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorPur
     private ActorFacingDirection oldFacingDirection;
     private ActorFacingDirection facingDirection;
 
-    public VacuumWorldCleaningAgent(VacuumWorldAgentAppearance appearance, List<Sensor<VacuumWorldSensorPurpose>> sensors, List<Actuator<VacuumWorldActuatorPurpose>> actuators, VacuumWorldDefaultMind mind, VacuumWorldDefaultBrain brain, ActorFacingDirection facingDirection) {
+    public VacuumWorldCleaningAgent(VacuumWorldAgentAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, VacuumWorldDefaultMind mind, VacuumWorldDefaultBrain brain, ActorFacingDirection facingDirection) {
 	super(appearance, sensors, actuators, mind, brain);
 
 	this.oldFacingDirection = null;
@@ -58,37 +60,37 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorPur
     }
 
     public List<VacuumWorldDefaultSensor> getSeeingSensors() {
-	return getSpecificSensors(VacuumWorldSensorPurpose.SEEING_SENSOR);
+	return getSpecificSensors(SensorPurpose.LOOK);
     }
 
     public List<VacuumWorldDefaultSensor> getListeningSensors() {
-	return getSpecificSensors(VacuumWorldSensorPurpose.LISTENING_SENSOR);
+	return getSpecificSensors(SensorPurpose.HEAR);
     }
 
     public List<VacuumWorldDefaultSensor> getUndefinedSensors() {
-	return getSpecificSensors(VacuumWorldSensorPurpose.UNDEFINED);
+	return getSpecificSensors(SensorPurpose.UNDEFINED);
     }
 
-    private List<VacuumWorldDefaultSensor> getSpecificSensors(VacuumWorldSensorPurpose role) {
-	List<Sensor<VacuumWorldSensorPurpose>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getPurpose())).collect(Collectors.toList());
+    private List<VacuumWorldDefaultSensor> getSpecificSensors(SensorPurpose purpose) {
+	List<Sensor> candidates = getSensors().stream().filter(sensor -> purpose.equals(sensor.getPurpose())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(sensor -> sensor instanceof VacuumWorldDefaultSensor).map(sensor -> (VacuumWorldDefaultSensor) sensor).collect(Collectors.toList());
     }
 
     public List<VacuumWorldDefaultActuator> getPhysicalActuators() {
-	return getSpecificActuators(VacuumWorldActuatorPurpose.PHYSICAL_ACTUATOR);
+	return getSpecificActuators(ActuatorPurpose.ACT);
     }
 
     public List<VacuumWorldDefaultActuator> getSpeakingActuators() {
-	return getSpecificActuators(VacuumWorldActuatorPurpose.SPEAKING_ACTUATOR);
+	return getSpecificActuators(ActuatorPurpose.SPEAK);
     }
 
     public List<VacuumWorldDefaultActuator> getundefinedActuators() {
-	return getSpecificActuators(VacuumWorldActuatorPurpose.UNDEFINED);
+	return getSpecificActuators(ActuatorPurpose.UNDEFINED);
     }
 
-    private List<VacuumWorldDefaultActuator> getSpecificActuators(VacuumWorldActuatorPurpose role) {
-	List<Actuator<VacuumWorldActuatorPurpose>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getPurpose())).collect(Collectors.toList());
+    private List<VacuumWorldDefaultActuator> getSpecificActuators(ActuatorPurpose purpose) {
+	List<Actuator> candidates = getActuators().stream().filter(actuator -> purpose.equals(actuator.getPurpose())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(actuator -> actuator instanceof VacuumWorldDefaultActuator).map(actuator -> (VacuumWorldDefaultActuator) actuator).collect(Collectors.toList());
     }

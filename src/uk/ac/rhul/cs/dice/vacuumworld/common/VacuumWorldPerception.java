@@ -8,10 +8,8 @@ import java.util.stream.Collectors;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldAgentType;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.DirtType;
@@ -99,7 +97,7 @@ public class VacuumWorldPerception implements VWPerception {
     }
     
     @Override
-    public List<AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose>> getActorsInPerception() {
+    public List<AbstractAgent> getActorsInPerception() {
 	return this.perception.values().stream().filter(location -> !location.getCoordinates().equals(getActorCoordinates())).filter(location -> location.isAnAgentPresent() || location.isAUserPresent()).map(location -> location.isAnAgentPresent() ? location.getAgent() : location.isAUserPresent() ? location.getUser() : null).collect(Collectors.toList());
     }
 
@@ -167,7 +165,7 @@ public class VacuumWorldPerception implements VWPerception {
     }
 
     @Override
-    public List<AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose>> getActorsInPerceptionIncludingSelf() {
+    public List<AbstractAgent> getActorsInPerceptionIncludingSelf() {
 	return this.perception.values().stream().filter(location -> location.isAnAgentPresent() || location.isAUserPresent()).map(location -> location.isAnAgentPresent() ? location.getAgent() : location.isAUserPresent() ? location.getUser() : null).collect(Collectors.toList());
     }
 
@@ -188,7 +186,7 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<Dirt> getDirtsOfSpecificTypeInPerception(DirtType type) {
-	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> type.equals(location.getDirt().getExternalAppearance().getDirtType())).map(location -> location.getDirt()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> type.equals(location.getDirt().getExternalAppearance().getDirtType())).map(VacuumWorldLocation::getDirt).collect(Collectors.toList());
     }
 
     @Override
@@ -280,7 +278,7 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<Dirt> getCompatibleDirtsInPerception() {
-	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> DirtType.agentAndDirtCompatible(location.getDirt().getExternalAppearance().getDirtType(), getCurrentActorColorIfAgent())).map(location -> location.getDirt()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).filter(location -> DirtType.agentAndDirtCompatible(location.getDirt().getExternalAppearance().getDirtType(), getCurrentActorColorIfAgent())).map(VacuumWorldLocation::getDirt).collect(Collectors.toList());
     }
 
     @Override
@@ -295,7 +293,7 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<VacuumWorldCleaningAgent> getGreenAgentsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.GREEN.equals(location.getAgent().getExternalAppearance().getType())).map(VacuumWorldLocation::getAgent).collect(Collectors.toList());
     }
 
     @Override
@@ -315,7 +313,7 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<VacuumWorldCleaningAgent> getOrangeAgentsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.ORANGE.equals(location.getAgent().getExternalAppearance().getType())).map(VacuumWorldLocation::getAgent).collect(Collectors.toList());
     }
 
     @Override
@@ -335,7 +333,7 @@ public class VacuumWorldPerception implements VWPerception {
 
     @Override
     public List<VacuumWorldCleaningAgent> getWhiteAgentsInPerceptionIncludingSelfIfApplicable() {
-	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(location -> location.getAgent()).collect(Collectors.toList());
+	return this.perception.values().stream().filter(VacuumWorldLocation::isAnAgentPresent).filter(location -> VacuumWorldAgentType.WHITE.equals(location.getAgent().getExternalAppearance().getType())).map(VacuumWorldLocation::getAgent).collect(Collectors.toList());
     }
 
     @Override
@@ -394,7 +392,7 @@ public class VacuumWorldPerception implements VWPerception {
     }
 
     @Override
-    public AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> getCurentActor() {
+    public AbstractAgent getCurentActor() {
 	if(getCurrentActorLocation().isAUserPresent()) {
 	    return getCurrentActorLocation().getUser();
 	}

@@ -7,7 +7,9 @@ import uk.ac.rhul.cs.dice.gawl.interfaces.actions.EnvironmentalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.actions.PhysicalAction;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.AbstractAgent;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.ActuatorPurpose;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
+import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.SensorPurpose;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObservable;
 import uk.ac.rhul.cs.dice.gawl.interfaces.observer.CustomObserver;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.PerceiveAction;
@@ -16,18 +18,16 @@ import uk.ac.rhul.cs.dice.vacuumworld.actions.VacuumWorldEvent;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.actions.result.VacuumWorldSpeechActionResult;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.ActorFacingDirection;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
 import uk.ac.rhul.cs.dice.vacuumworld.utils.TurningDirection;
 
-public class User extends AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldActuatorPurpose> {
+public class User extends AbstractAgent {
     private VacuumWorldCoordinates oldLocation;
     private ActorFacingDirection facingDirection;
     private ActorFacingDirection oldFacingDirection;
     private VacuumWorldCoordinates currentLocation;
 
-    public User(UserAppearance appearance, List<Sensor<VacuumWorldSensorPurpose>> sensors, List<Actuator<VacuumWorldActuatorPurpose>> actuators, UserMind mind, UserBrain brain, ActorFacingDirection facingDirection) {
+    public User(UserAppearance appearance, List<Sensor> sensors, List<Actuator> actuators, UserMind mind, UserBrain brain, ActorFacingDirection facingDirection) {
 	super(appearance, sensors, actuators, mind, brain);
 
 	this.oldFacingDirection = null;
@@ -119,37 +119,37 @@ public class User extends AbstractAgent<VacuumWorldSensorPurpose, VacuumWorldAct
     }
 
     public List<UserSensor> getSeeingSensors() {
-	return getSpecificSensors(VacuumWorldSensorPurpose.SEEING_SENSOR);
+	return getSpecificSensors(SensorPurpose.LOOK);
     }
 
     public List<UserSensor> getListeningSensors() {
-	return getSpecificSensors(VacuumWorldSensorPurpose.LISTENING_SENSOR);
+	return getSpecificSensors(SensorPurpose.HEAR);
     }
 
     public List<UserSensor> getUndefinedSensors() {
-	return getSpecificSensors(VacuumWorldSensorPurpose.UNDEFINED);
+	return getSpecificSensors(SensorPurpose.UNDEFINED);
     }
 
-    private List<UserSensor> getSpecificSensors(VacuumWorldSensorPurpose role) {
-	List<Sensor<VacuumWorldSensorPurpose>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getPurpose())).collect(Collectors.toList());
+    private List<UserSensor> getSpecificSensors(SensorPurpose purpose) {
+	List<Sensor> candidates = getSensors().stream().filter(sensor -> purpose.equals(sensor.getPurpose())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(sensor -> sensor instanceof UserSensor).map(sensor -> (UserSensor) sensor).collect(Collectors.toList());
     }
 
     public List<UserActuator> getPhysicalActuators() {
-	return getSpecificActuators(VacuumWorldActuatorPurpose.PHYSICAL_ACTUATOR);
+	return getSpecificActuators(ActuatorPurpose.ACT);
     }
 
     public List<UserActuator> getSpeakingActuators() {
-	return getSpecificActuators(VacuumWorldActuatorPurpose.SPEAKING_ACTUATOR);
+	return getSpecificActuators(ActuatorPurpose.SPEAK);
     }
 
     public List<UserActuator> getundefinedActuators() {
-	return getSpecificActuators(VacuumWorldActuatorPurpose.UNDEFINED);
+	return getSpecificActuators(ActuatorPurpose.UNDEFINED);
     }
 
-    private List<UserActuator> getSpecificActuators(VacuumWorldActuatorPurpose role) {
-	List<Actuator<VacuumWorldActuatorPurpose>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getPurpose())).collect(Collectors.toList());
+    private List<UserActuator> getSpecificActuators(ActuatorPurpose purpose) {
+	List<Actuator> candidates = getActuators().stream().filter(actuator -> purpose.equals(actuator.getPurpose())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(actuator -> actuator instanceof UserActuator).map(actuator -> (UserActuator) actuator).collect(Collectors.toList());
     }

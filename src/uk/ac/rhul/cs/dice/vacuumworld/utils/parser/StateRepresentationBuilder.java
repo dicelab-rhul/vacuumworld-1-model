@@ -13,9 +13,7 @@ import javax.json.JsonValue;
 
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Actuator;
 import uk.ac.rhul.cs.dice.gawl.interfaces.entities.agents.Sensor;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldActuatorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldCleaningAgent;
-import uk.ac.rhul.cs.dice.vacuumworld.agents.VacuumWorldSensorPurpose;
 import uk.ac.rhul.cs.dice.vacuumworld.agents.user.User;
 import uk.ac.rhul.cs.dice.vacuumworld.dirt.Dirt;
 import uk.ac.rhul.cs.dice.vacuumworld.environment.VacuumWorldCoordinates;
@@ -100,7 +98,7 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonObject buildSensors(List<Sensor<VacuumWorldSensorPurpose>> sensors) {
+    private static JsonObject buildSensors(List<Sensor> sensors) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("number", sensors.size());
@@ -109,14 +107,14 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonArray buildSensorsArray(List<Sensor<VacuumWorldSensorPurpose>> sensors) {
+    private static JsonArray buildSensorsArray(List<Sensor> sensors) {
 	JsonArrayBuilder builder = Json.createArrayBuilder();
 	sensors.forEach(sensor -> builder.add(buildSensor(sensor)));
 
 	return builder.build();
     }
 
-    private static JsonObject buildSensor(Sensor<VacuumWorldSensorPurpose> sensor) {
+    private static JsonObject buildSensor(Sensor sensor) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("id", sensor.getSensorId().toString());
@@ -125,7 +123,7 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonObject buildActuators(List<Actuator<VacuumWorldActuatorPurpose>> actuators) {
+    private static JsonObject buildActuators(List<Actuator> actuators) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("number", actuators.size());
@@ -134,14 +132,14 @@ public class StateRepresentationBuilder {
 	return builder.build();
     }
 
-    private static JsonArray buildActuatorsArray(List<Actuator<VacuumWorldActuatorPurpose>> actuators) {
+    private static JsonArray buildActuatorsArray(List<Actuator> actuators) {
 	JsonArrayBuilder builder = Json.createArrayBuilder();
 	actuators.forEach(actuator -> builder.add(buildActuator(actuator)));
 
 	return builder.build();
     }
 
-    private static JsonObject buildActuator(Actuator<VacuumWorldActuatorPurpose> actuator) {
+    private static JsonObject buildActuator(Actuator actuator) {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("id", actuator.getActuatorId().toString());
@@ -161,7 +159,7 @@ public class StateRepresentationBuilder {
     }
 
     private static boolean isUserPresent(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid) {
-	return grid.values().stream().filter(location -> location.isAUserPresent()).findAny().isPresent();
+	return grid.values().stream().filter(VacuumWorldLocation::isAUserPresent).findAny().isPresent();
     }
 
     private static int getSize(Map<VacuumWorldCoordinates, VacuumWorldLocation> grid) {

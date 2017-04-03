@@ -4,9 +4,10 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="res/javax.json-1.0.4.jar" sourcepath="res/bson-3.4.0-rc1-sources.jar"/>
 	<classpathentry kind="lib" path="res/vwcommon.jar"/>
-	<classpathentry kind="lib" path="res/mongo-java-driver-3.4.2.jar"/>
-	<classpathentry kind="lib" path="res/mongodb-driver-core-3.4.2.jar"/>
-	<classpathentry kind="lib" path="res/bcprov-jdk15on-156.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/genericagentsworldlibrary"/>
+	<classpathentry kind="lib" path="res/mongodb-driver-core-3.4.0-rc1.jar"/>
+	<classpathentry kind="lib" path="res/mongodb-driver-3.4.0-rc1.jar"/>
+	<classpathentry kind="lib" path="res/bson-3.4.0-rc1.jar"/>
+	<classpathentry kind="lib" path="res/bcprov-jdk15on-155.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/GenericAgentsWorldLibrary"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
