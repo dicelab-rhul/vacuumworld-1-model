@@ -120,7 +120,7 @@ public class StateRepresentationBuilder {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("id", sensor.getSensorId().toString());
-	builder.add("purpose", sensor.getRole().toString());
+	builder.add("purpose", sensor.getPurpose().toString());
 
 	return builder.build();
     }
@@ -145,7 +145,7 @@ public class StateRepresentationBuilder {
 	JsonObjectBuilder builder = Json.createObjectBuilder();
 
 	builder.add("id", actuator.getActuatorId().toString());
-	builder.add("purpose", actuator.getRole().toString());
+	builder.add("purpose", actuator.getPurpose().toString());
 
 	return builder.build();
     }

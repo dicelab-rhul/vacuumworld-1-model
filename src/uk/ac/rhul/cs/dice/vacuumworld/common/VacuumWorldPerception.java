@@ -156,11 +156,13 @@ public class VacuumWorldPerception implements VWPerception {
     
     @Override
     public List<VacuumWorldLocation> getLocationsWithDirtInPerception() {
+    	//TODO rename it getDirtyLocations()
 	return this.perception.values().stream().filter(VacuumWorldLocation::isDirtPresent).collect(Collectors.toList());
     }
     
     @Override
     public List<VacuumWorldCoordinates> getCoordinatesWithDirtInPerception() {
+    	//TODO as above but for coordinates
 	return this.perception.keySet().stream().filter(key -> this.perception.get(key).isDirtPresent()).collect(Collectors.toList());
     }
 

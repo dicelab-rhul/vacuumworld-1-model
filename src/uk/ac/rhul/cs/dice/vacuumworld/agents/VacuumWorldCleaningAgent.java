@@ -70,7 +70,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorPur
     }
 
     private List<VacuumWorldDefaultSensor> getSpecificSensors(VacuumWorldSensorPurpose role) {
-	List<Sensor<VacuumWorldSensorPurpose>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getRole())).collect(Collectors.toList());
+	List<Sensor<VacuumWorldSensorPurpose>> candidates = getSensors().stream().filter(sensor -> role.equals(sensor.getPurpose())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(sensor -> sensor instanceof VacuumWorldDefaultSensor).map(sensor -> (VacuumWorldDefaultSensor) sensor).collect(Collectors.toList());
     }
@@ -88,7 +88,7 @@ public class VacuumWorldCleaningAgent extends AbstractAgent<VacuumWorldSensorPur
     }
 
     private List<VacuumWorldDefaultActuator> getSpecificActuators(VacuumWorldActuatorPurpose role) {
-	List<Actuator<VacuumWorldActuatorPurpose>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getRole())).collect(Collectors.toList());
+	List<Actuator<VacuumWorldActuatorPurpose>> candidates = getActuators().stream().filter(actuator -> role.equals(actuator.getPurpose())).collect(Collectors.toList());
 	
 	return candidates.stream().filter(actuator -> actuator instanceof VacuumWorldDefaultActuator).map(actuator -> (VacuumWorldDefaultActuator) actuator).collect(Collectors.toList());
     }
